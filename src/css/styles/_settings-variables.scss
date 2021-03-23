@@ -1,0 +1,30 @@
+/**
+ * ********** Variables **********
+ */
+
+$font-web:       'Open Sans';
+$font-fallback:  'Open Sans Local', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-stack:     $font-web, $font-fallback;
+$font-mono:      Lucida Console, Lucida Sans Typewriter, monaco, Bitstream Vera Sans Mono, monospace;
+
+$color-primary:    #00ddaa;
+$color-secondary:  #25423e;
+$color-background: #172525;
+
+$color-warning: #f4d03f;
+$color-negative: #f64747;
+
+$color-text:    #c2c2c2;
+$color-text--i: #595959;
+$color-text--lighter: #adadad; //#bababa; // #e3e3e3;
+$color-selection: lighten($color-primary, 45%);
+
+$width-site: 960px;
+
+/** Nonexistent variables */
+
+$color-gray-1: #a2a2a2;
+$color-gray-2: #c2c2c2;
+
+$height-site-header: 50px;
+$height-site-header-md: 70px;

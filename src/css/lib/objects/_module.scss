@@ -1,0 +1,42 @@
+/**
+ * ********** Module **********
+ */
+
+.module {
+	box-sizing: border-box;
+
+	background-color: $color-white;
+
+	> div {
+		@extend .container;
+		@extend .container--sh;
+		@extend .container--sv;
+
+		> :last-child {
+			margin-bottom: 0;
+		}
+	}
+}
+
+.module--transparent {
+	background-color: transparent;
+}
+
+.module--limited {
+	> div {
+		max-width: 800px;
+	}
+}
+
+.module--decreased-padding {
+	> div {
+		padding: 1rem;
+	}
+}
+
+.module--edged {
+	> div {
+		padding: 0;
+		// padding: 0 0 0.01px 0;
+	}
+}

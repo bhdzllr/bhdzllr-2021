@@ -1,0 +1,54 @@
+/**
+ * ********** Display **********
+ */
+
+.hidden {
+	display: none;
+}
+
+@media #{$screen-min-sm} {
+	.sm-show {
+		display: block;
+	}
+
+	.sm-hidden {
+		display: none;
+	}
+}
+
+@media #{$screen-min-md} {
+	.md-show {
+		display: block;
+	}
+
+	.md-hidden {
+		display: none;
+	}
+}
+
+@media #{$screen-min-lg} {
+	.lg-show {
+		display: block;
+	}
+
+	.lg-hidden {
+		display: none;
+	}
+}
+
+@media #{$screen-min-xl} {
+	.xl-show {
+		display: block;
+	}
+
+	.xl-hidden {
+		display: none;
+	}
+}
+
+.sm-show,
+.md-show,
+.lg-show,
+.xl-show {
+	display: none;
+}

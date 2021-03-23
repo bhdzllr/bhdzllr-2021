@@ -1,0 +1,56 @@
+.loader {
+	display: inline-block;
+
+	color: black;
+	font-family: $font-mono
+}
+
+.loader::after {
+	content: '';
+}
+
+.loader--ellipsis::after {
+	animation: loader-ellipsis 3s infinite;
+}
+
+.loader--retro::after {
+	animation: loader-retro 0.5s infinite;
+}
+
+@keyframes loader-ellipsis {
+	0%,
+	100% {
+		content: '';
+	}
+
+	25% {
+		content: '.';
+	}
+
+	50% {
+		content: '..';
+	}
+
+	75% {
+		content: '...';
+	}
+}
+
+@keyframes loader-retro {
+	0%,
+	100% {
+		content: '\005C';
+	}
+
+	25% {
+		content: '|';
+	}
+
+	50% {
+		content: '/';
+	}
+
+	75% {
+		content: '-';
+	}
+}

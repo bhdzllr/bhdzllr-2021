@@ -1,0 +1,61 @@
+/**
+ * ********** Message **********
+ */
+
+.message-container {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+.message {
+	width: 100%;
+	padding: 1em;
+	box-sizing: border-box;
+
+	background-color: $color-text;
+	border-color: $color-text;
+	border-radius: 3px;
+
+	color: $color-text--i;
+
+	&.message--info,
+	&.message--warning,
+	&.message--error,
+	&.message--success {
+		border: 1px solid;
+	}
+
+	&.message--info {
+		background-color: lighten($color-info, 50%);
+		border-color: $color-info;
+
+		color: darken($color-info, 5%);
+	}
+
+	&.message--warning {
+		background-color: lighten($color-warning, 50%);
+		border-color: $color-warning;
+
+		color: darken($color-warning, 5%);
+	}
+
+	&.message--error {
+		background-color: lighten($color-negative, 40%);
+		border-color: $color-negative;
+
+		color: darken($color-negative, 10%);
+	}
+
+	&.message--success {
+		background-color: lighten($color-positive, 50%);
+		border-color: $color-positive;
+
+		color: darken($color-positive, 5%);
+	}
+
+	&.message--overlay {
+		box-shadow: 0 7px 20px rgba($color-text, 0.5)
+	}
+
+}
+

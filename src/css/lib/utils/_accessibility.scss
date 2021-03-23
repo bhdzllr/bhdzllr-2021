@@ -1,0 +1,49 @@
+/**
+ * ********** Accessibility **********
+ */
+
+@mixin outline {
+	outline: 1px dotted $color-text;
+	outline-offset: 2px;
+}
+
+.is-tabbing,
+.no-js {
+	:focus {
+		@include outline;	
+	}
+}
+
+.offscreen {
+	position: absolute;
+	left: -1000em;
+}
+
+.screen-reader-text {
+	position: absolute;
+
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+
+	border: 0;
+	clip-path: inset(50%);
+
+	white-space: nowrap;
+
+	&--focusable:active,
+	&--focusable:focus {
+		position: static;
+
+		width: auto;
+		height: auto;
+		margin: 0;
+		overflow: visible;
+
+		clip-path: none;
+
+		white-space: inherit;
+	}
+}

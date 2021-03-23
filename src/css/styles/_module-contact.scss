@@ -1,0 +1,123 @@
+.contact {
+	display: block;
+
+	.terminal {
+		padding: 0 0 1.5rem 1.25rem;
+
+		background: none;
+	}
+
+	.terminal__screen-input {
+		position: relative;
+
+		margin-top: 1rem;
+
+		color: $color-primary;
+		font-weight: inherit;
+
+		&:first-of-type {
+			margin-top: 0;
+		}
+	}
+
+	.terminal__screen-output {
+		margin-bottom: 0.15rem;
+
+		color: inherit;
+	}
+
+	.terminal__screen-warning {
+		margin-top: 0.35rem;
+		margin-bottom: 0.35rem;
+
+		color: $color-warning;
+	}
+
+	.terminal__screen-error {
+		margin-top: 0.35rem;
+		margin-bottom: 0.35rem;
+
+		color: $color-negative;
+	}
+
+	.terminal__output {
+		margin-bottom: 1rem;
+
+		small {
+			color: inherit;
+
+			a {
+				color: inherit;
+			}
+		}
+	}
+
+	.terminal__input-custom {
+		color: $color-primary;
+	}
+
+	.terminal__input-caret {
+		border-color: $color-white;
+	}
+
+	.terminal__input-field:focus ~ .terminal__input-caret {
+		border-color: $color-primary;
+	}
+
+	.terminal__input-field:disabled ~ .terminal__input-helper:empty ~ .terminal__input-caret {
+		border-color: #999999;
+	}
+
+	.terminal__screen-input::before,
+	.terminal__input-custom::before {
+		position: absolute;
+		top: 0.3rem;
+		left: -1.5rem;
+
+		content: '';
+		display: block;
+		width: 18px;
+		height: 18px;
+
+		background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="#{$color-primary}" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" /><polyline points="9 6 15 12 9 18" /></svg>');
+		background-position: center center;
+		background-repeat: no-repeat;
+		background-size: 100%;
+
+		@media #{$screen-min-md} {
+			top: 0.6rem;
+
+			width: 18px;
+			height: 18px;
+		}
+	}
+
+	.terminal__loader {
+		color: inherit;
+		font-family: $font-mono
+	}
+}
+
+.contact--no-js {
+	display: none;
+}
+
+.no-js {
+	.contact {
+		display: none;
+	}
+
+	.contact--no-js {
+		display: block;
+
+		ul li::before {
+			content: none;
+		}
+
+		p svg,
+		ul li svg {
+			vertical-align: middle;
+			margin-right: 0.35rem;
+		}
+	}
+}

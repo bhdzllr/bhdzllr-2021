@@ -1,0 +1,159 @@
+/**
+ * ********** Text **********
+ */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h5 {
+	margin-top: 0;
+
+	line-height: 1.35;
+}
+
+h1,
+.h1 {
+	font-size: 1.75em;
+
+	@media #{$screen-min-md} {
+		font-size: 2.5em;
+	}
+}
+
+h2,
+.h2 {
+	margin-top: 1.35em;
+
+	font-size: 1.35em;
+
+	@media #{$screen-min-md} {
+		font-size: 1.85em;
+	}
+}
+
+h3,
+.h3 {
+	margin-top: 1.15em;
+
+	font-size: 1.15em;
+
+	@media #{$screen-min-md} {
+		font-size: 1.45em;
+	}
+}
+
+h4,
+h5,
+h6,
+.h4,
+.h5,
+.h6 {
+	margin-top: 1.05em;
+
+	font-size: 1.05em;
+
+	@media #{$screen-min-md} {
+		font-size: 1.15em;
+	}
+}
+
+* > h1,
+* > h2,
+* > h3,
+* > h4,
+* > h5,
+* > h6,
+* > .h1,
+* > .h2,
+* > .h3,
+* > .h4,
+* > .h5,
+* > .h6 {
+	&:first-child {
+		margin-top: 0;
+	}
+}
+
+
+p,
+.p {
+	margin: 0 0 1em;
+}
+
+small {
+	display: inline-block;
+
+	color: lighten($color-text, 15%);
+	font-size: 0.85em;
+	line-height: 1.35;
+
+	p & {
+		display: inline;
+	}
+}
+
+mark {
+	background: $color-mark;
+}
+
+abbr {
+	cursor: help;
+}
+
+abbr[title] {
+	border-bottom: 1px dotted;
+}
+
+.text-sm {
+	font-size: 0.85em;
+	line-height: 1.35;
+}
+
+.text-md {
+	font-size: 1.25rem;
+	line-height: 1.75;
+}
+
+.text-lg {
+	font-size: 1.5rem;
+	line-height: 2;
+}
+
+.text-left {
+	text-align: left;
+}
+
+.text-center {
+	text-align: center;
+}
+
+.text-right {
+	text-align: right;
+}
+
+.text-justify {
+	text-align: justify;
+}
+
+.list-simple {
+	margin: 0;
+	padding: 0;
+
+	list-style: none;
+}
+
+.description-list-simple {
+	margin-top: 0;
+
+	dt {
+		margin-bottom: 0.25em;
+
+		font-weight: bold;
+	}
+
+	dd {
+		margin: 0 0 1.5em 0;
+	}
+}

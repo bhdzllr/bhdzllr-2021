@@ -1,0 +1,12 @@
+{
+  "short_name": "bhdzllr.com",
+  "name": "bhdzllr.com",
+  "icons": [{
+    "src": "icon.png",
+    "type": "image/png",
+    "sizes": "192x192"
+  }],
+  "start_url": ".",
+  "background_color": "#172525",
+  "theme_color": "#172525"
+}

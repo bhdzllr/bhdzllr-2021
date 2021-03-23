@@ -1,0 +1,35 @@
+.title-bar {
+	background-color: #25423e;
+
+	color: $color-primary;
+
+	> div {
+		@extend main.container;
+
+		display: flex;
+		// justify-content: space-between;
+		align-items: center;
+		padding-top: 0.325rem;
+		padding-bottom: 0.325rem;
+	}
+
+	h1 {
+		margin: 0;
+
+		font-size: 0.875rem;
+
+		@media #{$screen-min-md} {
+			font-size: 1rem;
+		}
+	}
+
+	small {
+		max-width: 48%;
+		margin-left: 0.75rem;
+		overflow: hidden;
+
+		color: $color-gray-2;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}

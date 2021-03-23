@@ -1,0 +1,435 @@
+/**
+ * ********** Form **********
+ */
+
+form > :last-child,
+fieldset > :last-child {
+	margin-bottom: 0;
+}
+
+[type="checkbox"],
+[type="radio"] {
+	vertical-align: baseline;
+
+	& + label {
+		display: inline;
+		vertical-align: middle;
+	}
+}
+
+.form {
+	margin: 0 auto;
+
+	@mixin text-input {
+		padding: 0.75em 0.65em;
+		box-sizing: border-box;
+
+		background-color: $color-white;
+		border: 1px solid lighten($color-black, 60%);
+		box-shadow: inset 0 1px 3px lighten($color-black, 90%);
+		border-radius: 0.15em;
+
+		line-height: 1.3;
+	}
+
+	@mixin text-input-disabled {
+		background-color: lighten($color-black, 95%);
+		cursor: not-allowed;
+	}
+
+	@mixin form-outline {
+		border-color: lighten($color-primary, 10%);
+		box-shadow: 0 0 0 0.2em lighten($color-primary, 35%);
+		outline: none;
+	}
+
+	fieldset {
+		margin: 0 0 1em;
+		padding: 0;
+
+		border: none;
+		border-radius: 0.15em;
+
+		&.fieldset-visible {
+			padding: 1em;
+
+			border: 1px solid lighten($color-text, 70%);
+		}
+	}
+
+	label {
+		display: block;
+		padding-bottom: 0.15em;
+
+		line-height: 1.35;
+	}
+
+	input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]),
+	textarea,
+	select {
+		@include text-input;
+
+		&:focus {
+			@include form-outline;
+		}
+
+		&:disabled {
+			@include text-input-disabled;
+		}
+	}
+
+	textarea {
+		max-height: 320px;
+
+		resize: vertical;
+	}
+
+	select {
+		min-width: 3em;
+	
+		&:not([multiple]) {
+			padding-right: 1.75em;
+
+			-webkit-appearance: none; // Remove shadow, without styling select looks like regular input (no arrow)
+			// background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><path d="M0 0l4 4 4-4h-8z" transform="translate(0 2)" /></svg>');
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><path d="M1.5 0l-1.5 1.5 4 4 4-4-1.5-1.5-2.5 2.5-2.5-2.5z" transform="translate(0 1)" /></svg>');
+			background-position: calc(100% - 10px) center;
+			background-repeat: no-repeat;
+			background-attachment: scroll;
+			background-size: 0.625em;
+		}
+
+		&::-ms-expand {
+			display: none;
+		}
+
+		&:-moz-focusring {
+			color: transparent;
+			text-shadow: 0 0 0 $color-text;
+		}
+
+		option:not(:checked) {
+			color: $color-text;
+		}
+	}
+
+	select:not([multiple]) {
+		box-shadow: none;
+		border-bottom-width: 2px;
+
+		&:focus {
+			@include form-outline;
+		}
+	}
+
+	[type="checkbox"],
+	[type="radio"] {
+		position: absolute;
+
+		width: 0.1px;
+		height: 0.1px;
+
+		appearance: none;
+		opacity: 0.00001;
+
+		& + label {
+			position: relative;
+
+			margin-left: 1.5em;
+
+			cursor: pointer;
+		}
+
+		& + label::before,
+		&:checked + label::after {
+			position: absolute;
+			top: 50%;
+			left: -1.5em;
+
+			content: '';
+			display: inline-block;
+			width: 1em;
+			height: 1em;
+
+			border: 1px solid lighten($color-text, 50%);
+			box-shadow: inset 1px 1px 1px lighten($color-black, 90%);
+			transform: translateY(-50%);
+
+			line-height: 1.1;
+			text-align: center;
+		}
+
+		&:checked + label::after {
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="8" height="8" viewBox="0 0 8 8"><path d="M6.41 0l-.69.72-2.78 2.78-.81-.78-.72-.72-1.41 1.41.72.72 1.5 1.5.69.72.72-.72 3.5-3.5.72-.72-1.44-1.41z" transform="translate(0 1)" fill="#{$color-primary}" /></svg>');
+			background-position: center center;
+			background-repeat: no-repeat;
+			background-size: 75%;
+			border-color: transparent;
+			box-shadow: none;
+		}
+
+		&:focus + label::before {
+			@include form-outline;
+		}
+
+		&:disabled + label::before {
+			@include text-input-disabled;
+		}
+	}
+
+	[type="radio"] {
+		& + label::before,
+		&:checked + label::after {
+			border-radius: 50%;
+		}
+
+		&:checked + label::after {
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="-4 -4 8 8"><circle r="3" fill="#{$color-primary}" /></svg>');
+			background-size: 50%;
+		}
+	}
+
+	[type="file"] {
+		& + label {
+			@include text-input;
+
+			&::after {
+				@extend .btn !optional;
+
+				display: inline-block;
+				margin: 0;
+				padding-top: 0.75em;
+				padding-bottom: 0.75em;
+
+				border-radius: 0;
+			}
+		}
+
+		&:focus + label {
+			@include form-outline;
+		}
+
+		&:disabled + label {
+			@include text-input-disabled;
+		}
+
+		&:disabled + label::after {
+			@extend .btn:disabled;
+		}
+	}
+
+	[type="range"] {
+		margin: 0;
+		padding: 0;
+
+		-webkit-appearance: none;
+		appearance: none;
+		background: transparent;
+
+		$slider-track-height: 0.5em;
+		$slider-thumb-size: $slider-track-height * 2;
+		$slider-track-border-radius: 0.15em;
+		$slider-color-track: lighten($color-black, 75%);
+		$slider-color-track-disabled: lighten($color-black, 90%);
+		$slider-color-thumb-background: $color-white;
+		$slider-color-thumb-border: lighten($color-black, 60%);
+
+		@mixin slider-thumb-outline {
+			@include form-outline;
+		}
+
+		@mixin slider-thumb {
+			width: $slider-thumb-size;
+			height: $slider-thumb-size;
+			margin-top: ($slider-track-height - $slider-thumb-size) / 2;
+
+			appearance: none;
+			-webkit-appearance: none;
+			background: $slider-color-thumb-background;
+			border: 1px solid $slider-color-thumb-border;
+			border-radius: 50%;
+		}
+
+		@mixin slider-track {
+			width: 100%;
+			height: $slider-track-height;
+
+			appearance: none;
+			-webkit-appearance: none;
+			background-color: $slider-color-track;
+			border-radius: $slider-track-border-radius;
+			border-color: transparent;
+			cursor: pointer;
+		}
+
+		// Do not combine vendor pseudo elements
+
+		&:focus,
+		&:active {
+			outline: none;
+
+			&::-webkit-slider-thumb {
+				@include slider-thumb-outline;
+			}
+
+			&::-moz-range-thumb {
+				@include slider-thumb-outline;
+			}
+
+			&::-ms-thumb {
+				@include slider-thumb-outline;
+			}
+		}
+
+		&::-moz-focus-outer {
+			border: 0;
+		}
+
+		&::-webkit-slider-thumb {
+			@include slider-thumb;
+		}
+
+		&::-moz-range-thumb {
+			@include slider-thumb;
+		}
+
+		&::-ms-thumb {
+			@include slider-thumb;
+
+			margin-top: 0;
+			margin-right: 0.15em;
+			margin-left: 0.15em;
+		}
+
+		&::-webkit-slider-runnable-track {
+			@include slider-track;
+		}
+
+		&::-moz-range-track {
+			@include slider-track;
+		}
+
+		&::-ms-track {
+			@include slider-track;
+
+			background-color: transparent;
+			border-width: 0.5em;
+			border-color: transparent;
+
+			color: transparent;
+		}
+
+		&::-ms-fill-lower {
+			background-color: $slider-color-track;
+			border-radius: $slider-track-border-radius;
+		}
+
+		&::-ms-fill-upper {
+			background-color: $slider-color-track;
+			border-radius: $slider-track-border-radius;
+		}
+
+		&:disabled {
+			&::-webkit-slider-thumb {
+				background-color: $slider-color-track-disabled;
+			}
+
+			&::-moz-range-thumb {
+				background-color: $slider-color-track-disabled;
+			}
+
+			&::-ms-thumb {
+				background-color: $slider-color-track-disabled;
+			}
+
+			&::-webkit-slider-runnable-track {
+				cursor: default;
+			}
+
+			&::-moz-range-track {
+				cursor: default;
+			}
+		}
+	}
+
+	[type="date"],
+	[type="time"] {
+		-webkit-appearance: none; // Make it look like a normal text input, not like the default system (e. g. iOS) dropdown.
+	}
+
+	&-controls-expanded {
+		input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]),
+		textarea,
+		select,
+		[type="file"] + label {
+			width: 100%;
+		}
+	}
+
+	&__assistive {
+		display: block;
+		padding-bottom: 0.15em;
+
+		font-size: 0.8em;
+		color: $color-text--lighter;
+		line-height: 1.25;
+	}
+
+	&__assistive--invalid {
+		display: none;
+		margin: 0;
+		padding-top: 0.25em;
+
+		color: $color-negative;
+		font-size: 1em;
+		font-weight: bold;
+	}
+
+	&--validated {
+		input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]),
+		textarea,
+		select {
+			&:invalid {
+				border: 2px solid $color-negative;
+
+				&:focus {
+					border-color: lighten($color-negative, 10%);
+					box-shadow: 0 0 0 0.2em lighten($color-negative, 35%);
+				}
+			}
+
+			&:valid + .form__assistive--invalid {
+				display: none;
+			}
+		}
+
+		.form__assistive--invalid {
+			display: block;
+		}
+	}
+
+	&--disabled {
+		position: relative;
+
+		&::after {
+			position: absolute;
+			top: 0;
+
+			display: block;
+			width: 100%;
+			height: 100%;
+			content: '';
+
+			background-color: rgba(255, 255, 255, 0.45);
+			cursor: not-allowed;
+		}
+	}
+
+	[type="submit"] {
+		margin: 0.5em 0;
+
+		&:focus {
+			@include form-outline;
+		}	
+	}
+}

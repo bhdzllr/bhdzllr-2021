@@ -1,0 +1,74 @@
+/**
+ * ********** Minimal Normalize ********** 
+ */
+
+html {
+	-webkit-text-size-adjust: 100%; /* iOS: Prevent text size adjust after device orientation change. */
+}
+
+main,
+details {
+	display: block;
+}
+
+summary {
+	display: list-item;
+}
+
+progress {
+	vertical-align: baseline;
+}
+
+[hidden],
+template {
+	display: none;
+}
+
+button,
+input,
+optgroup,
+select,
+textarea {
+	color: inherit;
+	font-family: inherit;
+	font-size: inherit;
+}
+
+button::-moz-focus-inner,
+input::-moz-focus-inner {
+	border: 0;  /** Button size fix */
+	padding: 0; /** Button size fix */
+}
+
+textarea {
+	vertical-align: top;
+	overflow: auto;
+}
+
+button,
+[type="button"],
+[type="reset"],
+[type="submit"] {
+	-webkit-appearance: button; // Without styling, buttons have just a thin rounded border
+}
+
+[type="search"] {
+	-webkit-appearance: textfield;
+	outline-offset: -2px;
+}
+
+[type="search"]::-webkit-search-decoration {
+	-webkit-appearance: none;
+}
+
+::-webkit-file-upload-button {
+	-webkit-appearance: button;
+	font: inherit;
+}
+
+iframe {
+	display: block;
+	margin: 0 auto;
+
+	border: 0;
+}
