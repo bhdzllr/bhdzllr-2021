@@ -60,6 +60,20 @@ handlebars.Handlebars.registerHelper({
 	ifNotEquals: function (a, b, options) {
 		return (a != b) ? options.fn(this) : options.inverse(this);
 	},
+	link: function (name) {
+		switch (name) {
+			case 'blog':
+				return '/blog';
+			case 'work':
+				return '/projects';
+			case 'mail':
+				return '/mail';
+			case 'imprint':
+				return '/imprint.html';
+			case 'legal':
+				return '/legal.html';
+		}
+	},
 	currentYear: function (options) {
 		return new Date().getFullYear();
 	},

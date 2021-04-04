@@ -1,7 +1,62 @@
 {{#extend "layouts/main" title="Start"}}
 {{#content "content"}}
 
-	INDEX
+	<div class="cube-scene js-cube-scene">
+		<div class="cube js-cube">
+			<section class="cube__section">
+				<div class="cube__nav">
+					<div class="cube__tab">
+						<button class="cube-nav-left js-cube-nav-left">
+							<span class="screen-reader-text">Rotate to Data</span>
+						</button>
+						<button class="cube-nav-right js-cube-nav-right">
+							<span class="screen-reader-text">Rotate to Skills</span>
+						</button>
+					</div>
+				</div>
+
+				<h2>WHOAMI</h2>
+
+				<p>
+					Hello! My name is Bernhard. I'm a web developer from Austria,
+					working on the web doing code, design and usability since 2005.
+				</p>
+
+				<p>
+					I like to build small <a href="{{link 'work'}}">side projects</a>.
+					You can follow me on <a href="https://www.twitter.com/bhdzllr">Twitter</a>.
+				</p>
+			</section>
+
+			<section class="cube__section">
+				<div class="cube__nav">
+					<div class="cube__tab">
+						<button class="cube-nav-right js-cube-nav-right">
+							<span class="screen-reader-text">Rotate to Intro</span>
+						</button>
+					</div>
+				</div>
+
+				<h2>Data</h2>
+
+				<p>...</p>
+			</section>
+
+			<section class="cube__section">
+				<div class="cube__nav">
+					<div class="cube__tab">
+						<button class="cube-nav-left js-cube-nav-left">
+							<span class="screen-reader-text">Rotate to Intro</span>
+						</button>
+					</div>
+				</div>
+
+				<h2>Skills</h2>
+
+				<p>...</p>
+			</section>
+		</div>
+	</div>
 
 {{/content}}
 {{/extend}}

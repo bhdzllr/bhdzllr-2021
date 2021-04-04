@@ -1,0 +1,224 @@
+// Default values form JS Cube Module
+$degrees: 65;
+$spacing: 10;
+$tangent: 0.637;
+
+// @todo Links jetzt klickbar?
+// @todo Cube-Scene Höhe
+// @todo .no-js
+
+.content {
+	.cube-scene {
+		height: 300px;
+		margin: 2rem auto;
+
+		perspective: 1000px;
+	}
+
+	.cube {
+		position: relative;
+
+		width: 100%;
+		height: 100%;
+
+		color: $color-primary;
+	}
+	 
+	.cube__nav {
+		position: absolute;
+		top: -1.5rem;
+		right: 0;
+		left: 0;
+
+		height: 1.5rem;
+
+		&::after {
+			position: absolute;
+			top: calc(1.5rem - 1px);
+			right: 0;
+
+			content: '';
+			display: block;
+			width: calc(100% - 60px - 1.5rem);
+			height: 1px;
+
+			background-color: $color-primary;
+		}
+	}
+
+	.cube__tab {
+		position: absolute;
+
+		width: 60px;
+		height: calc(100% - 1px);
+
+		background-color: $color-card;
+		border-top: 1px solid $color-primary;
+
+		&::before {
+			position: absolute;
+			top: 0;
+			left: 100%;
+
+			content: '';
+			display: block;
+			width: 1.5rem;
+			height: 1.5rem;
+
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" viewBox="0 0 50 50"><polyline fill="#{$color-card}" points="50,50 0,50 0,0 "/><polyline fill="none" stroke="#{$color-primary}" stroke-width="2" points="0,0 50,50 "/></svg>');
+			background-position: center center;
+			background-repeat: no-repeat;
+			background-size: 100%;
+			transform: translateY(-1px);
+		}
+	}
+
+	.cube-nav-left,
+	.cube-nav-right {
+		position: absolute;
+
+		display: block;
+		height: 100%;
+
+		background: none;
+		border: none;
+		cursor: pointer;
+
+		&::after {
+			content: '';
+			display: block;
+			width: 10px;
+			height: 10px;
+
+			background-position: center center;
+			background-repeat: no-repeat;
+			background-size: 100%;
+		}
+	}
+
+	.cube-nav-left {
+		left: 0;
+
+		&::after {
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 20 20"><polygon fill="#{$color-primary}" points="20,0 0,10 20,20"/></svg>');
+		}
+	}
+
+	.cube-nav-right {
+		right: -8px;
+
+		&::after {
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 20 20"><polygon fill="#{$color-primary}" points="0,0 20,10 0,20"/></svg>');
+		}
+	}
+	
+	.cube__section {
+		height: 100%;
+		padding: 0.5rem;
+		box-sizing: border-box;
+		// overflow: hidden;
+
+		background-color: $color-card;
+
+		&::before,
+		&::after {
+			position: absolute;
+			bottom: -25px;
+
+			height: 25px;
+			content: '';
+			display: block;
+		}
+
+		&::before {
+			left: 0;
+
+			width: calc(100% - 25px);
+			height: 24px;
+
+			background-color: $color-card;
+			border-bottom: 1px solid $color-primary;
+		}
+
+		&::after {
+			right: 0;
+
+			width: 25px;
+
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25"><polyline fill="#{$color-card}" points="0,0 25,0 0,25"/><polyline fill="none" stroke="#{$color-primary}" stroke-width="1" points="25,0 0,25 "/></svg>');
+		}
+	}
+
+	@media #{$screen-min-sm} {
+		.cube-scene {
+			width: 420px;
+		}
+
+		.cube__section {
+			&:nth-child(1) {
+				transform: rotateY(0deg) translateZ(calc((420px + #{$spacing}px) / 2 / #{$tangent}));
+			}
+
+			&:nth-child(2) {
+				transform: rotateY(-#{$degrees}deg) translateZ(calc((420px + #{$spacing}px) / 2 / #{$tangent}));
+			}
+
+			&:nth-child(3) {
+				transform: rotateY(#{$degrees}deg) translateZ(calc((420px + #{$spacing}px) / 2 / #{$tangent}));
+			}
+		}
+	}
+
+	@media #{$screen-min-md} {
+		.cube-scene {
+			width: 540px;
+		}
+
+		.cube__section {
+			padding: 1rem;
+
+			&:nth-child(1) {
+				transform: rotateY(0deg) translateZ(calc((540px + #{$spacing}px) / 2 / #{$tangent}));
+			}
+
+			&:nth-child(2) {
+				transform: rotateY(-#{$degrees}deg) translateZ(calc((540px + #{$spacing}px) / 2 / #{$tangent}));
+			}
+
+			&:nth-child(3) {
+				transform: rotateY(#{$degrees}deg) translateZ(calc((540px + #{$spacing}px) / 2 / #{$tangent}));
+			}
+		}
+	}
+}
+
+.no-js .content {
+	.cube-scene {
+		height: auto;
+	}
+
+	.cube-nav-left,
+	.cube-nav-right {
+		display: none;
+	}
+
+	.cube__section {
+		&:nth-child(1),
+		&:nth-child(2),
+		&:nth-child(3) {
+			transform: none;
+		}
+
+		&:nth-child(2)::before,
+		&:nth-child(2)::after,
+		&:nth-child(3)::before,
+		&:nth-child(3)::after {
+			content: none;
+		}
+
+		&:nth-child(2) .cube__nav,
+		&:nth-child(3) .cube__nav {
+			display: none;
+		}
+	}
+}

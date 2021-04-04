@@ -252,6 +252,7 @@ body {
 
 main {
 	flex-grow: 1;
+	overflow-x: hidden;
 
 	color: $color-text;
 	font-weight: lighter;

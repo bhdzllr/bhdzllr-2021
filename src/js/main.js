@@ -10,6 +10,7 @@ import { lazyLoadImages } from './lib/utils/loading-images';
 import { addOutlineHandler, addRoleButtonListener } from './lib/utils/accessibility';
 import { beautifyFileInputs } from './lib/utils/beautification';
 
+import { Cube, addCubeDefaultStyles } from './Cube';
 import { Terminal, addTerminalDefaultStyles } from './Terminal';
 
 document.addEventListener('DOMContentLoaded', async function (e) {
@@ -37,6 +38,22 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 		// Don't forget to make global variables available because of uglify, e. g. with:
 		// window['_paq'] = _paq;
 	});
+
+	if (document.querySelector('.js-cube')) {
+		/* let cube = await import(
+			/* webpackChunkName: 'cube' * /
+			/* webpackExports: ["addCubeDefaultStyles", "Cube"] * /
+			'./Terminal'
+		); */
+
+		const options = {
+			responsive: false,
+		};
+
+		addCubeDefaultStyles(options);
+
+		new Cube(document.querySelector('.js-cube'), options);
+	}
 
 	if (document.querySelector('.js-mail-terminal')) {
 		/* let terminal = await import(
