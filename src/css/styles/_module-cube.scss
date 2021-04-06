@@ -3,16 +3,20 @@ $degrees: 65;
 $spacing: 10;
 $tangent: 0.637;
 
-// @todo Links jetzt klickbar?
-// @todo Cube-Scene Höhe
-// @todo .no-js
-
 .content {
 	.cube-scene {
-		height: 300px;
+		height: 270px;
 		margin: 2rem auto;
 
 		perspective: 1000px;
+
+		@media #{$screen-min-sm} {
+			height: 240px;
+		}
+
+		@media #{$screen-min-md} {
+			height: 300px;
+		}
 	}
 
 	.cube {
@@ -76,17 +80,25 @@ $tangent: 0.637;
 	.cube-nav-left,
 	.cube-nav-right {
 		position: absolute;
+		top: 2px; // Little optical correction
 
-		display: block;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 25px;
 		height: 100%;
+		padding: 0; // iOS Safari
 
 		background: none;
 		border: none;
 		cursor: pointer;
 
+		text-align: center;
+
 		&::after {
 			content: '';
-			display: block;
+			display: inline-block;
+			vertical-align: middle;
 			width: 10px;
 			height: 10px;
 
@@ -195,6 +207,8 @@ $tangent: 0.637;
 .no-js .content {
 	.cube-scene {
 		height: auto;
+		padding-left: 0.625rem;
+		padding-right: 0.625rem;
 	}
 
 	.cube-nav-left,

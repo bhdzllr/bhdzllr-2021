@@ -31,10 +31,10 @@ body {
 }
 
 .module {
-	background-color: transparent;
+	background-color: $color-module;
 
-	&--white {
-		background-color: $color-white;
+	&--transparent {
+		background-color: transparent;
 	}
 }
 
@@ -252,12 +252,16 @@ body {
 
 main {
 	flex-grow: 1;
+	padding-top: 2rem;
+	padding-bottom: 3rem;
 	overflow-x: hidden;
 
 	color: $color-text;
 	font-weight: lighter;
 
 	@media #{$screen-min-md} {
+		padding-top: 3rem;
+
 		color: $color-text--lighter;
 		font-size: 1.125rem;
 		font-size: 1.25rem;
@@ -276,11 +280,6 @@ main {
 			padding-right: 2rem;
 			padding-left: 2rem;
 		}
-	}
-
-	.module > div {
-		padding-right: 0;
-		padding-left: 0;
 	}
 
 	a,

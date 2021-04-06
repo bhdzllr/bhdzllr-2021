@@ -67,7 +67,7 @@ handlebars.Handlebars.registerHelper({
 			case 'work':
 				return '/projects';
 			case 'mail':
-				return '/mail';
+				return '/contact';
 			case 'imprint':
 				return '/imprint.html';
 			case 'legal':
