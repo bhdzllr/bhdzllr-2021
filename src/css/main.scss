@@ -12,7 +12,6 @@
 @import 'lib/components/button';
 @import 'lib/components/form';
 @import 'lib/components/table';
-@import 'lib/components/browsehappy';
 @import 'lib/components/message';
 @import 'lib/objects/grid';
 @import 'lib/objects/media';
@@ -33,5 +32,7 @@
 @import 'styles/module-contact';
 @import 'styles/page-contact';
 @import 'styles/animation-hand-wave';
+@import 'styles/animation-glitch';
+@import 'styles/animation-flick';
 
 @import 'lib/settings/print';

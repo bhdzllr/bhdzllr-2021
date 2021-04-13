@@ -1,0 +1,18 @@
+.flick {
+	animation-name: flick;
+	animation-duration: 2.5s;
+}
+
+@keyframes flick {
+	0% {
+		background-color: #213936;
+	}
+
+	1% {
+		background-color: #006a4e;
+	}
+
+	100% {
+		background-color: #213936;
+	}
+}

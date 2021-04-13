@@ -2,13 +2,13 @@
  * ********** Grid **********
  */
 
-.container {
+@mixin container {
 	max-width: $width-site;
 	margin: 0 auto;
 	padding: 0;
 }
 
-.container--sh {
+@mixin container--sh {
 	padding-right: 1rem;
 	padding-left: 1rem;
 
@@ -18,9 +18,21 @@
 	}
 }
 
-.container--sv {
+@mixin container--sv {
 	padding-top: 1.5rem;
 	padding-bottom: 1.5rem;
+}
+
+.container {
+	@include container;
+}
+
+.container--sh {
+	@include container--sh;
+}
+
+.container--sv {
+	@include container--sv;
 }
 
 .grid-container {

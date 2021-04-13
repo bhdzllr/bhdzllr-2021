@@ -108,6 +108,7 @@ function pages(cb) {
 }
 
 function types(cb) {
+	// Revalidator types: https://github.com/flatiron/revalidator
 	const propertiesDefault = {
 		'lang': {
 			type: 'string',
@@ -121,23 +122,63 @@ function types(cb) {
 			type: 'string',
 			required: false,
 		},
-		'description': {
+		'tagline': {
 			type: 'string',
-			required: false,
+			required: true,
+		},
+		'categories': {
+			type: 'array',
+			required: true,
+		},
+		'meta': {
+			type: 'object',
+			required: true,
+			properties: {
+				description: {
+					type: 'string',
+					required: true,
+				},
+				author: {
+					type: 'string',
+					required: false,
+					default: 'Bernhard Zeller',
+				},
+			},
 		},
 	};
 	const types = [
 		{
 			src: 'src/blog',
-			layout: 'layouts/main',
+			layout: 'layouts/article',
 			dist: distFolder + '/blog/',
-			schema: Object.assign(propertiesDefault, {}),
+			schema: Object.assign(Object.assign({}, propertiesDefault), {
+				'tags': {
+					type: 'array',
+					required: true,
+				},
+			}),
 		},
 		{
 			src: 'src/projects',
-			layout: 'layouts/main',
+			layout: 'layouts/article',
 			dist: distFolder + '/projects/',
-			schema: Object.assign(propertiesDefault, {}),
+			schema: Object.assign(Object.assign({}, propertiesDefault), {
+				'year': {
+					type: 'number',
+					required: true,
+				},
+				'categories': {
+					type: 'array',
+					required: true,
+					items: {
+						type: 'string',
+						enum: [
+							'Web Development',
+							'Side Projects',
+						],
+					},
+				},
+			}),
 		},
 	];
 
@@ -168,16 +209,16 @@ function typesSubtask(type) {
 						}
 					}
 
+					if (!data.meta) data.meta = {};
+					if (!data.meta.author) data.meta.author = type.schema.meta.properties.author.default;
+
+					const layoutStart = `{{#extend "${type.layout}"
+						${ data.titleOverride ? `title-override="${data.titleOverride}"` : data.title ? `title="${data.title}"` : '' }	
+						description="${data?.meta?.description ?? ''}"
+						author="${data?.meta?.author ?? ''}"
+					}}{{#content "content"}}`;
+					const layoutEnd = `{{/content}}{{/extend}}`;
 					const templateData = { content: {} };
-					let layoutStart = '{{#extend "' + type.layout + '"}}{{#content "content"}}';
-					let layoutEnd = '{{/content}}{{/extend}}';
-
-					if (data.titleOverride) {
-						layoutStart = '{{#extend "' + type.layout + '" title-override="' + data.titleOverride + '"}}{{#content "content"}}';
-					} else if (data.title) {
-						layoutStart = '{{#extend "' + type.layout + '" title="' + data.title + '"}}{{#content "content"}}';
-					}
-
 					const body = layoutStart
 						+ md
 							.render(content)
@@ -190,6 +231,7 @@ function typesSubtask(type) {
 					file.contents = new Buffer.from(body);
 					
 					templateData.content = data;
+					templateData.content.url = file.path.split('/src')[1].replace('index.md', '');
 					templateData.content.createdAt = file.stat.birthtime;
 					templateData.content.updatedAt = file.stat.mtime;
 
@@ -319,6 +361,7 @@ function dev() {
 
 	watch([
 		'src/blog/**/*.{html,md}',
+		'src/projects/**/*.{html,md}',
 		'src/templates/**/*.html',
 	], series(types));
 

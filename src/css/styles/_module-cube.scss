@@ -5,17 +5,17 @@ $tangent: 0.637;
 
 .content {
 	.cube-scene {
-		height: 270px;
+		height: 260px;
 		margin: 2rem auto;
 
 		perspective: 1000px;
 
 		@media #{$screen-min-sm} {
-			height: 240px;
+			height: 230px;
 		}
 
 		@media #{$screen-min-md} {
-			height: 300px;
+			height: 290px;
 		}
 	}
 
@@ -26,6 +26,20 @@ $tangent: 0.637;
 		height: 100%;
 
 		color: $color-primary;
+
+		h2 {
+			margin-top: 1rem;
+
+			text-transform: uppercase;
+		}
+
+		p {
+			margin-bottom: 0.75rem;
+
+			@media #{$screen-min-md} {
+				margin-bottom: 1rem;
+			}
+		}
 	}
 	 
 	.cube__nav {
@@ -132,21 +146,28 @@ $tangent: 0.637;
 
 		background-color: $color-card;
 
+		> p,
+		> ul,
+		> dl, {
+			position: relative;
+		}
+
 		&::before,
 		&::after {
 			position: absolute;
-			bottom: -25px;
+			bottom: -1.5rem;
 
-			height: 25px;
 			content: '';
 			display: block;
+			height: 1.5rem;
+			box-sizing: border-box;
 		}
 
 		&::before {
 			left: 0;
 
-			width: calc(100% - 25px);
-			height: 24px;
+			width: calc(100% - 1.5rem);
+			height: 1.5rem;
 
 			background-color: $color-card;
 			border-bottom: 1px solid $color-primary;
@@ -155,9 +176,11 @@ $tangent: 0.637;
 		&::after {
 			right: 0;
 
-			width: 25px;
+			width: 1.5rem;
 
-			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" viewBox="0 0 25 25"><polyline fill="#{$color-card}" points="0,0 25,0 0,25"/><polyline fill="none" stroke="#{$color-primary}" stroke-width="1" points="25,0 0,25 "/></svg>');
+			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><polyline fill="#{$color-card}" points="0,0 24,0 0,24"/><polyline fill="none" stroke="#{$color-primary}" stroke-width="1" points="24,0 0,24 "/></svg>');
+			background-repeat: no-repeat;
+			background-size: 1.5rem;
 		}
 	}
 
@@ -199,6 +222,93 @@ $tangent: 0.637;
 
 			&:nth-child(3) {
 				transform: rotateY(#{$degrees}deg) translateZ(calc((540px + #{$spacing}px) / 2 / #{$tangent}));
+			}
+		}
+	}
+
+	.cube__dl {
+		position: relative;
+		z-index: 2;
+
+		display: flex;
+		flex-wrap: wrap;
+
+		dt,
+		dd {
+			display: flex;
+			align-items: center;
+		}
+
+		dt {
+			flex: 0 1 6.5rem;
+
+			font-size: 0.85rem;
+			font-weight: bold;
+		}
+
+		dd {
+			width: calc(100% - 6.5rem);
+			margin: 0.25rem 0;
+		}
+	}
+
+	.cube__tools {
+		margin: 1.5rem 0 0;
+		padding: 0;
+
+		text-align: center;
+
+		li {
+			display: inline-block;
+			margin: 0.15rem 0;
+			padding: 0.15rem 0.35rem;
+
+			background-color: #213936;
+			cursor: default;
+			transition: background-color 2.5s ease;
+
+			&:hover {
+				background-color: #006a4e;
+				transition: background-color 0.2s ease;
+			}
+
+			&::before {
+				content: none;
+			}
+		}
+	}
+
+	.cube__hologram {
+		position: absolute;
+		top: 50%;
+		z-index: 1;
+
+		display: flex;
+		flex-direction: column;
+		width: calc(100% - 0.5rem);
+		height: 100%;
+		max-height: 100%;
+		overflow: hidden;
+
+		transform: translateY(-50%);
+
+		@media #{$screen-min-md} {
+			width: calc(100% - 1rem);
+		}
+
+		img {
+			position: absolute;
+			left: 50%;
+
+			height: 100%;
+
+			&:nth-child(2) {
+				transform: translateX(5px);
+				animation-name: glitch;
+				animation-duration: 2.5s;
+				animation-timing-function: linear;
+				animation-iteration-count: infinite;
+				animation-direction: alternate;
 			}
 		}
 	}

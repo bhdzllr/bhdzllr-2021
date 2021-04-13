@@ -1,15 +1,19 @@
 ---
 title: Post 2
+tagline: Lorem
+categories:
+  - Web Development
+tags:
+  - web
+  - development
+  - html
+  - css
+  - gulp
+  - static
+  - website
+  - blog
 meta:
-  - name: eins
-    bla: super
-    x: ma
-  - name: zwei
-    bla: mega
-    x: zwa
-  - name: drei
-    bla: uiuiui
-    x: asdf
+  description: Desc
 ---
 
 # Second post
@@ -60,9 +64,9 @@ do();
 
 <div class="module">
   <div>
-    <h2>Normales Modul</h2>
+	<h2>Normales Modul</h2>
 
-    <p>Lorem ipsum dolor sit amet.</p>
+	<p>Lorem ipsum dolor sit amet.</p>
   </div>
 </div>
 

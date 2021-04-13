@@ -1,0 +1,38 @@
+{{> "html-start"}}
+
+		<main role="main" class="content container container--sh">
+			<article class="article">
+				<header class="article__header">
+					<h1>{{content.title}}</h1>
+					<p>{{content.tagline}}</p>
+
+					<!-- @todo Image -->
+
+					<p>{{content.year}}</p>
+					<p>{{content.categories}}</p>
+				</header>
+
+				<div class="article__content">
+					{{#block "content"}}{{/block}}
+				</div>
+
+				<footer class="article__footer">
+					<button>Like this article</button>
+
+					<p>tag, tag, tag</p>
+				</footer>
+
+				<aside class="thanks">
+					<p>
+						Thank you
+						<svg width="1rem" height="1rem" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="currentColor" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+							<title>Heart</title>
+							<path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
+							<path d="M19.5 13.572l-7.5 7.428l-7.5 -7.428m0 0a5 5 0 1 1 7.5 -6.566a5 5 0 1 1 7.5 6.572"></path>
+						</svg>
+						for reading. If you enjoyed this story I would be happy if you share it or send me a message on <a href="https://www.twitter.com/bhdzllr">Twitter</a>.</p>
+				</aside>
+			</article>
+		</main>
+
+{{> "html-end"}}

@@ -272,7 +272,7 @@ main {
 		width: 100%;
 		max-width: 760px; // 72ch
 		padding-top: 2rem;
-		padding-bottom: 3rem;
+		padding-bottom: 2rem;
 		box-sizing: border-box;
 
 		@media #{$screen-min-md} {
@@ -346,6 +346,8 @@ h3,
 	}
 
 	ul {
+		margin: 1rem 0;
+		padding: 0 0 0 2rem;
 		list-style: none;
 
 		li::before {
@@ -358,5 +360,17 @@ h3,
 			color: darken($color-primary, 6%);
 			font-weight: bold;
 		}
+	}
+}
+
+// @todo article
+
+.thanks {
+	p {
+		margin-bottom: 0;
+	}
+
+	svg {
+		transform: translateY(2px);
 	}
 }

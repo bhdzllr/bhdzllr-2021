@@ -53,6 +53,21 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 		addCubeDefaultStyles(options);
 
 		new Cube(document.querySelector('.js-cube'), options);
+
+		if (document.querySelector('.js-cube-tools')) {
+			const toolElements = document.querySelectorAll('.js-cube-tools li');
+
+			setInterval(function () {
+				let ri = Math.floor(Math.random() * toolElements.length);
+				if (ri == toolElements.length) ri = toolElements.length - 1;
+
+				
+				toolElements[ri].classList.add('flick');
+
+				setTimeout(() => toolElements[ri].classList.remove('flick'), 3000);
+			}, 3000);
+
+		}
 	}
 
 	if (document.querySelector('.js-mail-terminal')) {

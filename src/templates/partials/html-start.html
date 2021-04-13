@@ -6,7 +6,8 @@
 
 		<title>{{#if title-override}}{{title-override}}{{else}}{{#if title}}{{title}} @bhdzllr{{else}}@bhdzllr{{/if}}{{/if}}</title>
 
-		<meta name="description" content="{{#if description}}{{description}}{{else}}Bernhard Zeller (@bhdzllr) is a Web Developer and Maker from Austria.{{/if}}" />
+		<meta name="description" content="{{#if description}}{{description}}{{else}}Bernhard Zeller (@bhdzllr) is a Full Stack Web Developer and Maker from Austria.{{/if}}" />
+		{{#if author}}<meta name="author" content="{{author}}" />{{/if}}
 		<meta name="robots" content="index, follow" />
 
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -22,18 +23,18 @@
 		<link rel="stylesheet" href="/css/style.min.css" />
 	</head>
 	<body{{#if bodyClassList}} class="{{bodyClassList}}"{{/if}}>
-		<!--[if IE]>
-		<div class="browsehappy">
-			<p lang="en">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-			<p lang="de">Sie verwenden einen <strong>veralteten</strong> Browser. Bitte <a href="http://browsehappy.com/" title="Browser Upgrade">aktualisieren Sie Ihren Browser</a> um ein besseres Surferlebnis zu erhalten.</p>
-		</div>
-		<![endif]-->
-
 		<header id="site-header">
 			<div id="site-header-bar" class="container container--sh">
 				<a href="/" title="Start" id="site-branding"{{#ifEquals title 'Start'}} class="page-active"{{/ifEquals}}>
 					<em>@bhdzllr</em>
 				</a>
+
+				<!-- @todo
+					Bessere Implementierung von active link
+					Like/Feedback Button
+					Social Media Tags
+					Analytics
+				-->
 
 				<nav id="site-nav">
 					<ul>

@@ -1,5 +1,19 @@
 ---
 title: Post 1
+tagline: Lorem
+categories:
+  - Web Development
+tags:
+  - web
+  - development
+  - html
+  - css
+  - gulp
+  - static
+  - website
+  - blog
+meta:
+  description: Desc
 ---
 
 # {{content.title}}

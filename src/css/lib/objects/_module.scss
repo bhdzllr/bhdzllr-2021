@@ -8,9 +8,9 @@
 	background-color: $color-white;
 
 	> div {
-		@extend .container;
-		@extend .container--sh;
-		@extend .container--sv;
+		@include container;
+		@include container--sh;
+		@include container--sv;
 
 		> :last-child {
 			margin-bottom: 0;
@@ -37,6 +37,5 @@
 .module--edged {
 	> div {
 		padding: 0;
-		// padding: 0 0 0.01px 0;
 	}
 }
