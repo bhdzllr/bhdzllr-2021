@@ -20,7 +20,7 @@ body {
 	color: $color-text--i;
 }
 
-.container--sh {
+@mixin container--sh {
 	padding-right: 0.625rem;
 	padding-left: 0.625rem;
 
@@ -30,11 +30,19 @@ body {
 	}
 }
 
+.container--sh {
+	@include container--sh;
+}
+
 .module {
 	background-color: $color-module;
 
 	&--transparent {
 		background-color: transparent;
+	}
+
+	> div {
+		@include container--sh;
 	}
 }
 
@@ -269,17 +277,19 @@ main {
 	}
 
 	&.container {
-		width: 100%;
 		max-width: 760px; // 72ch
-		padding-top: 2rem;
+		padding-top: 1.25rem;
 		padding-bottom: 2rem;
-		box-sizing: border-box;
 
 		@media #{$screen-min-md} {
 			padding-top: 3rem;
 			padding-right: 2rem;
 			padding-left: 2rem;
 		}
+	}
+
+	&.container--article { // @todo Notwendig? Oder Übernahme auf Block darüber? ("&.container")
+		max-width: 960px;
 	}
 
 	a,
@@ -318,20 +328,53 @@ h3,
 	font-size: 1.15rem; 
 }
 
+h4,
+.h4 {
+	margin-top: 1.05rem;
+	margin-bottom: 0.65rem;
+
+	color: $color-white;
+	font-size: 1.05rem; 
+}
+
+.extended {
+	margin-left: -0.625rem;
+	margin-right: -0.625rem;
+
+	@media #{$screen-min-md} {
+		margin-left: -2rem;
+		margin-right: -2rem;
+	}
+}
+
+.extended--max-md {
+	@media #{$screen-min-md} {
+		margin-right: 0;
+		margin-left: 0;
+	}
+}
+
+.extended--space {
+	padding: 0.625rem;
+
+	@media #{$screen-min-md} {
+		padding: 2rem;
+	}
+}
+
 .content {
 	img {
 		margin: 0 auto;
 	}
 
 	img.img-extended {
+		@extend .extended;
+
 		max-width: calc(100% + 1.25rem);
-		margin-left: -0.625rem;
-		margin-right: -0.625rem;
 
 		@media #{$screen-min-md} {
 			max-width: calc(100% + 4rem);
-			margin-left: -2rem;
-			margin-right: -2rem;
+			padding: 0;
 		}
 	}
 
@@ -363,7 +406,98 @@ h3,
 	}
 }
 
-// @todo article
+.article {
+	h2,
+	.h2,
+	h3,
+	.h3,
+	h4,
+	.h4 {
+		color: #444444;
+	}
+}
+
+.article__tagline {
+	position: relative;
+	z-index: 2;
+
+	color: #e3e3e3;
+}
+
+.article__image {
+	@extend .extended;
+	@extend .extended--max-md;
+
+	position: relative;
+	z-index: 1;
+
+	max-height: 480px;
+	margin-top: -3rem;
+	overflow: hidden;
+
+	&::before {
+		position: absolute;
+		right: 0;
+		left: 0;
+
+		content: '';
+		display: block;
+		width: 100%;
+		height: 100%;
+
+		background: linear-gradient(0deg, $color-background 5%, rgba(0,101,78,0.65) 50%, $color-background 95%);
+		// background: transparent radial-gradient(closest-side at 50% 50%, #00654E82 0%, #172525 100%) 0% 0% no-repeat padding-box;
+	}
+
+	img {
+		display: block;
+		width: 100%;
+		max-width: none;
+	}
+}
+
+.article__datetime,
+.article__categories {
+	position: relative;
+	z-index: 2;
+
+	color: #8dbbb7;
+}
+
+.article__datetime {
+	margin-top: -2rem;
+	margin-bottom: 0.375em;
+
+	font-size: 0.750rem;
+
+	&::before {
+		content: '//';
+		margin-right: 0.25rem;
+	}
+}
+
+.article__categories {
+	font-size: 0.875rem;
+
+	span:first-child::before {
+		content: '//';
+		margin-right: 0.25rem;
+	}
+}
+
+.article__content {
+	@extend .extended;
+	@extend .extended--max-md;
+	@extend .extended--space;
+
+	background-color: $color-article;
+
+	color: #444444;
+
+	&--project {
+		background-color: none;
+	}
+}
 
 .thanks {
 	p {

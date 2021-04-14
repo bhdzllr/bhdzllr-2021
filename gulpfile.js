@@ -126,17 +126,47 @@ function types(cb) {
 			type: 'string',
 			required: true,
 		},
+		'image': {
+			type: 'string',
+			required: true,
+		},
+		'imageAlt': {
+			type: 'string',
+			required: true,
+		},
 		'categories': {
+			type: 'array',
+			required: true,
+			items: {
+				type: 'string',
+				enum: [
+					'Web Development',
+					'Design',
+					'Usability',
+					'Accessibility',
+					'Side Projects',
+					'Freelance',
+					'Business',
+					'Net Politics',
+					'Privacy',
+					'Photo',
+					'Video',
+					'Tech',
+					'Productivity',
+				],
+			},
+		},
+		'tags': {
 			type: 'array',
 			required: true,
 		},
 		'meta': {
 			type: 'object',
-			required: true,
+			required: false,
 			properties: {
 				description: {
 					type: 'string',
-					required: true,
+					required: false,
 				},
 				author: {
 					type: 'string',
@@ -148,17 +178,14 @@ function types(cb) {
 	};
 	const types = [
 		{
+			name: 'blog',
 			src: 'src/blog',
 			layout: 'layouts/article',
 			dist: distFolder + '/blog/',
-			schema: Object.assign(Object.assign({}, propertiesDefault), {
-				'tags': {
-					type: 'array',
-					required: true,
-				},
-			}),
+			schema: Object.assign(Object.assign({}, propertiesDefault), {}),
 		},
 		{
+			name: 'project',
 			src: 'src/projects',
 			layout: 'layouts/article',
 			dist: distFolder + '/projects/',
@@ -166,17 +193,6 @@ function types(cb) {
 				'year': {
 					type: 'number',
 					required: true,
-				},
-				'categories': {
-					type: 'array',
-					required: true,
-					items: {
-						type: 'string',
-						enum: [
-							'Web Development',
-							'Side Projects',
-						],
-					},
 				},
 			}),
 		},
@@ -211,6 +227,7 @@ function typesSubtask(type) {
 
 					if (!data.meta) data.meta = {};
 					if (!data.meta.author) data.meta.author = type.schema.meta.properties.author.default;
+					if (!data.meta.description) data.meta.description = data.tagline;
 
 					const layoutStart = `{{#extend "${type.layout}"
 						${ data.titleOverride ? `title-override="${data.titleOverride}"` : data.title ? `title="${data.title}"` : '' }	
@@ -231,6 +248,7 @@ function typesSubtask(type) {
 					file.contents = new Buffer.from(body);
 					
 					templateData.content = data;
+					templateData.type = type.name;
 					templateData.content.url = file.path.split('/src')[1].replace('index.md', '');
 					templateData.content.createdAt = file.stat.birthtime;
 					templateData.content.updatedAt = file.stat.mtime;

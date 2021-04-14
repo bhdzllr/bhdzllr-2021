@@ -1,6 +1,8 @@
 ---
 title: Post 2
 tagline: Lorem
+image: test.jpg
+imageAlt: Test Image
 categories:
   - Web Development
 tags:
