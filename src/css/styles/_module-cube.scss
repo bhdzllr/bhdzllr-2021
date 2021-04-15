@@ -344,5 +344,9 @@ $tangent: 0.637;
 		&:nth-child(3) .cube__nav {
 			display: none;
 		}
+
+		&:nth-child(2) {
+			position: relative;
+		}
 	}
 }
