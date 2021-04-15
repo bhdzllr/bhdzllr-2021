@@ -248,7 +248,7 @@ function typesSubtask(type) {
 					file.contents = new Buffer.from(body);
 					
 					templateData.content = data;
-					templateData.type = type.name;
+					templateData.content.type = type.name;
 					templateData.content.url = file.path.split('/src')[1].replace('index.md', '');
 					templateData.content.createdAt = file.stat.birthtime;
 					templateData.content.updatedAt = file.stat.mtime;
