@@ -10,13 +10,7 @@ body {
 	background-color: $color-background;
 
 	color: $color-text;
-	font-family: $font-fallback;
+	font-family: $font-stack;
 	font-size: 1em;
 	line-height: 1.625;
-
-	.no-js &,
-	.fonts-loaded & {
-		font-family: $font-stack;
-		font-weight: normal;
-	}
 }

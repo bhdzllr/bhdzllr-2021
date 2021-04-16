@@ -39,8 +39,6 @@
     "webpack-stream": "^6.1.1"
   },
   "dependencies": {
-    "es6-promise": "^4.2.8",
-    "fontfaceobserver-es": "^3.3.3",
     "whatwg-fetch": "^3.6.2"
   }
 }

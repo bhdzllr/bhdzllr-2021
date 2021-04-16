@@ -43,14 +43,3 @@
 	     url('/fonts/OpenSans-Bold.woff2') format('woff2'),
 	     url('/fonts/OpenSans-Bold.woff') format('woff');
 }
-
-/** Web Font Extra Bold */
-@font-face {
-	font-family: 'Open Sans';
-	font-style: normal;
-	font-weight: 800;
-	font-display: swap;
-	src: local('Open Sans Bold'), local('OpenSans-Bold'),
-	     url('/fonts/OpenSans-ExtraBold.woff2') format('woff2'),
-	     url('/fonts/OpenSans-ExtraBold.woff') format('woff');
-}
