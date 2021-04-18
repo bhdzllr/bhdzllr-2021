@@ -65,7 +65,7 @@
 	}
 
 	.terminal__input-field:disabled ~ .terminal__input-helper:empty ~ .terminal__input-caret {
-		border-color: #999999;
+		border-color: $color-text--darker;
 	}
 
 	.terminal__screen-input::before,

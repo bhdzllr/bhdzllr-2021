@@ -5,14 +5,14 @@
 
 @keyframes flick {
 	0% {
-		background-color: #213936;
+		background-color: darken($color-secondary, 2%);
 	}
 
 	1% {
-		background-color: #006a4e;
+		background-color: darken($color-primary, 22%);
 	}
 
 	100% {
-		background-color: #213936;
+		background-color: darken($color-secondary, 2%);
 	}
 }

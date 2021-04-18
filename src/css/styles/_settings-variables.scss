@@ -15,8 +15,9 @@ $color-warning: #f4d03f;
 $color-negative: #f64747;
 
 $color-text:    #c2c2c2;
-$color-text--i: #595959;
+$color-text--i: #494949;
 $color-text--lighter: #adadad; //#bababa; // #e3e3e3;
+$color-text--darker: #999999;
 $color-selection: lighten($color-primary, 45%);
 
 $width-site: 960px;
@@ -25,6 +26,7 @@ $width-site: 960px;
 
 $color-gray-1: #a2a2a2;
 $color-gray-2: #c2c2c2;
+$color-small: #8dbbb7;
 $color-card: rgba(40, 70, 66, 0.85);
 $color-module: #1d3330;
 $color-article: rgba(255, 255, 255, 0.9);

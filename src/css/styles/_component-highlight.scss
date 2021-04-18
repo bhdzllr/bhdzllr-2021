@@ -1,9 +1,15 @@
 .hljs {
+	@extend .extended;
+
 	display: block;
 	padding: 0.5em;
 	overflow-x: auto;
 
 	background: #233c39;
+
+	@media #{$screen-min-md} {
+		padding: 1.5rem;
+	}
 }
 
 .hljs,

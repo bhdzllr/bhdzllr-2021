@@ -11,6 +11,7 @@ import { beautifyFileInputs } from './lib/utils/beautification';
 
 import { Cube, addCubeDefaultStyles } from './Cube';
 import { Terminal, addTerminalDefaultStyles } from './Terminal';
+import { Like } from './Like';
 
 document.addEventListener('DOMContentLoaded', async function (e) {
 
@@ -54,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 			setInterval(function () {
 				let ri = Math.floor(Math.random() * toolElements.length);
 				if (ri == toolElements.length) ri = toolElements.length - 1;
-
 				
 				toolElements[ri].classList.add('flick');
 

@@ -6,9 +6,11 @@
 					<h1 class="article__title">{{content.title}}</h1>
 					<p class="article__tagline">{{content.tagline}}</p>
 
+					{{#if content.image}}
 					<div class="article__image">
 						<img src="{{content.image}}" alt="{{content.imageAlt}}" />
 					</div>
+					{{/if}}
 
 					<p class="article__datetime">{{content.year}}</p>
 					<p class="article__categories">
@@ -24,12 +26,12 @@
 
 				<footer class="article__footer">
 					{{#ifEquals content.type 'blog'}}
-					<button>Like this article</button>
+					<bhdzllr-like value="2"></bhdzllr-like>
 					{{/ifEquals}}
 
 					<p class="article__tags">
 						{{#each content.tags}}
-						<span>{{this}}</span>
+						<span class="article__tag">{{this}}</span>
 						{{/each}}
 					</p>
 				</footer>

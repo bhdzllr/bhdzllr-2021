@@ -128,11 +128,11 @@ function types(cb) {
 		},
 		'image': {
 			type: 'string',
-			required: true,
+			required: false,
 		},
 		'imageAlt': {
 			type: 'string',
-			required: true,
+			required: false,
 		},
 		'categories': {
 			type: 'array',

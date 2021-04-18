@@ -24,7 +24,7 @@ Lorem ipsum dolor sit amet, [consectetuer adipiscing](https://www.bhdzllr.com/) 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit.
 
 <figure>
-  <img src="/img/image-640.jpg" alt="Sonnenaufgang mit Nebel" class="img-extended" />
+  <img src="/img/image-640.jpg" alt="Sonnenaufgang mit Nebel" />
   <figcaption>Das ist ein Text der das Bild beschreibt. Was soll ich sonst noch dazu sagen?</figcaption>
 </figure>
 
