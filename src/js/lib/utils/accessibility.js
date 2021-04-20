@@ -10,10 +10,15 @@ export function addOutlineHandler(className = 'is-tabbing') {
 	});
 }
 
-export function addRoleButtonListener() {
+export function addRoleButtonListener(exceptions = []) {
 	let buttons = document.querySelectorAll('[role="button"]');
 
 	for (let i = 0; i < buttons.length; i++) {
+		if (exceptions.indexOf(buttons[i].nodeName.toLowerCase()) > -1) {
+			console.log(buttons[i].nodeName);
+			continue;
+		}
+
 		buttons[i].addEventListener('keydown', function (e) {
 			if (e.keyCode === 13 || e.keyCode === 32) {
 				e.preventDefault();

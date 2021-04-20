@@ -6,12 +6,12 @@ import { default as de } from './lang/de.json';
 import I18n from './lib/modules/I18n';
 import { AnalyticsOptOut, addAnalyticsCode } from './lib/modules/Analytics';
 import { lazyLoadImages } from './lib/utils/loading-images';
-import { addOutlineHandler, addRoleButtonListener } from './lib/utils/accessibility';
+import { addOutlineHandler } from './lib/utils/accessibility';
 import { beautifyFileInputs } from './lib/utils/beautification';
 
 import { Cube, addCubeDefaultStyles } from './Cube';
 import { Terminal, addTerminalDefaultStyles } from './Terminal';
-import { Like } from './Like';
+import { Reaction } from './Reaction';
 
 document.addEventListener('DOMContentLoaded', async function (e) {
 
@@ -21,7 +21,6 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 	// addServiceWorker('/sw.js');
 	lazyLoadImages();
 	addOutlineHandler();
-	addRoleButtonListener();
 	beautifyFileInputs(i18n);
 
 	if (document.querySelector('.js-analytics-opt-out')) {
