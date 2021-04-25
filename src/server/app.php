@@ -216,12 +216,12 @@ class Route {
 	use InterceptorTrait;
 
 	const GET = 'GET';
-    const POST = 'POST';
-    const PUT = 'PUT';
-    const PATCH = 'PATCH';
-    const HEAD = 'HEAD';
-    const OPTIONS = 'OPTIONS';
-    const DELETE = 'DELETE';
+	const POST = 'POST';
+	const PUT = 'PUT';
+	const PATCH = 'PATCH';
+	const HEAD = 'HEAD';
+	const OPTIONS = 'OPTIONS';
+	const DELETE = 'DELETE';
 
 	public $method;
 	public $uri;
