@@ -341,6 +341,7 @@ function scripts() {
 function server() {
 	return src([
 			'src/server/**/*',
+			'src/server/**/.env',
 			'!composer.json',
 			'!composer.lock',
 		])

@@ -85,9 +85,6 @@ class Result {
 	const SUCCESS   = 'success';
 	const ERROR     = 'error';
 	const INVALID   = 'invalid';
-	const INFO      = 'info';
-	const WARNING   = 'warning';
-	const NOT_FOUND = 'not-found';
 
 	public static function generate(string $result = RESULT::SUCCESS, ?string $message = null, ?array $context = [], ?int $status = 200) {
 		return [
