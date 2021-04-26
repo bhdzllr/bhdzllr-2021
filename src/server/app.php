@@ -182,6 +182,8 @@ class Session {
 
 }
 
+// class Database {} // @todo Maybe add later
+
 class Result {
 
 	use HeaderTrait;
@@ -321,10 +323,11 @@ class Router {
 			}
 
 			// Replace patterns with regex.
-			$uriPattern = str_replace('/{any}',  '\/([A-Za-z0-9_-]+)',   $uriPattern);
-			$uriPattern = str_replace('/{any?}', '\/?([A-Za-z0-9_-]+)?', $uriPattern);
-			$uriPattern = str_replace('/{num}',  '\/(\d+)',   $uriPattern);
-			$uriPattern = str_replace('/{num?}', '\/?(\d+)?', $uriPattern);
+			$uriPattern = preg_quote($uriPattern);
+			$uriPattern = str_replace('\{any\}',   '([A-Za-z0-9_-]+)',   $uriPattern);
+			$uriPattern = str_replace('\{any\?\}', '?([A-Za-z0-9_-]+)?', $uriPattern);
+			$uriPattern = str_replace('\{num\}',   '(\d+)',   $uriPattern);
+			$uriPattern = str_replace('\{num\?\}', '?(\d+)?', $uriPattern);
 
 			$routeMatch = preg_match('(^' . $uriPattern . '$)i', $requestedUri, $parameters);
 
@@ -450,28 +453,15 @@ class App extends Router {
 	}
 
 	private function init() {
-		set_exception_handler([$this, 'exceptionHandler']);
-
 		if (getEnv('DEBUG') && getEnv('DEBUG') == 'true') error_reporting(E_ALL);
 
-		$requestMethod = Route::GET;
-		if (isset($_POST['_method'])) {
-			$requestMethod = $_POST['_method'];
-		} elseif ($_SERVER['REQUEST_METHOD']) {
-			$requestMethod = $_SERVER['REQUEST_METHOD'];
-		}
-
-		$originalHeaders = getallheaders();
-		$lowercasedHeaders = [];
-		foreach ($originalHeaders as $name => $value) {
-			$lowercasedHeaders[strtolower($name)] = $value;
-		}
+		set_exception_handler([$this, 'exceptionHandler']);
 
 		$this->contextPath = getenv('APP_CONTEXT_PATH');
 
-		$this->method = $requestMethod;
+		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? Route::GET;;
 		$this->uri = $_SERVER['REQUEST_URI'];
-		$this->headers = $originalHeaders;
+		$this->headers = getallheaders();
 
 		$this->host = $_SERVER['HTTP_HOST'];
 		$this->fullUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";

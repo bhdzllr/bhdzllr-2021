@@ -2,7 +2,7 @@
 
 $app = require 'app.php';
 
-$app->post('/server/api.php\?action=mail', function () use ($app) {
+$app->post('mail', function () use ($app) {
 	if ($app->getHeader('Content-Type') !== 'application/json') {
 		throw new HttpException('Bad request Content-Type.', 400);
 	}
@@ -59,14 +59,14 @@ $app->post('/server/api.php\?action=mail', function () use ($app) {
 	return $result;
 });
 
-$app->get('/server/api.php\?action=like&id=([A-Za-z0-9_-]+)', function (string $id) {
+$app->get('like&id={any}', function (string $id) {
 
 	// Return likes
 
 	return [$id];
 });
 
-$app->post('/server/api.php\?action=like&id=([A-Za-z0-9_-]+)', function () {
+$app->post('like&id={any}', function () {
 
 	// Save like
 
