@@ -3,3 +3,4 @@
 ssh.json
 node_modules/
 dist/
+storage/
