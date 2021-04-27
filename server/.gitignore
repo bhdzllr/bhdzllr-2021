@@ -1,0 +1,6 @@
+.DS_Store
+.env
+.migrations
+vendor/
+env.php
+env-production.php

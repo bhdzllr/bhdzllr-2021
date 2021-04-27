@@ -32,7 +32,7 @@ const sourcemaps = require('gulp-sourcemaps');
 const tar = require('gulp-tar');
 const GulpSSH = require('gulp-ssh');
 
-const distFolder = 'dist'
+const distFolder = 'dist';
 const sshConfig = require('./ssh.json');
 const ssh = new GulpSSH({
 	ignoreErrors: false,
@@ -87,7 +87,7 @@ handlebars.Handlebars.registerHelper({
 
 function clean() {
 	return del([
-		distFolder
+		distFolder,
 	], { force: true });
 }
 
@@ -340,12 +340,13 @@ function scripts() {
 
 function server() {
 	return src([
-			'src/server/**/*',
-			'src/server/**/.env',
+			'server/app.php',
+			'server/api.php',
+			'server/env.php',
 			'!composer.json',
 			'!composer.lock',
 		])
-		.pipe(dest('dist/server/'));
+		.pipe(dest(distFolder + '/server/'));
 }
 
 function res(cb) {
@@ -393,7 +394,7 @@ function dev() {
 	], series(scripts));
 
 	watch([
-		'src/server/**/*.php'
+		'server/**/*.php'
 	], series(server));
 }
 

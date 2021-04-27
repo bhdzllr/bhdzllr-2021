@@ -1,5 +1,9 @@
 <?php
 
+namespace App;
+
+use \Exception;
+
 interface BeforeInterceptorInterface {
 
 	public function __invoke(App $app);
@@ -57,6 +61,13 @@ class HttpException extends Exception {
 }
 
 class Helpers {
+
+	public static function registerAutoload() {
+		spl_autoload_register(function (string $class) {
+			$classFile = str_replace('\\', '/', $class) . '.php';
+			if (file_exists($classFile)) require $classFile;
+		});
+	}
 
 	public static function redirect(string $url) {
 		header('Location: ' . $url);
@@ -398,21 +409,24 @@ class App extends Router {
 		}
 	}
 
-	public function run() {
-		$route = $this->getRoute($this->method, $this->uri);
-		if (!$route) throw new HttpException('Not Found.', 404);
-		$this->route = $route;
+	public function init() {
+		if (getEnv('DEBUG') && getEnv('DEBUG') == 'true') error_reporting(E_ALL);
 
-		if (!$route->onlyRouteInterceptor && $this->interceptorBefore) ($this->interceptorBefore)($this);
-		if ($route->interceptorBefore) ($route->interceptorBefore)($this);
+		set_exception_handler([$this, 'exceptionHandler']);
 
-		$result = ($route->action)(...$route->parameters);
-		if (!$result instanceof Result) $result = new Result($result);
+		$this->contextPath = getenv('APP_CONTEXT_PATH');
 
-		if ($route->interceptorAfter) $result = ($route->interceptorAfter)($this, $result);
-		if (!$route->onlyRouteInterceptor && $this->interceptorAfter) $result = ($this->interceptorAfter)($this, $result);
+		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? Route::GET;;
+		$this->uri = $_SERVER['REQUEST_URI'];
+		$this->headers = getallheaders();
 
-		$this->render($result);
+		$this->host = $_SERVER['HTTP_HOST'];
+		$this->fullUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+		$this->queryParams = $_GET;
+		$this->parsedBody = $_POST;
+		$this->uploadedFiles = $_FILES;
+		$this->cookieParams = $_COOKIE;
+		$this->body = file_get_contents('php://input', 'r') ?: null;
 	}
 
 	public function exceptionHandler(Exception $e) {
@@ -452,24 +466,21 @@ class App extends Router {
 		$this->render($result);
 	}
 
-	private function init() {
-		if (getEnv('DEBUG') && getEnv('DEBUG') == 'true') error_reporting(E_ALL);
+	public function run() {
+		$route = $this->getRoute($this->method, $this->uri);
+		if (!$route) throw new HttpException('Not Found.', 404);
+		$this->route = $route;
 
-		set_exception_handler([$this, 'exceptionHandler']);
+		if (!$route->onlyRouteInterceptor && $this->interceptorBefore) ($this->interceptorBefore)($this);
+		if ($route->interceptorBefore) ($route->interceptorBefore)($this);
 
-		$this->contextPath = getenv('APP_CONTEXT_PATH');
+		$result = ($route->action)(...$route->parameters);
+		if (!$result instanceof Result) $result = new Result($result);
 
-		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? Route::GET;;
-		$this->uri = $_SERVER['REQUEST_URI'];
-		$this->headers = getallheaders();
+		if ($route->interceptorAfter) $result = ($route->interceptorAfter)($this, $result);
+		if (!$route->onlyRouteInterceptor && $this->interceptorAfter) $result = ($this->interceptorAfter)($this, $result);
 
-		$this->host = $_SERVER['HTTP_HOST'];
-		$this->fullUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
-		$this->queryParams = $_GET;
-		$this->parsedBody = $_POST;
-		$this->uploadedFiles = $_FILES;
-		$this->cookieParams = $_COOKIE;
-		$this->body = file_get_contents('php://input', 'r') ?: null;
+		$this->render($result);
 	}
 
 	public function render(Result $result) {
@@ -662,4 +673,8 @@ return (function () {
 	$app->after(new AppAfterInterceptor());
 
 	return $app;
+
+	// For use of "index.php" in subfolder, e. g. "./public" but keeping files
+	// like ".env" in root "./"
+	// chdir(dirname(__DIR__));
 })();

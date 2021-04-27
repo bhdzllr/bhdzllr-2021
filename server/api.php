@@ -1,6 +1,14 @@
 <?php
 
+use App\Helpers;
+
 $app = require 'app.php';
+require 'env.php'; // Using PHP because of shared host
+$app->init(); // Reinitialize env properties
+
+$config = [
+	'storageLikes' => getenv('STORAGE_LIKES'),
+];
 
 $app->post('mail', function () use ($app) {
 	if ($app->getHeader('Content-Type') !== 'application/json') {
@@ -59,22 +67,50 @@ $app->post('mail', function () use ($app) {
 	return $result;
 });
 
-$app->get('like&id={any}', function (string $id) {
+$app->get('like&id={any}', function (string $id) use ($config) {
+	if (!file_exists($config['storageLikes'])) throw new Exception('Problem while reading storage.');
 
-	// Return likes
+	$data = json_decode(file_get_contents($config['storageLikes']));
 
-	return [$id];
+	foreach ($data as $like) {
+		if ($like->id == $id) return $like;
+	}
+
+	return new \stdClass();
 });
 
-$app->post('like&id={any}', function () {
+$app->post('like&id={any}', function (string $id) use ($config) {
+	if (!file_exists($config['storageLikes'])) throw new Exception('Problem while reading from likes storage.');
 
-	// Save like
+	$data = json_decode(file_get_contents($config['storageLikes'])) ?? [];
+	$found = false;
+	$returnRecord = new \stdClass();
 
-	return [];
+	foreach ($data as $key => $like) {
+		if ($like->id == $id) {
+			$like->likes++;
+			$found = true;
+			$returnRecord = $like;
+			break;
+		}
+	}
+
+	if (!$found) {
+		$data[] = [
+			'id' => $id,
+			'likes' => 1,
+		];
+		$returnRecord = end($data);
+	}
+
+	$isFileWritten = file_put_contents($config['storageLikes'], json_encode($data));
+	if (!$isFileWritten) throw new Exception('Problem while writing to likes storage.');
+
+	return $returnRecord;
 })->before(function ($app) {
-	Helpers::checkRateLimitCookie($app, 'rate-limit-like');
+	// Helpers::checkRateLimitCookie($app, 'rate-limit-like');
 })->after(function ($app, $result) {
-	Helpers::setRateLimitCookie($result->status, 'rate-limit-like', 25);
+	// Helpers::setRateLimitCookie($result->status, 'rate-limit-like', 25);
 
 	return $result;
 });
