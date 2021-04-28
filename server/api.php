@@ -108,9 +108,9 @@ $app->post('like&id={any}', function (string $id) use ($config) {
 
 	return $returnRecord;
 })->before(function ($app) {
-	// Helpers::checkRateLimitCookie($app, 'rate-limit-like');
+	Helpers::checkRateLimitCookie($app, 'rate-limit-like');
 })->after(function ($app, $result) {
-	// Helpers::setRateLimitCookie($result->status, 'rate-limit-like', 25);
+	Helpers::setRateLimitCookie($result->status, 'rate-limit-like', 25);
 
 	return $result;
 });

@@ -1,3 +1,5 @@
+import 'whatwg-fetch';
+
 const template = document.createElement('template');
 template.innerHTML = `
 	<style>
@@ -104,7 +106,8 @@ export class Reaction extends HTMLElement {
 	}
 
 	connectedCallback() {
-		if (!this.hasAttribute('value')) this.setAttribute('value', 0);
+		if (!this.hasAttribute('id')) console.warn('[Reaction] No id set.');
+		// if (!this.hasAttribute('value')) this.setAttribute('value', 0);
 		if (!this.hasAttribute('icon') && !this.innerHTML) this.setAttribute('icon', 'like');
 		if (!this.hasAttribute('url')) console.warn('[Reaction] No URL set.');
 		if (!this.hasAttribute('role')) this.setAttribute('role', 'button');
@@ -122,6 +125,14 @@ export class Reaction extends HTMLElement {
 				this.output.insertAdjacentHTML('beforebegin', this.icon);
 
 				if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', this.icon);
+			}
+		}
+
+		if (this.hasAttribute('id')) {
+			const localReactions = JSON.parse(localStorage.getItem('reactions')) ?? [];
+
+			if (localReactions.indexOf(this.getAttribute('id')) > -1) {
+				this.pressed = true;
 			}
 		}
 
@@ -149,6 +160,8 @@ export class Reaction extends HTMLElement {
 	}
 
 	get value() {
+		if (isNaN(this.getAttribute('value'))) return;
+
 		return parseInt(this.getAttribute('value'));
 	}
 
@@ -184,14 +197,29 @@ export class Reaction extends HTMLElement {
 		const url = this.getAttribute('url');
 		if (!url) return;
 
-		// @todo fetch
+		fetch(encodeURI(url))
+			.then(response => response.json())
+			.then(async responseData => {
+				this.value = responseData.likes ?? 0;
+			});
 	}
 
 	saveValue() {
 		const url = this.getAttribute('url');
 		if (!url) return;
 
-		// @todo fetch
+		fetch(encodeURI(url), {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+			});
+	}
+
+	rememberValue() {
+		const localReactions = JSON.parse(localStorage.getItem('reactions')) ?? [];
+
+		localReactions.push(this.getAttribute('id'));
+
+		localStorage.setItem('reactions', JSON.stringify(localReactions));
 	}
 
 	handleKeyDown(e) {
@@ -216,6 +244,7 @@ export class Reaction extends HTMLElement {
 		this.value++
 
 		this.saveValue();
+		this.rememberValue();
 	}
 
 	isPredefinedIcon(iconName) {

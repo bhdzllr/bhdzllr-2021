@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 			mailTerminal.showLoader();
 
 			setTimeout(() => {
-				fetch('/server/mail.php', {
+				fetch('/server/api.php?action=mail', {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
 					body: JSON.stringify(data),

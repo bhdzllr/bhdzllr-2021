@@ -26,7 +26,7 @@
 
 				<footer class="article__footer">
 					{{#ifEquals content.type 'blog'}}
-					<bhdzllr-reaction></bhdzllr-reaction>
+					<bhdzllr-reaction url="/server/api.php?action=like&id={{content.id}}" id="{{content.id}}"></bhdzllr-reaction>
 					{{/ifEquals}}
 
 					<p class="article__tags">

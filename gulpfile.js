@@ -110,6 +110,11 @@ function pages(cb) {
 function types(cb) {
 	// Revalidator types: https://github.com/flatiron/revalidator
 	const propertiesDefault = {
+		'id': {
+			type: 'string',
+			required: true,
+			pattern: '^[a-zA-Z0-9_-]+$',
+		},
 		'lang': {
 			type: 'string',
 			required: false,

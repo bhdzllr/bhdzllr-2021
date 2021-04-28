@@ -1,4 +1,5 @@
 ---
+id: second
 title: Post 2
 tagline: Lorem
 categories:
