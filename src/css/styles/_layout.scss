@@ -601,6 +601,14 @@ h4,
 			padding: 4.5rem 7rem;
 		}
 
+		:focus {
+			outline-color: $color-text--i;
+		}
+
+		::selection {
+			background: lighten($color-secondary, 54%);
+		}
+
 		h2,
 		.h2,
 		h3,

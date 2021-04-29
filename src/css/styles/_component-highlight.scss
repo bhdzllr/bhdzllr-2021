@@ -7,8 +7,12 @@
 
 	background: #233c39;
 
-	@media #{$screen-min-md} {
+	font-size: inherit;
+
+	@media #{$screen-min-sm} {
 		padding: 1.5rem;
+
+		font-size: 1rem;
 	}
 }
 

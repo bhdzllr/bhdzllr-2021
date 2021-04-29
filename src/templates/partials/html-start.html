@@ -32,13 +32,13 @@
 				</a>
 
 				<!-- Font Face Observer aus Web Template entfernen -->
+				<!-- ::-moz-selection entfernen -->
+				<!-- outline: 2px solid $color-text; outline-offset: 2px; -->
 
 				<!-- @todo
-					Like/Feedback Button
-					Outline und Selection Style in article--blog
-
-					Bilder 2x und width + height
 					Bessere Implementierung von active link (sub pages)
+					Chrome Fehler Reaction
+					Bilder 2x und width + height
 					Gallery
 					Social Media Tags
 					Analytics
@@ -51,13 +51,13 @@
 				<nav id="site-nav">
 					<ul>
 						<li>
-							<a href="/blog"{{#ifEquals title 'Blog'}} class="page-active"{{/ifEquals}}>Blog</a>
+							<a href="{{link 'blog'}}"{{#ifIsParentActive '/blog'}} class="page-active"{{/ifIsParentActive}}>Blog</a>
 						</li>
 						<li>
-							<a href="/projects"{{#ifEquals title 'Work'}} class="page-active"{{/ifEquals}}>Work</a>
+							<a href="{{link 'work'}}"{{#ifIsParentActive '/projects'}} class="page-active"{{/ifIsParentActive}}>Work</a>
 						</li>
 						<li>
-							<a href="/contact"{{#ifEquals title 'Mail'}} class="page-active"{{/ifEquals}}>Mail</a>
+							<a href="{{link 'mail'}}"{{#ifIsParentActive '/contact'}} class="page-active"{{/ifIsParentActive}}>Mail</a>
 						</li>
 					</ul>
 				</nav>

@@ -60,6 +60,9 @@ handlebars.Handlebars.registerHelper({
 	ifNotEquals: function (a, b, options) {
 		return (a != b) ? options.fn(this) : options.inverse(this);
 	},
+	ifIsParentActive: function (parent, options) {
+		return (this.data.url.startsWith(parent)) ? options.fn(this) : options.inverse(this);
+	},
 	link: function (name) {
 		switch (name) {
 			case 'blog':
@@ -85,6 +88,24 @@ handlebars.Handlebars.registerHelper({
 	}
 });
 
+const handlebarsDefaultData = function (file) {
+	let url;
+
+	if (file.path.includes('/pages')) {
+		url = file.path.split('/pages')[1];
+	} else if (file.path.includes('/blog')) {
+		url = file.path.split('/src')[1];
+	} else if (file.path.includes('/projects')) {
+		url = file.path.split('/src')[1];
+	}
+
+	return {
+		data: {
+			url: url,
+		},
+	}; 
+};
+
 function clean() {
 	return del([
 		distFolder,
@@ -93,6 +114,7 @@ function clean() {
 
 function pages(cb) {
 	src('src/pages/**/*.html')
+		.pipe(data(handlebarsDefaultData))
 		.pipe(handlebars({}, {
 			batch: handlebarsBatch,
 		}))
@@ -252,13 +274,15 @@ function typesSubtask(type) {
 
 					file.contents = new Buffer.from(body);
 					
-					templateData.content = data;
-					templateData.content.type = type.name;
-					templateData.content.url = file.path.split('/src')[1].replace('index.md', '');
-					templateData.content.createdAt = file.stat.birthtime;
-					templateData.content.updatedAt = file.stat.mtime;
+					templateData.article = data;
+					templateData.article.type = type.name;
+					templateData.article.url = file.path.split('/src')[1].replace('index.md', '');
+					templateData.article.createdAt = file.stat.birthtime;
+					templateData.article.updatedAt = file.stat.mtime;
 
-					entries.push(templateData.content);
+					entries.push(templateData.article);
+
+					templateData.data = handlebarsDefaultData(file).data;
 
 					return templateData;
 				}))
@@ -277,6 +301,7 @@ function typesSubtask(type) {
 
 	function createIndex(entries) {
 		src(type.src + '/index.html')
+			.pipe(data(handlebarsDefaultData))
 			.pipe(handlebars({
 				entries: entries,
 			}, {

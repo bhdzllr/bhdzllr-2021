@@ -24,11 +24,17 @@ template.innerHTML = `
 			cursor: default;
 		}
 
+		.icon {
+			max-height: 100%;
+			line-height: 1;
+		}
+
 		svg {
 			fill: transparent;
 			storke: currentColor;
 
 			transform: scale(1) rotate3d(0, 1, 0, 0deg);
+			transform-origin: 50%;
 			transition: transform 0.5s ease, fill 0.5s ease, stroke 0.5s ease;
 		}
 
@@ -115,14 +121,19 @@ export class Reaction extends HTMLElement {
 		if (!this.hasAttribute('aria-pressed')) this.setAttribute('aria-pressed', 'false');
 
 		if (this.hasAttribute('icon') && !this.innerHTML) {
+			const iconDiv = document.createElement('div');
+			iconDiv.classList.add('icon');
+
 			if (this.isPredefinedIcon(this.getAttribute('icon'))) {
 				this.icon = this.getIcon(this.getAttribute('icon'));
-				this.output.insertAdjacentHTML('beforebegin', this.icon.html);
+				iconDiv.innerHTML = this.icon.html;
+				this.output.parentNode.insertBefore(iconDiv, this.output);
 
 				if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', this.icon.label);
 			} else {
 				this.icon = this.getAttribute('icon');
-				this.output.insertAdjacentHTML('beforebegin', this.icon);
+				iconDiv.innerHTML = this.icon;
+				this.output.parentNode.insertBefore(iconDiv, this.output);
 
 				if (!this.hasAttribute('aria-label')) this.setAttribute('aria-label', this.icon);
 			}

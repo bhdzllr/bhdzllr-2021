@@ -1,20 +1,20 @@
 {{> "html-start"}}
 
 		<main role="main" class="content container container--article container--sh">
-			<article class="article article--{{content.type}}">
+			<article class="article article--{{article.type}}">
 				<header class="article__header">
-					<h1 class="article__title">{{content.title}}</h1>
-					<p class="article__tagline">{{content.tagline}}</p>
+					<h1 class="article__title">{{article.title}}</h1>
+					<p class="article__tagline">{{article.tagline}}</p>
 
-					{{#if content.image}}
+					{{#if article.image}}
 					<div class="article__image">
-						<img src="{{content.image}}" alt="{{content.imageAlt}}" />
+						<img src="{{article.image}}" alt="{{article.imageAlt}}" />
 					</div>
 					{{/if}}
 
-					<p class="article__datetime">{{content.year}}</p>
+					<p class="article__datetime">{{article.year}}</p>
 					<p class="article__categories">
-						{{#each content.categories}}
+						{{#each article.categories}}
 						<span>{{this}}</span>
 						{{/each}}
 					</p>
@@ -25,12 +25,12 @@
 				</div>
 
 				<footer class="article__footer">
-					{{#ifEquals content.type 'blog'}}
-					<bhdzllr-reaction url="/server/api.php?action=like&id={{content.id}}" id="{{content.id}}"></bhdzllr-reaction>
+					{{#ifEquals article.type 'blog'}}
+					<bhdzllr-reaction url="/server/api.php?action=like&id={{article.id}}" id="{{article.id}}"></bhdzllr-reaction>
 					{{/ifEquals}}
 
 					<p class="article__tags">
-						{{#each content.tags}}
+						{{#each article.tags}}
 						<span class="article__tag">{{this}}</span>
 						{{/each}}
 					</p>
