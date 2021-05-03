@@ -2,6 +2,7 @@ const { series, parallel, src, dest, watch } = require('gulp');
 
 const del = require('del');
 const fs = require('fs');
+var path = require('path');
 
 const data = require('gulp-data');
 const fm = require('@github-docs/frontmatter');
@@ -14,13 +15,15 @@ const md = require('markdown-it')({
 	highlight: function (str, lang) {
 		if (lang && hljs.getLanguage(lang)) {
 			try {
-				return `<pre class="hljs hljs--${lang}"><code>${hljs.highlight(lang, str, true).value}</code></pre>`;
+				return `<pre class="hljs hljs--${lang}"><code>${hljs.highlight(str, { language: lang, ignore_illegals: true }).value}</code></pre>`;
 			} catch (__) {}
 		}
 
 		return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
 	},
 });
+const glob = require('glob');
+const sharp = require('sharp');
 const handlebars = require('gulp-compile-handlebars');
 const layouts = require('handlebars-layouts');
 const mergeStream = require('merge-stream');
@@ -33,6 +36,7 @@ const tar = require('gulp-tar');
 const GulpSSH = require('gulp-ssh');
 
 const distFolder = 'dist';
+const srcFolder = 'src';
 const sshConfig = require('./ssh.json');
 const ssh = new GulpSSH({
 	ignoreErrors: false,
@@ -44,11 +48,8 @@ const ssh = new GulpSSH({
 	}
 });
 
-const handlebarsBatch = [
-	'src/templates/',
-	'src/templates/modules/',
-	'src/templates/partials/',
-];
+const images = [];
+
 handlebars.Handlebars.registerHelper(layouts(handlebars.Handlebars));
 handlebars.Handlebars.registerHelper({
 	html: function (value) {
@@ -77,6 +78,25 @@ handlebars.Handlebars.registerHelper({
 				return '/legal.html';
 		}
 	},
+	image: function (imgSrc, alt) {
+		const image = images.find(image => image.original == imgSrc);
+
+		if (!image) return;
+
+		return new handlebars.Handlebars.SafeString(`
+			<img
+				src="${image.preview}"
+				data-src="${image.large}"
+				data-srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
+				sizes="(max-width: 480px) 100vw, 960px"			
+				alt="${alt}"
+				width="${image.originalWidth}"
+				height="${image.originalHeight}"
+				decoding="async"
+				class="js-lazy-image"
+			/>
+		`);
+	},
 	currentYear: function (options) {
 		return new Date().getFullYear();
 	},
@@ -88,15 +108,15 @@ handlebars.Handlebars.registerHelper({
 	}
 });
 
-const handlebarsDefaultData = function (file) {
+function getHandlebarsDefaultData(file) {
 	let url;
 
 	if (file.path.includes('/pages')) {
 		url = file.path.split('/pages')[1];
 	} else if (file.path.includes('/blog')) {
-		url = file.path.split('/src')[1];
+		url = file.path.split('/' + srcFolder)[1];
 	} else if (file.path.includes('/projects')) {
-		url = file.path.split('/src')[1];
+		url = file.path.split('/' + srcFolder)[1];
 	}
 
 	return {
@@ -106,30 +126,15 @@ const handlebarsDefaultData = function (file) {
 	}; 
 };
 
-function clean() {
-	return del([
-		distFolder,
-	], { force: true });
+function getHandlebarsBatch() {
+	return [
+		srcFolder + '/templates/',
+		srcFolder + '/templates/modules/',
+		srcFolder + '/templates/partials/',
+	];
 }
 
-function pages(cb) {
-	src('src/pages/**/*.html')
-		.pipe(data(handlebarsDefaultData))
-		.pipe(handlebars({}, {
-			batch: handlebarsBatch,
-		}))
-		.pipe(rename({ extname: '.html' }))
-		.pipe(dest(distFolder));
-
-	src([
-		'src/pages/**/*',
-		'!src/pages/**/*.html'
-	]).pipe(dest(distFolder));
-
-	cb();
-}
-
-function types(cb) {
+function getPageTypes() {
 	// Revalidator types: https://github.com/flatiron/revalidator
 	const propertiesDefault = {
 		'id': {
@@ -203,17 +208,18 @@ function types(cb) {
 			},
 		},
 	};
-	const types = [
+
+	return [
 		{
 			name: 'blog',
-			src: 'src/blog',
+			src: srcFolder + '/blog',
 			layout: 'layouts/article',
 			dist: distFolder + '/blog/',
 			schema: Object.assign(Object.assign({}, propertiesDefault), {}),
 		},
 		{
 			name: 'project',
-			src: 'src/projects',
+			src: srcFolder + '/projects',
 			layout: 'layouts/article',
 			dist: distFolder + '/projects/',
 			schema: Object.assign(Object.assign({}, propertiesDefault), {
@@ -224,8 +230,37 @@ function types(cb) {
 			}),
 		},
 	];
+}
 
-	for (const type of types) {
+function clean() {
+	return del([
+		distFolder,
+	], { force: true });
+}
+
+function pages(cb) {
+	src(srcFolder + '/pages/**/*.html')
+		.pipe(data(getHandlebarsDefaultData))
+		.pipe(handlebars({}, {
+			batch: getHandlebarsBatch(),
+		}))
+		.pipe(rename({ extname: '.html' }))
+		.pipe(dest(distFolder));
+
+	// Res
+	// src([
+	// 		srcFolder + '/pages/**/*',
+	// 		'!' + srcFolder + '/pages/**/*.html',
+	// 	])
+	// 	.pipe(dest(distFolder));
+
+	cb();
+}
+
+function types(cb) {
+	const pageTypes = getPageTypes();
+
+	for (const type of pageTypes) {
 		typesSubtask(type);
 	}
 
@@ -276,18 +311,18 @@ function typesSubtask(type) {
 					
 					templateData.article = data;
 					templateData.article.type = type.name;
-					templateData.article.url = file.path.split('/src')[1].replace('index.md', '');
+					templateData.article.url = file.path.split('/' + srcFolder)[1].replace('index.md', '');
 					templateData.article.createdAt = file.stat.birthtime;
 					templateData.article.updatedAt = file.stat.mtime;
 
 					entries.push(templateData.article);
 
-					templateData.data = handlebarsDefaultData(file).data;
+					templateData.data = getHandlebarsDefaultData(file).data;
 
 					return templateData;
 				}))
 				.pipe(handlebars({}, {
-					batch: handlebarsBatch,
+					batch: getHandlebarsBatch(),
 				}))
 				.pipe(rename({
 					extname: '.html',
@@ -301,23 +336,24 @@ function typesSubtask(type) {
 
 	function createIndex(entries) {
 		src(type.src + '/index.html')
-			.pipe(data(handlebarsDefaultData))
+			.pipe(data(getHandlebarsDefaultData))
 			.pipe(handlebars({
 				entries: entries,
 			}, {
-				batch: handlebarsBatch,
+				batch: getHandlebarsBatch(),
 			}))
 			.pipe(rename({ extname: '.html' }))
 			.pipe(dest(type.dist));
 	}
 
-	function copyResources() {
-		src([
-			type.src + '/**/*',
-			'!' + type.src + '/index.html',
-			'!' + type.src + '/**/*.md'
-		]).pipe(dest(type.dist));
-	}
+	// Res
+	// function copyResources() {
+	// 	src([
+	// 		type.src + '/**/*',
+	// 		'!' + type.src + '/index.html',
+	// 		'!' + type.src + '/**/*.md'
+	// 	]).pipe(dest(type.dist));
+	// }
 
 	// function finishTask() {
 	// 	cb();
@@ -325,12 +361,12 @@ function typesSubtask(type) {
 
 	createType()
 		.then(createIndex)
-		.then(copyResources)
+		// .then(copyResources)
 		// .then(finishTask);
 }
 
 function styles() {
-	return src('src/css/main.scss')
+	return src(srcFolder + '/css/main.scss')
 		.pipe(sourcemaps.init())
 		.pipe(sass({
 			errorLogToConsole: true,
@@ -355,15 +391,15 @@ function styles() {
 }
 
 function scripts() {
-	if (fs.existsSync('src/sw.js')) {
-		src('src/sw.js')
+	if (fs.existsSync(srcFolder + '/sw.js')) {
+		src(srcFolder + '/sw.js')
 			.pipe(dest(distFolder));
 	}	
 
-	src('src/js/lib/files/check.js')
+	src(srcFolder + '/js/lib/files/check.js')
 		.pipe(dest(distFolder + '/js/lib/files/'));
 
-	return src('src/js/main.js')
+	return src(srcFolder + '/js/main.js')
 		.pipe(webpack(require('./webpack.config.js')))
 		.pipe(dest(distFolder + '/'));
 }
@@ -380,47 +416,129 @@ function server() {
 }
 
 function res(cb) {
-	src('src/img/**/*')
+	// Pages
+	src([
+			srcFolder + '/pages/**/*',
+			'!' + srcFolder + '/pages/**/*.html',
+		])
+		.pipe(dest(distFolder));
+
+	// PageTypes
+	const pageTypes = getPageTypes();
+	for (const type of pageTypes) { 
+		src([
+				type.src + '/**/*',
+				'!' + type.src + '/index.html',
+				'!' + type.src + '/**/*.md',
+			])
+			.pipe(dest(type.dist));
+	}
+
+	src(srcFolder + '/img/**/*')
 		.pipe(dest(distFolder + '/img/'));
 
-	src('src/fonts/**/*')
+	src(srcFolder + '/fonts/**/*')
 		.pipe(dest(distFolder + '/fonts/'));
 
-	src('src/docs/**/*')
+	src(srcFolder + '/docs/**/*')
 		.pipe(dest(distFolder + '/docs/'));
 
 	src([
-			'src/browserconfig.xml',
-			'src/favicon.ico',
-			'src/icon.png',
-			'src/site.webmanifest',
-			'src/tile.png',
-			'src/tile-wide.png',
+			srcFolder + '/browserconfig.xml',
+			srcFolder + '/favicon.ico',
+			srcFolder + '/icon.png',
+			srcFolder + '/site.webmanifest',
+			srcFolder + '/tile.png',
+			srcFolder + '/tile-wide.png',
 		])
 		.pipe(dest(distFolder + '/'));
 
 	cb();
 }
 
+async function responsiveImages(cb) {
+	const resize = function (imagePath, distFolder, width, suffix) {
+		const imageExtension = path.extname(imagePath);
+		const imageName = path.basename(imagePath).replace(imageExtension, '');
+		const imageNameResized = distFolder + imageName + suffix + imageExtension;
+
+		let sharpImage = sharp(imagePath)
+			.resize({
+				width: width,
+				withoutEnlargement: true,
+			});
+
+		if (['.jpg', '.jpeg'].includes(imageExtension)) {
+			sharpImage.jpeg({
+				quality: 80,
+			});
+		}
+
+		if (suffix == '-preview') {
+			sharpImage.blur();
+		}
+
+		sharpImage
+			.toFile(imageNameResized)
+			.catch(function (err) {
+				console.log('Sharp ' + err);
+			});
+
+		return imageNameResized;
+	};
+
+	const imageNames = glob.sync(srcFolder + '/**/*.{jpg,jpeg}');
+
+	for (imageName of imageNames) {
+		const imageDistFolder = imageName.replace(path.basename(imageName), '').replace(srcFolder, distFolder);
+
+		if (!fs.existsSync(imageDistFolder)) {
+			fs.mkdirSync(imageDistFolder, { recursive: true }, (err) => {
+				if (err) throw err;
+			});
+		}
+
+		const imageOriginalMetadata = await sharp(imageName).metadata();
+		const imagePreview = resize(imageName, imageDistFolder, 25, '-preview');
+		const imageThumbnail = resize(imageName, imageDistFolder, 150, '-thumbnail');
+		const imageMedium = resize(imageName, imageDistFolder, 480, '-480');
+		const imageLarge = resize(imageName, imageDistFolder, 960, '-960');
+		const imageXLarge = resize(imageName, imageDistFolder, 1200, '-1200');
+
+		images.push({
+			original: imageName.replace(srcFolder, ''),
+			originalWidth: imageOriginalMetadata.width,
+			originalHeight: imageOriginalMetadata.height,
+			preview: imagePreview.replace(distFolder, ''),
+			thumbnail: imageThumbnail.replace(distFolder, ''),
+			medium: imageMedium.replace(distFolder, ''),
+			large: imageLarge.replace(distFolder, ''),
+			xlarge: imageXLarge.replace(distFolder, ''),
+		});
+	}
+
+	cb();
+}
+
 function dev() {
 	watch([
-		'src/index.html',
-		'src/pages/**/*.html',
-		'src/templates/**/*.html',
+		srcFolder + '/index.html',
+		srcFolder + '/pages/**/*.html',
+		srcFolder + '/templates/**/*.html',
 	], series(pages));
 
 	watch([
-		'src/blog/**/*.{html,md}',
-		'src/projects/**/*.{html,md}',
-		'src/templates/**/*.html',
+		srcFolder + '/blog/**/*.{html,md}',
+		srcFolder + '/projects/**/*.{html,md}',
+		srcFolder + '/templates/**/*.html',
 	], series(types));
 
 	watch([,
-		'src/css/**/*.scss',
+		srcFolder + '/css/**/*.scss',
 	], series(styles));
 
 	watch([,
-		'src/js/**/*.js',
+		srcFolder + '/js/**/*.js',
 	], series(scripts));
 
 	watch([
@@ -451,7 +569,7 @@ function deployDown() {
 	return del([distFolder + '/package.tar']);
 }
 
-exports.default = series(clean, parallel(pages, types, styles, scripts, server, res), dev);
+exports.default = series(clean, responsiveImages, parallel(pages, types, styles, scripts, server, res), dev);
 exports.dev = exports.default;
-exports.dist = series(clean, parallel(pages, types, styles, scripts, server, res));
+exports.dist = series(clean, responsiveImages, parallel(pages, types, styles, scripts, server, res));
 exports.deploy = series(deployUp, deployRemote, deployDown);
