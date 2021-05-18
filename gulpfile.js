@@ -78,24 +78,77 @@ handlebars.Handlebars.registerHelper({
 				return '/legal.html';
 		}
 	},
-	image: function (imgSrc, alt) {
-		const image = images.find(image => image.original == imgSrc);
+	image: function (src, alt, classList) {
+		const image = images.find(image => image.original == src);
 
 		if (!image) return;
 
 		return new handlebars.Handlebars.SafeString(`
 			<img
 				src="${image.preview}"
+				alt="${alt}"
 				data-src="${image.large}"
 				data-srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
 				sizes="(max-width: 480px) 100vw, 960px"			
-				alt="${alt}"
 				width="${image.originalWidth}"
 				height="${image.originalHeight}"
 				decoding="async"
-				class="js-lazy-image"
+				class="js-lazy-image${(typeof classList === 'string') ? ' ' + classList : ''}"
 			/>
+			<noscript>
+				<img
+					src="${image.large}"
+					alt="${alt}"
+					srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
+					sizes="(max-width: 480px) 100vw, 960px"			
+					width="${image.originalWidth}"
+					height="${image.originalHeight}"
+					decoding="async"
+					${(typeof classList === 'string') ? 'class="' + classList + '"' : ''}
+				/>
+			</noscript>
 		`);
+	},
+	galleryImage: function (src, alt) {
+		const image = images.find(image => image.original == src);
+
+		if (!image) return;
+
+		const factor = image.originalWidth / image.originalHeight;
+
+		return new handlebars.Handlebars.SafeString(`
+			<a
+				href="${image.large}"
+				data-alt="${alt}"
+				data-srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
+				data-sizes="(max-width: 480px) 100vw, 960px"
+				data-width="${image.originalWidth}"
+				data-height="${image.originalHeight}"
+				data-preview="${image.preview}"
+			>
+				<img
+					src="${image.preview}"
+					alt="${alt}"
+					data-src="${image.thumbnail}"
+					width="200"
+					height="${200 / factor}"
+					decoding="async"
+					class="js-lazy-image"
+				/>
+				<noscript>
+					<img
+						src="${image.thumbnail}"
+						alt="${alt}"
+						width="200"
+						height="200"
+						decoding="async"
+					/>
+				</noscript>
+			</a>
+		`);
+	},
+	gallery: function (options) {
+		return new handlebars.Handlebars.SafeString(`<div class="gallery js-gallery">${options.fn(this)}</div>`);
 	},
 	currentYear: function (options) {
 		return new Date().getFullYear();
@@ -303,8 +356,6 @@ function typesSubtask(type) {
 							.render(content)
 							.replace(/<hbs>/g, '')
 							.replace(/<\/hbs>/g, '')
-							.replace(/({{)&gt;\s[“|„|"]?(.*?)[”|“|"]?(}})/g, '$1> "$2"$3')
-							.replace(/({{)>\s"?&quot;(.*?)&quot;"?(}})/g, '$1> "$2"$3')
 						+ layoutEnd;
 
 					file.contents = new Buffer.from(body);
@@ -470,7 +521,7 @@ async function responsiveImages(cb) {
 
 		if (['.jpg', '.jpeg'].includes(imageExtension)) {
 			sharpImage.jpeg({
-				quality: 80,
+				quality: 60,
 			});
 		}
 
@@ -500,7 +551,7 @@ async function responsiveImages(cb) {
 
 		const imageOriginalMetadata = await sharp(imageName).metadata();
 		const imagePreview = resize(imageName, imageDistFolder, 25, '-preview');
-		const imageThumbnail = resize(imageName, imageDistFolder, 150, '-thumbnail');
+		const imageThumbnail = resize(imageName, imageDistFolder, 200, '-thumbnail');
 		const imageMedium = resize(imageName, imageDistFolder, 480, '-480');
 		const imageLarge = resize(imageName, imageDistFolder, 960, '-960');
 		const imageXLarge = resize(imageName, imageDistFolder, 1200, '-1200');

@@ -3,9 +3,11 @@ const defaultOptions = {
 	spacing: 10, // Pixels
 	responsive: true, // Boolean
 	perspective: 1000, // Pixels
-	rotationFactor: 12, // Pixels
-	transitionDuration: 500, // Milliseconds
+	touchDeltaTime: 300, // Milliseconds
+	touchDeltaFactor: 5, // Percentages from Scene
+	scrollFactor: 20, // Percentages from Scene
 	scrollWidth: 15, // Pixels
+	transitionDuration: 500, // Milliseconds
 	interactiveElements: [
 		'a',
 		'button',
@@ -23,8 +25,10 @@ export class Cube {
 		this.isTicking = false;
 		this.viewportWidth = (window.innerWidth || document.documentElement.clientWidth);
 		this.touchStartX = 0;
+		this.touchStartTime = 0;
 		this.lastRotation = 0;
 		this.lastDirection = null;
+		this.lastDistancePercentages = 0;
 		this.rotation = 0;
 		this.tz = 0;
 
@@ -48,13 +52,13 @@ export class Cube {
 		}
 
 		this.element.addEventListener('touchstart', (e) => this.touchStart(e), false);
-		this.element.addEventListener('touchend', (e) => this.touchEnd(e), false);
-		this.element.addEventListener('touchmove', (e) => this.touchMove(e), false);
+		window.addEventListener('touchend', (e) => this.touchEnd(e), false);
+		window.addEventListener('touchmove', (e) => this.touchMove(e), false);
 		this.element.addEventListener('touchmove', (e) => this.touchScrolling(e), { passive: false });
 
 		this.element.addEventListener('mousedown', (e) => this.touchStart(e), false);
-		this.element.addEventListener('mouseup', (e) => this.touchEnd(e), false);
-		this.element.addEventListener('mousemove', (e) => this.touchMove(e), false);
+		window.addEventListener('mouseup', (e) => this.touchEnd(e), false);
+		window.addEventListener('mousemove', (e) => this.touchMove(e), false);
 
 		window.addEventListener('resize', () => this.updateViewportAndTranslateZ(), false);
 	}
@@ -70,6 +74,7 @@ export class Cube {
 
 		this.isTouchMoving = true;
 		this.touchStartX = this.getTouchX(e);
+		this.touchStartTime = Date.now();
 	}
 
 	touchEnd(e) {
@@ -79,26 +84,27 @@ export class Cube {
 
 		this.isTouchMoving = false;
 
+		const touchDeltaTime = Date.now() - this.touchStartTime;
 		let snapRotation = 0;
 
-		if (this.lastDirection == 'left') {
-			if (this.lastRotation > (this.options.degrees / this.options.rotationFactor)) { // < 0
-				snapRotation = this.options.degrees;
+		if (Math.abs(this.lastDistancePercentages) > this.options.scrollFactor
+			|| (touchDeltaTime < this.options.touchDeltaTime && Math.abs(this.lastDistancePercentages) > this.options.touchDeltaFactor)
+		) {
+			if (this.lastDirection == 'left') {
+				if (this.rotation == 0
+					|| this.rotation == this.options.degrees && this.lastRotation > this.options.degrees // Snap back
+				) {
+					snapRotation = this.options.degrees;
+				}
 			} else {
-				snapRotation = 0;
+				if (this.rotation == 0
+					|| this.rotation == -this.options.degrees && this.lastRotation < -this.options.degrees // Snap back
+				) {
+					snapRotation = -this.options.degrees;
+				}
 			}
 		} else {
-			if (this.lastRotation < -(this.options.degrees / this.options.rotationFactor)) { // < 0
-				snapRotation = -this.options.degrees;
-			} else {
-				snapRotation = 0;
-			}
-		}
-
-		if (snapRotation > this.options.degrees) {
-			snapRotation = this.options.degrees;
-		} else if (snapRotation < -this.options.degrees) {
-			snapRotation = -this.options.degrees;
+			snapRotation = this.rotation;
 		}
 
 		setTimeout(() => {
@@ -110,6 +116,8 @@ export class Cube {
 				this.element.classList.remove('cube--transition');
 			}, this.options.transitionDuration);
 		});
+
+		this.lastDistancePercentages = 0;
 	}
 
 	touchMove(e) {
@@ -124,9 +132,11 @@ export class Cube {
 				let touchX = this.getTouchX(e);
 				let distance = touchX - this.touchStartX;
 				let distancePercentFromViewport = (distance * 100) / this.viewportWidth;
+				let distancePercentFromScene = (distance * 100) / (this.scene.innerWidth || this.scene.clientWidth);
 				let deg = this.rotation + parseInt((this.options.degrees / 100) * distancePercentFromViewport);
 
 				this.lastDirection = distance > 0 ? 'left' : 'right';
+				this.lastDistancePercentages = distancePercentFromScene;
 
 				this.rotate(deg);
 			});
@@ -212,11 +222,14 @@ export function addCubeDefaultStyles(options = {}) {
 		}
  
 		.cube {
+			cursor: grab;
+			user-select: none;
 			transform-style: preserve-3d;
 			transition: transform 0.1s ease-out;
 		}
 
 		.cube--transition {
+			cursor: grabbing;
 			transition: transform 0.5s ease-out;
 		}
 

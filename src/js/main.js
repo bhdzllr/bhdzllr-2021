@@ -5,6 +5,7 @@ import { default as de } from './lang/de.json';
 
 import I18n from './lib/modules/I18n';
 import { AnalyticsOptOut, addAnalyticsCode } from './lib/modules/Analytics';
+import { DialogModal, addDialogModalDefaultStyles } from './lib/modules/DialogModal';
 import { lazyLoadImages } from './lib/utils/loading-images';
 import { addOutlineHandler } from './lib/utils/accessibility';
 import { beautifyFileInputs } from './lib/utils/beautification';
@@ -12,6 +13,8 @@ import { beautifyFileInputs } from './lib/utils/beautification';
 import { Cube, addCubeDefaultStyles } from './Cube';
 import { Terminal, addTerminalDefaultStyles } from './Terminal';
 import { Reaction } from './Reaction';
+import { ItemSlider } from './ItemSlider';
+
 
 document.addEventListener('DOMContentLoaded', async function (e) {
 
@@ -169,6 +172,90 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 			mailTerminal.setFlow(contactFlow, contactFlowCb);
 			mailTerminal.runCommand('start');
 		}, 500);
+	}
+
+	if (document.querySelector('.js-gallery')) {
+		addDialogModalDefaultStyles();
+
+		const galleries = document.querySelectorAll('.js-gallery');
+
+		for (const gallery of galleries) {
+			const galleryImages = gallery.querySelectorAll('a');
+			const galleryDialog = new DialogModal({
+				contentAsHtml: '',
+				showCallback: () => {
+					lazyLoadImages({
+						loadCallback: (image) => {
+							image.parentElement.classList.remove('gallery__loader');
+						},
+					});
+				},
+			});
+			const gallerySliderContent = '<bhdzllr-item-slider>';
+			let sliderIndex = 0;
+			let sliderX = 0;
+
+			for (let i = 0; i < galleryImages.length; i++) {
+				const galleryImage = galleryImages[i];
+
+				gallerySliderContent += `
+					<div class="gallery__loader" data-text="Loading ...">
+						<img
+							src="${galleryImage.dataset.preview}"
+							alt="${galleryImage.dataset.alt}"
+							data-src="${galleryImage.href}"
+							data-srcset="${galleryImage.dataset.srcset}"
+							sizes="${galleryImage.dataset.sizes}"
+							width="${galleryImage.dataset.width}"
+							height="${galleryImage.dataset.height}"
+							decoding="async"
+							class="js-lazy-image"
+						/>
+					</div>
+				`;
+
+				const showDialog = function () {
+					galleryDialog.dialog.querySelector('bhdzllr-item-slider').setAttribute('pos', i); // Wie in Komponente abbilden????
+					galleryDialog.show();
+				}
+
+				galleryImage.addEventListener('click', function (e) {
+					e.preventDefault();
+					showDialog();
+				});
+
+				galleryImage.addEventListener('keydown', function (e) {
+					if (e.keyCode !== 32) return;
+					e.preventDefault();
+				});
+
+				galleryImage.addEventListener('keyup', function (e) {
+					if (e.keyCode !== 32) return;
+					e.preventDefault();
+					showDialog();
+				})
+			}
+
+			gallerySliderContent += '</bhdzllr-item-slider>';
+
+			galleryDialog.overlay.classList.add('gallery-overlay');
+			galleryDialog.setContentAsHtml(gallerySliderContent);
+
+			const itemSlider = galleryDialog.dialog.querySelector('bhdzllr-item-slider');
+
+			itemSlider.addEventListener('onButtonRightHidden', () => {
+				galleryDialog.setLastFocusableElement(itemSlider.shadowRoot.querySelectorAll('button')[0]);
+				galleryDialog.focusLastFocusableElement();
+			});
+
+			itemSlider.addEventListener('onButtonRightVisible', () => {
+				galleryDialog.setLastFocusableElement(itemSlider.shadowRoot.querySelectorAll('button')[1]);
+			});
+
+			itemSlider.addEventListener('onButtonLeftHidden', () => {
+				galleryDialog.focusLastFocusableElement();
+			});
+		}
 	}
 
 });

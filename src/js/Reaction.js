@@ -13,6 +13,7 @@ template.innerHTML = `
 			background: none;
 			border: none;
 			cursor: pointer;
+			outline: inherit;
 		}
 
 		:host([hidden]) {
@@ -31,7 +32,7 @@ template.innerHTML = `
 
 		svg {
 			fill: transparent;
-			storke: currentColor;
+			stroke: currentColor;
 
 			transform: scale(1) rotate3d(0, 1, 0, 0deg);
 			transform-origin: 50%;
@@ -222,6 +223,9 @@ export class Reaction extends HTMLElement {
 		fetch(encodeURI(url), {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
+			})
+			.then((response) => {
+				if (response.status == 200) this.rememberValue();
 			});
 	}
 
@@ -255,7 +259,7 @@ export class Reaction extends HTMLElement {
 		this.value++
 
 		this.saveValue();
-		this.rememberValue();
+		// this.rememberValue();
 	}
 
 	isPredefinedIcon(iconName) {

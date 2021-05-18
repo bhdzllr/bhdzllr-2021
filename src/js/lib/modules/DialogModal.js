@@ -8,26 +8,27 @@ export class DialogModal {
 		showCallback = null,
 		hideCallback = null,
 		ariaLabelledBy = '',
+		hideRootScrollbars = true,
 	}) {
 		this.contentAsHtml = contentAsHtml;
 		this.showOnCreation = showOnCreation;
 		this.showCallback = showCallback;
 		this.hideCallback = hideCallback;
 		this.ariaLabelledBy = ariaLabelledBy;
+		this.hideRootScrollbars = hideRootScrollbars;
 
 		this.overlay;
 		this.dialog;
 		this.btnClose;
+		this.firstFocusableElement;
+		this.lastFocusableElement;
 		this.lastElement;
 		this.isOpen = false;
 
 		this.initDom();
-		this.initAriaAttributes();
 		this.initListeners();
 
-		if (this.showOnCreation) {
-			this.show();
-		}
+		if (this.showOnCreation) this.show();
 	}
 
 	initDom() {
@@ -39,22 +40,21 @@ export class DialogModal {
 		this.dialog = document.createElement('div');
 		this.dialog.classList.add('dm-dialog');
 		this.dialog.classList.add('js-dm-dialog');
-		this.dialog.innerHTML = this.contentAsHtml;
+		this.dialog.setAttribute('role', 'dialog');
+		this.dialog.setAttribute('aria-modal', 'true'); // Tell screenreaders that content behind the modal is not interactive
+		this.dialog.setAttribute('aria-labelledby', this.ariaLabelledBy); // Tell screenreaders the ID of the title element
+	
+		this.setContentAsHtml(this.contentAsHtml);
 
 		this.btnClose = document.createElement('button');
 		this.btnClose.classList.add('dm-btn-close');
 		this.btnClose.classList.add('js-dm-btn-close');
-		this.btnClose.innerHTML = `<span aria-label="Close">&times;</span>`;
+		this.btnClose.setAttribute('aria-label', 'Close');
+		this.btnClose.innerHTML = `<span aria-hidden="true">&times;</span>`;
 
 		this.overlay.appendChild(this.btnClose);
 		this.overlay.appendChild(this.dialog);
 		document.body.appendChild(this.overlay);
-	}
-
-	initAriaAttributes() {
-		this.dialog.setAttribute('role', 'dialog');
-		this.dialog.setAttribute('aria-modal', 'true'); // Tell screenreaders that content behind the modal is not interactive
-		this.dialog.setAttribute('aria-labelledby', this.ariaLabelledBy); // Tell screenreaders the ID of the title element
 	}
 
 	initListeners() {
@@ -74,27 +74,85 @@ export class DialogModal {
 			let overlay = document.querySelector('.js-dm-overlay');
 			if (overlay) this.hide();
 		});
+
+		this.handleFirstFocusableElementHandler = this.handleFirstFocusableElement.bind(this);
+		this.handleLastFocusableElementHandler = this.handleLastFocusableElement.bind(this);
+	}
+
+	setContentAsHtml(contentAsHtml) {
+		this.contentAsHtml = contentAsHtml;
+		this.dialog.innerHTML = contentAsHtml;
+
+		const childNodes = this.getFocusableChildNodes();
+
+		if (!Boolean(childNodes.length)) return;
+
+		this.firstFocusableElement = childNodes[0];
+		this.lastFocusableElement = childNodes[childNodes.length - 1];
+
+		this.setFirstFocusableElement(this.firstFocusableElement);
+		this.setLastFocusableElement(this.lastFocusableElement);
+	}
+
+	setFirstFocusableElement(firstFocusableElement) {
+		if (this.firstFocusableElement) this.firstFocusableElement.removeEventListener('keydown', this.handleFirstFocusableElementHandler);
+		this.firstFocusableElement = firstFocusableElement;
+		this.firstFocusableElement.addEventListener('keydown', this.handleFirstFocusableElementHandler);
+	}
+
+	setLastFocusableElement(lastFocusableElement) {
+		if (this.lastFocusableElement) this.lastFocusableElement.removeEventListener('keydown', this.handleLastFocusableElementHandler);
+		this.lastFocusableElement = lastFocusableElement;
+		this.lastFocusableElement.addEventListener('keydown', this.handleLastFocusableElementHandler);
+	}
+
+	handleFirstFocusableElement(e) {
+		if (e.shiftKey && e.keyCode == 9) {
+			e.preventDefault();
+			this.focusLastFocusableElement();
+		}
+	}
+
+	handleLastFocusableElement(e) {
+		if (e.keyCode == 9 && !(e.shiftKey && e.keyCode == 9)) {
+			e.preventDefault();
+			this.focusFirstFocusableElement();
+		}
+	}
+
+	focusFirstFocusableElement() {
+		if (this.firstFocusableElement) this.firstFocusableElement.focus();
+	}
+
+	focusLastFocusableElement() {
+		if (this.lastFocusableElement) this.lastFocusableElement.focus();
+	}
+
+	focusLastDocumentElement() {
+		if (this.lastElement) this.lastElement.focus();
 	}
 
 	show() {
 		this.lastElement = document.activeElement;
 
-		document.documentElement.style.overflow = 'hidden';
-		document.body.style.overflow = 'hidden';
+		if (this.hideRootScrollbars) {
+			document.documentElement.style.overflow = 'hidden';
+			document.body.style.overflow = 'hidden';
+		}
 
 		this.overlay.classList.remove('hidden');
 		this.isOpen = true;
 
 		this.focusFirstFocusableElement();
-		this.addListenerOnFirstFocusableElement();
-		this.addListenerOnLastFocusableElement();
 
 		if (this.showCallback) this.showCallback();
 	}
 
 	hide() {
-		document.documentElement.style.overflow = 'auto';
-		document.body.style.overflow = 'auto';
+		if (this.hideRootScrollbars) {
+			document.documentElement.style.overflow = 'auto';
+			document.body.style.overflow = 'auto';
+		}
 
 		this.overlay.classList.add('hidden');
 		this.isOpen = false;
@@ -116,60 +174,21 @@ export class DialogModal {
 		const focusableSelector = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 		const childNodesOverlay = Array.prototype.slice.call(this.overlay.querySelectorAll(focusableSelector));
 		const childNodesDialog = Array.prototype.slice.call(this.dialog.querySelectorAll(focusableSelector));
+		let childNodesComponents = [];
 
-		return childNodesOverlay.concat(childNodesDialog).filter(function (node) {
+		const components = Array.prototype.slice.call(this.dialog.querySelectorAll('*')).filter((element) => {
+			if (element.tagName.includes('-')) return element; 
+		});
+
+		for (const component of components) {
+			if (!!component.shadowRoot) {
+				childNodesComponents = childNodesComponents.concat(Array.prototype.slice.call(component.shadowRoot.querySelectorAll(focusableSelector)));
+			}
+		}
+
+		return childNodesOverlay.concat(childNodesDialog).concat(childNodesComponents).filter(function (node) {
 			return isFocusable(node);
 		})
-	}
-
-	getFirstFocusableElement() {
-		const childNodes = this.getFocusableChildNodes();
-
-		if (Boolean(childNodes.length)) return childNodes[0];
-	}
-
-	getLastFocusableElement() {
-		const childNodes = this.getFocusableChildNodes();
-
-		if (Boolean(childNodes.length)) return childNodes[childNodes.length - 1];
-	}
-
-	addListenerOnFirstFocusableElement() {
-		const firstFocusableElement = this.getFirstFocusableElement();
-
-		if (firstFocusableElement) {
-			firstFocusableElement.addEventListener('keydown', (e) => {
-				if (e.shiftKey && e.keyCode == 9) {
-					e.preventDefault();
-					this.focusLastFocusableElement();
-				}
-			});
-		}
-	}
-
-	addListenerOnLastFocusableElement() {
-		const lastFocusableElement = this.getLastFocusableElement();
-
-		if (lastFocusableElement) {
-			lastFocusableElement.addEventListener('keydown', (e) => {
-				if (e.keyCode == 9 && !(e.shiftKey && e.keyCode == 9)) {
-					e.preventDefault();
-					this.focusFirstFocusableElement();
-				}
-			});
-		}
-	}
-
-	focusFirstFocusableElement() {
-		this.getFirstFocusableElement().focus();
-	}
-
-	focusLastFocusableElement() {
-		this.getLastFocusableElement().focus();
-	}
-
-	focusLastDocumentElement() {
-		if (this.lastElement) this.lastElement.focus();
 	}
 
 }
@@ -214,7 +233,7 @@ export function addDialogModalDefaultStyles() {
 			z-index: 100;
 
 			display: block;
-			padding: 3.5em 1em 1.5em;
+			padding: 3.5em 1.5em 1.5em;
 			overflow-y: auto;
 
 			background-color: rgba(0, 0, 0, 0.75);
@@ -227,11 +246,11 @@ export function addDialogModalDefaultStyles() {
 		.dm-btn-close {
 			position: absolute;
 			top: 5px;
-			right: 5px;
+			right: 0.45em;
 
 			display: inline-block;
 			width: 35px;
-			height: 35px;
+			height: 50px;
 
 			background: transparent;
 			border: none;

@@ -42,3 +42,19 @@ Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula 
 ## Gallery
 
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu.
+
+<hbs>
+{{image "/img/image-640.jpg" "Sonnenaufgang mit Nebel"}}
+</hbs>
+
+<hbs>
+{{#gallery}}
+	{{galleryImage '/img/image-3000.jpg' 'Sonnenaufgang mit Nebel'}}
+	{{galleryImage '/img/image-norway.jpg' 'Sonnenaufgang mit Nebel'}}
+	{{galleryImage '/img/image-3000.jpg' 'Sonnenaufgang mit Nebel'}}
+	{{galleryImage '/img/image-contrails.jpg' 'Sonnenaufgang mit Nebel'}}
+	{{galleryImage '/img/image-640.jpg' 'Sonnenaufgang mit Nebel'}}
+	{{galleryImage '/img/image-barn.jpg' 'Sonnenaufgang mit Nebel'}}
+	{{galleryImage '/img/image-640.jpg' 'Sonnenaufgang mit Nebel'}}
+{{/gallery}}
+</hbs>
