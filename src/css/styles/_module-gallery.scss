@@ -59,7 +59,15 @@
 
 	img {
 		display: block;
+		// width: auto;
+		// max-width: 100%;
+		// height: auto;
+		// max-height: calc(100vh - 7rem);
 		margin: 0 auto;
 		box-sizing: border-box;
+
+		// &.js-lazy-image {
+		// 	width: 100%;
+		// }
 	}
 }
