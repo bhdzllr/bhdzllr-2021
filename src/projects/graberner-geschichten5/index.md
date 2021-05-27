@@ -1,14 +1,13 @@
 ---
 id: graberner-geschichten
-title: Graberner GeschichteN
+title: Graberner GeschichteN 5
 tagline: An Austrian history project that documents stories of the town Grabern (Lower Austria), funded by the state.
-date: 2021-05-27
+date: 2021-05-15
 image: /projects/graberner-geschichten/graberner-geschichten.jpg
 imageAlt: Graberner Geschichten Website Screenshot
 year: 2016
 categories:
   - Side Projects
-  - Freelance
 tags:
   - web
   - development

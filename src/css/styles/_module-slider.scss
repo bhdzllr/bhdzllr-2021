@@ -1,0 +1,20 @@
+.slider {
+	display: flex;
+	flex-wrap: nowrap;
+	// padding: 0 !important;
+	box-sizing: border-box;
+	overflow-x: auto;
+	overflow-y: hidden;
+	-webkit-overflow-scolling: touch;
+
+	&::after {
+		content: ' ';
+		white-space: pre;
+		display: block;
+	}
+
+	> * {
+		flex: 1 0 auto;
+		margin-right: 1rem;
+	}
+}

@@ -77,7 +77,7 @@ const ICONS = [
 			</svg>
 		`,
 	},
-	{ 
+	{
 		name: 'star',
 		label: 'Rate positive',
 		html: `

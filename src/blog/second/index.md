@@ -2,6 +2,7 @@
 id: second
 title: Post 2
 tagline: Lorem
+date: 2021-05-22
 categories:
   - Web Development
 tags:

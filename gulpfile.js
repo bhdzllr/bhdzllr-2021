@@ -211,6 +211,11 @@ function getPageTypes() {
 			type: 'string',
 			required: true,
 		},
+		// `format: 'date'` only for Date Objects
+		'date': {
+			required: true,
+			pattern: /\d{4}-\d{2}-\d{2}/,
+		},
 		'image': {
 			type: 'string',
 			required: false,
@@ -324,6 +329,8 @@ function typesSubtask(type) {
 	function createType() {
 		return new Promise(function (resolve, reject) {
 			const entries = [];
+			const entriesStart = [];
+			const entriesEnd = [];
 
 			src(type.src + '/**/*.md')
 				.pipe(data(function (file) {
@@ -380,17 +387,31 @@ function typesSubtask(type) {
 				}))
 				.pipe(dest(type.dist))
 				.on('end', function () {
-					resolve(entries);
+					entries.sort(function(a, b) {
+						return b.date - a.date;
+					});
+
+					entries.forEach(function (element, index) {
+						if (index < 3) {
+							entriesStart.push(element);
+						} else {
+							entriesEnd.push(element);
+						}
+					});
+
+					resolve({
+						entries: entries,
+						entriesStart: entriesStart,
+						entriesEnd: entriesEnd,
+					});
 				});
 		});
 	}
 
-	function createIndex(entries) {
+	function createIndex(value) {
 		src(type.src + '/index.html')
 			.pipe(data(getHandlebarsDefaultData))
-			.pipe(handlebars({
-				entries: entries,
-			}, {
+			.pipe(handlebars(value, {
 				batch: getHandlebarsBatch(),
 			}))
 			.pipe(rename({ extname: '.html' }))

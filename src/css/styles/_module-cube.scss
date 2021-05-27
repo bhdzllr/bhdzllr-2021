@@ -144,43 +144,12 @@ $tangent: 0.637;
 		box-sizing: border-box;
 		// overflow: hidden;
 
-		background-color: $color-card;
+		border-top: none;
 
 		> p,
 		> ul,
 		> dl, {
 			position: relative;
-		}
-
-		&::before,
-		&::after {
-			position: absolute;
-			bottom: -1.5rem;
-
-			content: '';
-			display: block;
-			height: 1.5rem;
-			box-sizing: border-box;
-		}
-
-		&::before {
-			left: 0;
-
-			width: calc(100% - 1.5rem);
-			height: 1.5rem;
-
-			background-color: $color-card;
-			border-bottom: 1px solid $color-primary;
-		}
-
-		&::after {
-			right: 0;
-
-			width: 1.5rem;
-
-			background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><polyline fill="#{$color-card}" points="0,0 24,0 0,24"/><polyline fill="none" stroke="#{$color-primary}" stroke-width="1" points="24,0 0,24 "/></svg>');
-			background-repeat: no-repeat;
-			background-size: 1.5rem;
 		}
 	}
 

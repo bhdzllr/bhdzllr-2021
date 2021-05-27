@@ -1,12 +1,69 @@
 {{#extend "layouts/main" title="Work"}}
 {{#content "content"}}
 
-<ul>
-	{{#each entries}}
-	<li>
-		<a href="{{this.url}}">{{this.title}}</a>
-	</li>
-	{{/each}}
+<div class="module module--transparent">
+	<div>
+		<h1>Work</h1>
+	</div>
+</div>
+
+<ul class="list-simple">
+	{{#unless entries}}
+	<div class="module">
+		<div>
+			<p>There are currently no entries. Check back later.</p>
+		</div>
+	</div>
+	{{/unless}}
+	{{#if entriesStart}}
+	<div class="module">
+		<div class="slider" tabindex="-1">
+			{{#each entriesStart}}
+			<li class="article card article--card">
+				<p class="article__datetime">{{this.year}}</p>
+				<p class="article__categories">
+					{{#each this.categories}}
+					<span>{{this}}</span>
+					{{/each}}
+				</p>
+				{{#if this.image}}
+				<div class="article__image">
+					{{image this.image this.imageAlt}}
+				</div>
+				{{/if}}
+				<h2 class="article__title">{{this.title}}</h2>
+				<p class="article__tagline">{{this.tagline}}</p>
+				<a href="{{this.url}}" class="stretched-link stretched-link--screen-reader-text">
+					<span class="screen-reader-text article__link-text">Show Project</span>
+					<span class="screen-reader-text">{{this.title}}</span>
+				</a>
+			</li>
+			{{/each}}
+		</div>
+	</div>
+	{{/if}}
+	{{#if entriesEnd}}
+	<div class="module module--transparent module--limited">
+		<div>
+			{{#each entriesEnd}}
+			<li class="article article--list-item">
+				<h2 class="article__title">
+					<a href="{{this.url}}">{{this.title}}</a>
+				</h2>
+				<div class="article__meta">
+					<p class="article__datetime">{{this.year}}</p>
+					<p class="article__categories">
+						{{#each this.categories}}
+						<span>{{this}}</span>
+						{{/each}}
+					</p>
+				</div>
+				<p class="article__tagline">{{this.tagline}}</p>
+			</li>
+			{{/each}}
+		</div>
+	</div>
+	{{/if}}
 </ul>
 
 {{/content}}
