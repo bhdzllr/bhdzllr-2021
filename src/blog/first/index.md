@@ -3,6 +3,8 @@ id: first
 title: Post 1
 tagline: Lorem
 date: 2021-05-20
+image: /blog/first/junge-und-elefant.jpg
+imageAlt: Junge, Elefant und Ball sitzen und schauen
 categories:
   - Web Development
 tags:

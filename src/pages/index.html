@@ -98,15 +98,49 @@
 
 	<div class="module">
 		<div>
-			<h2>Work</h2>
-			<p>Latest Projects</p>
+			<h2>Blog</h2>
+			<p class="subtitle">Latest Articles</p>
+
+			{{#unless entries.blog.first}}
+			<p>There are currently no blog posts. Check back later.</p>
+			{{/unless}}
+			{{#if entries.blog.first}}
+			<!-- <div class="slider-nav js-slider-nav">
+				<button class="slider-nav-left js-slider-nav-left">
+					<span class="screen-reader-text">Previous</span>
+				</button>
+				<button class="slider-nav-right js-slider-nav-right">
+					<span class="screen-reader-text">Next</span>
+				</button>
+			</div> -->
+			<ol class="list-simple slider" tabindex="-1">
+			{{#each entries.blog.first}}
+				{{> card article=this}}
+			{{/each}}
+			</ol>
+			{{/if}}
+
+			<a href="{{link 'blog'}}" class="more-link">See all Articles</a>
 		</div>
 	</div>
 
 	<div class="module module--transparent">
 		<div>
-			<h2>Blog</h2>
-			<p>Latest Articles</p>
+			<h2>Work</h2>
+			<p class="subtitle">Latest Projects</p>
+
+			{{#unless entries.project.first}}
+			<p>There are currently no projects. Check back later.</p>
+			{{/unless}}
+			{{#if entries.project.first}}
+			<ol class="list-simple slider" tabindex="-1">
+			{{#each entries.project.first}}
+				{{> card article=this}}
+			{{/each}}
+			</ol>
+			{{/if}}
+
+			<a href="{{link 'work'}}" class="more-link">See all Projects</a>
 		</div>
 	</div>
 

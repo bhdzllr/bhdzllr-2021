@@ -11,10 +11,6 @@ $tangent: 0.637;
 		perspective: 1000px;
 
 		@media #{$screen-min-sm} {
-			height: 230px;
-		}
-
-		@media #{$screen-min-md} {
 			height: 290px;
 		}
 	}
@@ -28,8 +24,9 @@ $tangent: 0.637;
 		color: $color-primary;
 
 		h2 {
-			margin-top: 1rem;
+			margin-top: 0.75rem;
 
+			font-size: 1.125rem;
 			text-transform: uppercase;
 		}
 

@@ -28,7 +28,7 @@ export default class VisibilityObserver {
 				this.handleVisibilityChange();
 			}, false);
 		} else {
-			console.log('[VisibilityObserver] Browser does not support Page Visibility API.');
+			console.warn('[VisibilityObserver] Browser does not support Page Visibility API.');
 		}
 	}
 

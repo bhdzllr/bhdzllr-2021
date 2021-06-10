@@ -1,13 +1,55 @@
-{{#extend "layouts/main-container" title="Blog"}}
+{{#extend "layouts/main" title="Blog"}}
 {{#content "content"}}
 
-<ul>
-	{{#each entries}}
-	<li>
-		<a href="{{this.url}}">{{this.title}}</a>
-	</li>
-	{{/each}}
+<div class="module module--transparent">
+	<div>
+		<h1 class="pb-1">Blog</h1>
+	</div>
+</div>
+
+<ul class="list-simple">
+	{{#unless entries}}
+	<div class="module">
+		<div>
+			<p>There are currently no blog posts. Check back later.</p>
+		</div>
+	</div>
+	{{/unless}}
+	{{#if entriesFirst}}
+	<div class="module">
+		<div>
+			<div class="slider" tabindex="-1">
+			{{#each entriesFirst}}
+				{{> card article=this}}
+			{{/each}}
+			</div>
+		</div>
+	</div>
+	{{/if}}
+	{{#if entriesRest}}
+	<div class="module module--transparent module--limited">
+		<div>
+			{{#each entriesRest}}
+			<li class="article article--list-item">
+				<h2 class="article__title">
+					<a href="{{this.url}}">{{this.title}}</a>
+				</h2>
+				<div class="article__meta">
+					<p class="article__datetime">{{formatDate this.date}}</p>
+					<p class="article__categories">
+						{{#each this.categories}}
+						<span>{{this}}</span>
+						{{/each}}
+					</p>
+				</div>
+				<p class="article__tagline">{{this.tagline}}</p>
+			</li>
+			{{/each}}
+		</div>
+	</div>
+	{{/if}}
 </ul>
+
 
 {{/content}}
 {{/extend}}

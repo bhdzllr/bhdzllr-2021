@@ -1,7 +1,8 @@
 .slider {
 	display: flex;
 	flex-wrap: nowrap;
-	// padding: 0 !important;
+	margin-bottom: 1rem;
+	padding-bottom: 1rem;
 	box-sizing: border-box;
 	overflow-x: auto;
 	overflow-y: hidden;
@@ -11,10 +12,20 @@
 		content: ' ';
 		white-space: pre;
 		display: block;
+
+		@media #{$screen-min-lg} {
+			content: none;
+		}
 	}
 
 	> * {
 		flex: 1 0 auto;
-		margin-right: 1rem;
+		margin-right: 0.75rem;
+	}
+
+	> *:last-child {
+		@media #{$screen-min-lg} {
+			margin-right: 0;
+		}
 	}
 }

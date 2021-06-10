@@ -154,7 +154,6 @@ a.btn--arrow {
 	}
 }
 
-button[disabled],
 .btn[disabled],
 .btn--disabled {
 	@include button-disabled;

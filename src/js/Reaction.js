@@ -152,11 +152,6 @@ export class Reaction extends HTMLElement {
 		this.addEventListener('keydown', this.handleKeyDown);
 	}
 
-	disconnectedCallback() {
-		this.removeEventListener('click', this.increase);
-		this.removeEventListener('keydown', this.handleKeyDown);
-	}
-
 	attributeChangedCallback(name, oldValue, newValue) {
 		switch (name) {
 			case 'value':

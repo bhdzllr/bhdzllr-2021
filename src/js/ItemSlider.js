@@ -161,11 +161,8 @@ export class ItemSlider extends HTMLElement {
 		this.btnLeft.setAttribute('aria-label', this.text.previous);
 		this.btnRight.setAttribute('aria-label', this.text.next);
 
-		this.slideLeftHandler = this.slideLeft.bind(this);
-		this.slideRightHandler = this.slideRight.bind(this);
-
-		this.btnLeft.addEventListener('click', this.slideLeftHandler);
-		this.btnRight.addEventListener('click', this.slideRightHandler);
+		this.btnLeft.addEventListener('click', () => this.slideLeft());
+		this.btnRight.addEventListener('click', () => this.slideRight());
 
 		const undraggableElements = this.querySelectorAll(options.undraggableElementsSelector);
 		for (let i = 0; i < undraggableElements.length; i++) {
@@ -174,22 +171,25 @@ export class ItemSlider extends HTMLElement {
 			});
 		}
 
-		// @todo Handler
+		this.touchEndHandler = this.touchEnd.bind(this);
+		this.touchMoveHandler = this.touchMove.bind(this);
 
 		this.panel.addEventListener('touchstart', (e) => this.touchStart(e));
 		this.panel.addEventListener('touchmove', (e) => this.touchScrolling(e), { passive: false });
-		window.addEventListener('touchend', (e) => this.touchEnd(e));
-		window.addEventListener('touchmove', (e) => this.touchMove(e));
+		window.addEventListener('touchend', this.touchEndHandler);
+		window.addEventListener('touchmove', this.touchMoveHandler);
 
 		this.panel.addEventListener('mousedown', (e) => this.touchStart(e));
-		window.addEventListener('mouseup', (e) => this.touchEnd(e));
-		window.addEventListener('mousemove', (e) => this.touchMove(e));
+		window.addEventListener('mouseup', this.touchEndHandler);
+		window.addEventListener('mousemove', this.touchMoveHandler);
 	}
 
 	disconnectedCallback() {
-		// @todo
-		// this.btnLeft.removeEventListener('click', this.slideLeftHandler);
-		// this.btnRight.removeEventListener('click', this.slideRightHandler);
+		window.removeEventListener('touchend', this.touchEndHandler);
+		window.removeEventListener('touchmove', this.touchMoveHandler);
+
+		window.removeEventListener('mouseup', this.touchEndHandler);
+		window.removeEventListener('mousemove', this.touchMoveHandler);
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {

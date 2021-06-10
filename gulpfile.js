@@ -49,6 +49,7 @@ const ssh = new GulpSSH({
 });
 
 const images = [];
+const entries = {};
 
 handlebars.Handlebars.registerHelper(layouts(handlebars.Handlebars));
 handlebars.Handlebars.registerHelper({
@@ -149,6 +150,9 @@ handlebars.Handlebars.registerHelper({
 	},
 	gallery: function (options) {
 		return new handlebars.Handlebars.SafeString(`<div class="gallery js-gallery">${options.fn(this)}</div>`);
+	},
+	formatDate: function (date) {
+		return date.toISOString().split('T')[0];
 	},
 	currentYear: function (options) {
 		return new Date().getFullYear();
@@ -299,7 +303,9 @@ function clean() {
 function pages(cb) {
 	src(srcFolder + '/pages/**/*.html')
 		.pipe(data(getHandlebarsDefaultData))
-		.pipe(handlebars({}, {
+		.pipe(handlebars({
+			entries: entries,
+		}, {
 			batch: getHandlebarsBatch(),
 		}))
 		.pipe(rename({ extname: '.html' }))
@@ -315,22 +321,22 @@ function pages(cb) {
 	cb();
 }
 
-function types(cb) {
+async function types(cb) {
 	const pageTypes = getPageTypes();
 
 	for (const type of pageTypes) {
-		typesSubtask(type);
+		await typesSubtask(type);
 	}
 
 	cb();
 }
 
-function typesSubtask(type) {
-	function createType() {
+async function typesSubtask(type) {
+	async function createType() {
 		return new Promise(function (resolve, reject) {
-			const entries = [];
-			const entriesStart = [];
-			const entriesEnd = [];
+			const entriesType = [];
+			const entriesFirst = [];
+			const entriesRest = [];
 
 			src(type.src + '/**/*.md')
 				.pipe(data(function (file) {
@@ -373,7 +379,7 @@ function typesSubtask(type) {
 					templateData.article.createdAt = file.stat.birthtime;
 					templateData.article.updatedAt = file.stat.mtime;
 
-					entries.push(templateData.article);
+					entriesType.push(templateData.article);
 
 					templateData.data = getHandlebarsDefaultData(file).data;
 
@@ -387,22 +393,29 @@ function typesSubtask(type) {
 				}))
 				.pipe(dest(type.dist))
 				.on('end', function () {
-					entries.sort(function(a, b) {
+					entriesType.sort(function(a, b) {
 						return b.date - a.date;
 					});
 
-					entries.forEach(function (element, index) {
+					entriesType.forEach(function (element, index) {
 						if (index < 3) {
-							entriesStart.push(element);
+							entriesFirst.push(element);
 						} else {
-							entriesEnd.push(element);
+							entriesRest.push(element);
 						}
 					});
 
+					entries[type.name] = {};
+					entries[type.name] = {
+						all: entriesType,
+						first: entriesFirst,
+						rest: entriesRest,
+					};
+
 					resolve({
-						entries: entries,
-						entriesStart: entriesStart,
-						entriesEnd: entriesEnd,
+						entries: entriesType,
+						entriesFirst: entriesFirst,
+						entriesRest: entriesRest,
 					});
 				});
 		});
@@ -431,7 +444,7 @@ function typesSubtask(type) {
 	// 	cb();
 	// }
 
-	createType()
+	await createType()
 		.then(createIndex)
 		// .then(copyResources)
 		// .then(finishTask);
@@ -641,7 +654,7 @@ function deployDown() {
 	return del([distFolder + '/package.tar']);
 }
 
-exports.default = series(clean, responsiveImages, parallel(pages, types, styles, scripts, server, res), dev);
+exports.default = series(clean, responsiveImages, types, parallel(pages, styles, scripts, server, res), dev);
 exports.dev = exports.default;
-exports.dist = series(clean, responsiveImages, parallel(pages, types, styles, scripts, server, res));
+exports.dist = series(clean, responsiveImages, types, parallel(pages, styles, scripts, server, res));
 exports.deploy = series(deployUp, deployRemote, deployDown);

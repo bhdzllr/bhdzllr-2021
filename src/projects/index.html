@@ -3,7 +3,7 @@
 
 <div class="module module--transparent">
 	<div>
-		<h1>Work</h1>
+		<h1 class="pb-1">Work</h1>
 	</div>
 </div>
 
@@ -11,41 +11,25 @@
 	{{#unless entries}}
 	<div class="module">
 		<div>
-			<p>There are currently no entries. Check back later.</p>
+			<p>There are currently no projects. Check back later.</p>
 		</div>
 	</div>
 	{{/unless}}
-	{{#if entriesStart}}
+	{{#if entriesFirst}}
 	<div class="module">
-		<div class="slider" tabindex="-1">
-			{{#each entriesStart}}
-			<li class="article card article--card">
-				<p class="article__datetime">{{this.year}}</p>
-				<p class="article__categories">
-					{{#each this.categories}}
-					<span>{{this}}</span>
-					{{/each}}
-				</p>
-				{{#if this.image}}
-				<div class="article__image">
-					{{image this.image this.imageAlt}}
-				</div>
-				{{/if}}
-				<h2 class="article__title">{{this.title}}</h2>
-				<p class="article__tagline">{{this.tagline}}</p>
-				<a href="{{this.url}}" class="stretched-link stretched-link--screen-reader-text">
-					<span class="screen-reader-text article__link-text">Show Project</span>
-					<span class="screen-reader-text">{{this.title}}</span>
-				</a>
-			</li>
+		<div>
+			<div class="slider" tabindex="-1">
+			{{#each entriesFirst}}
+				{{> card article=this}}
 			{{/each}}
+			</div>
 		</div>
 	</div>
 	{{/if}}
-	{{#if entriesEnd}}
+	{{#if entriesRest}}
 	<div class="module module--transparent module--limited">
 		<div>
-			{{#each entriesEnd}}
+			{{#each entriesRest}}
 			<li class="article article--list-item">
 				<h2 class="article__title">
 					<a href="{{this.url}}">{{this.title}}</a>

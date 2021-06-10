@@ -161,11 +161,23 @@ export class Cube {
 	}
 
 	rotateLeft() {
-		this.rotateStep(this.lastRotation + this.options.degrees)
+		let degrees = this.lastRotation + this.options.degrees;
+		this.rotateStep(degrees);
+
+		// Prevents click on arrow of other cube section that is behind
+		if (degrees > this.options.degrees) {
+			setTimeout(() => this.rotateStep(this.options.degrees), 200);
+		}
 	}
 
 	rotateRight() {
-		this.rotateStep(this.lastRotation - this.options.degrees)
+		let degrees = this.lastRotation - this.options.degrees;
+		this.rotateStep(degrees);
+
+		// Prevents click on arrow of other cube section that is behind
+		if (degrees < -this.options.degrees) {
+			setTimeout(() => this.rotateStep(-this.options.degrees), 200);
+		}
 	}
 
 	rotateStep(degrees) {

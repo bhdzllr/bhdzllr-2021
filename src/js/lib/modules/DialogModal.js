@@ -58,12 +58,18 @@ export class DialogModal {
 	}
 
 	initListeners() {
+		let overlayMouseDownTarget;
+
 		this.btnClose.addEventListener('click', () => {
 			this.hide();
 		});
 
-		this.overlay.addEventListener('click', (e) => {
-			if ((e.target).classList.contains('js-dm-overlay')) {
+		this.overlay.addEventListener('mousedown', (e) => {
+			overlayMouseDownTarget = e.target;
+		});
+
+		this.overlay.addEventListener('mouseup', (e) => {
+			if (overlayMouseDownTarget && overlayMouseDownTarget.classList.contains('js-dm-overlay')) {
 				this.hide();
 			}
 		});

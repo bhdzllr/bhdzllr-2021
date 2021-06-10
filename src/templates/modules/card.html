@@ -1,0 +1,25 @@
+<{{#if element}}{{element}}{{else}}li{{/if}} class="article card article--card">
+	{{#if article.date}}
+	{{#if article.year}}
+	<p class="article__datetime">{{article.year}}</p>
+	{{else}}
+	<p class="article__datetime">{{formatDate article.date}}</p>
+	{{/if}}
+	{{/if}}
+	<p class="article__categories">
+		{{#each article.categories}}
+		<span>{{this}}</span>
+		{{/each}}
+	</p>
+	{{#if article.image}}
+	<div class="article__image">
+		{{image article.image article.imageAlt}}
+	</div>
+	{{/if}}
+	<h2 class="article__title">{{article.title}}</h2>
+	<p class="article__tagline">{{article.tagline}}</p>
+	<a href="{{article.url}}" class="stretched-link stretched-link--screen-reader-text">
+		<span class="screen-reader-text article__link-text">Show Project</span>
+		<span class="screen-reader-text">{{article.title}}</span>
+	</a>
+</{{#if element}}{{element}}{{else}}li{{/if}}>

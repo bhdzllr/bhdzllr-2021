@@ -12,7 +12,9 @@
 					</div>
 					{{/if}}
 
-					<p class="article__datetime">{{article.year}}</p>
+					<p class="article__datetime">
+						{{#if article.year}}{{article.year}}{{else}}{{formatDate article.date}}{{/if}}
+					</p>
 					<p class="article__categories">
 						{{#each article.categories}}
 						<span>{{this}}</span>

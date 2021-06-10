@@ -1,0 +1,46 @@
+.card {
+	position: relative;
+
+	margin-bottom: 1.5rem !important;
+	padding: 0.75rem;
+	box-sizing: border-box;
+
+	background-color: $color-card;
+	border-top: 1px solid $color-primary;
+
+	@media #{$screen-min-md} {
+		padding: 1.25rem;
+	}
+
+	&::before,
+	&::after {
+		position: absolute;
+		bottom: -1.5rem;
+
+		content: '';
+		display: block;
+		height: 1.5rem;
+		box-sizing: border-box;
+	}
+
+	&::before {
+		left: 0;
+
+		width: calc(100% - 1.5rem);
+		height: 1.5rem;
+
+		background-color: $color-card;
+		border-bottom: 1px solid $color-primary;
+	}
+
+	&::after {
+		content: '';
+		right: 0;
+
+		width: 1.5rem;
+
+		background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><polyline fill="#{$color-card}" points="0,0 24,0 0,24"/><polyline fill="none" stroke="#{$color-primary}" stroke-width="1" points="24,0 0,24 "/></svg>');
+		background-repeat: no-repeat;
+		background-size: 1.5rem;
+	}
+}

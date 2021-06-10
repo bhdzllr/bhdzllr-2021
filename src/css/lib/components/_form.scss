@@ -64,7 +64,7 @@ fieldset > :last-child {
 		line-height: 1.35;
 	}
 
-	input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="file"]):not([type="range"]),
+	input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
 	textarea,
 	select {
 		@include text-input;
