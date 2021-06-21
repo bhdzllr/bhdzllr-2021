@@ -34,17 +34,13 @@ textarea {
 	font-size: inherit;
 }
 
-input:not([type="submit"]):not([type="button"]):not([type="reset"]):not([type="checkbox"]):not([type="radio"]):not([type="file"]):not([type="range"]),
-select,
-textarea {
-	-webkit-appearance: none;
-	-webkit-border-radius: 0;
-}
-
 button::-moz-focus-inner,
-input::-moz-focus-inner {
-	border: 0;  /** Button size fix */
-	padding: 0; /** Button size fix */
+input::-moz-focus-inner,
+[type="submit"]::-moz-focus-inner,
+[type="button"]::-moz-focus-inner,
+[type="reset"]::-moz-focus-inner {
+	border: 0;  /* Button size fix */
+	padding: 0; /* Button size fix */
 }
 
 textarea {
@@ -53,10 +49,10 @@ textarea {
 }
 
 button,
+[type="submit"],
 [type="button"],
-[type="reset"],
-[type="submit"] {
-	-webkit-appearance: button; // Without styling, buttons have just a thin rounded border
+[type="reset"] {
+	-webkit-appearance: button;
 }
 
 [type="search"] {

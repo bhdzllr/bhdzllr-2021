@@ -142,6 +142,11 @@
 		margin-bottom: -40px;
 		margin-right: -0.75rem;
 		margin-left: -0.75rem;
+
+		@media #{$screen-min-md} {
+			margin-right: -1.25rem;
+			margin-left: -1.25rem;
+		}
 	}
 
 	@media #{$screen-min-sm} {

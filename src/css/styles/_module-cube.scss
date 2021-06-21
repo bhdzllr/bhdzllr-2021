@@ -258,6 +258,38 @@ $tangent: 0.637;
 
 		transform: translateY(-50%);
 
+		@supports (mask-image: url('')) {
+			mask-image: url('/img/bhdzllr-hologram-mask.png');
+			mask-position: 200%;
+			mask-repeat: no-repeat;
+			mask-size: 75% 100%;
+
+			@media #{$screen-min-md} {
+				mask-position: 112%;
+				mask-size: contain;
+			}
+		}
+
+		@supports (mask-image: url('')) {
+			&::before {
+				position: absolute;
+				z-index: 2;
+
+				content: '';
+				display: block;
+				width: 100%;
+				height: calc(100% + 8px);
+
+				background: linear-gradient(to bottom,
+					rgba(0, 0, 0, 0) 50%,
+					rgba(0, 0, 0, 0.15) 50%
+				);
+				background-size: 100% 8px;
+				animation: scan 0.75s infinite linear;
+				mix-blend-mode: multiply;
+			}
+		}
+
 		@media #{$screen-min-md} {
 			width: calc(100% - 1rem);
 		}
@@ -277,6 +309,16 @@ $tangent: 0.637;
 				animation-direction: alternate;
 			}
 		}
+	}
+}
+
+@keyframes scan {
+	0% {
+		margin-top: 0;
+	}
+
+	100% {
+		margin-top: -8px;
 	}
 }
 

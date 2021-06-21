@@ -110,6 +110,20 @@ handlebars.Handlebars.registerHelper({
 			</noscript>
 		`);
 	},
+	imageWidth: function (src) {
+		const image = images.find(image => image.original == src);
+
+		if (!image) return;
+
+		return image.originalWidth;
+	},
+	imageHeight: function (src) {
+		const image = images.find(image => image.original == src);
+
+		if (!image) return;
+
+		return image.originalHeight;
+	},
 	galleryImage: function (src, alt) {
 		const image = images.find(image => image.original == src);
 
@@ -166,18 +180,24 @@ handlebars.Handlebars.registerHelper({
 });
 
 function getHandlebarsDefaultData(file) {
-	let url;
+	let path;
 
 	if (file.path.includes('/pages')) {
-		url = file.path.split('/pages')[1];
+		path = file.path.split('/pages')[1];
 	} else if (file.path.includes('/blog')) {
-		url = file.path.split('/' + srcFolder)[1];
+		path = file.path.split('/' + srcFolder)[1];
 	} else if (file.path.includes('/projects')) {
-		url = file.path.split('/' + srcFolder)[1];
+		path = file.path.split('/' + srcFolder)[1];
 	}
+
+	let url = path
+		.replace('index.html', '')
+		.replace('index.md', '');
 
 	return {
 		data: {
+			baseUrl: 'https://www.bhdzllr.com',
+			path: path,
 			url: url,
 		},
 	}; 

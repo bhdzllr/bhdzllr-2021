@@ -49,6 +49,30 @@
 	}
 }
 
+@mixin scrollbar-style-horizontal {
+	scrollbar-width: thin;
+	scrollbar-color: lighten($color-secondary, 15%), $color-secondary;
+
+	& { // IE
+		scrollbar-face-color: lighten($color-secondary, 15%);
+		scrollbar-track-color: $color-secondary;
+	}
+
+	&::-webkit-scrollbar {
+		height: 14px;
+	}
+
+	&::-webkit-scrollbar-track {
+		background: $color-secondary;
+	}
+
+	&::-webkit-scrollbar-thumb {
+		background-color: lighten($color-secondary, 15%);
+		border-radius: 6px;
+		border: 3px solid $color-secondary;
+	}
+}
+
 /* Page Active State */
 
 @mixin page-active($padding: 0) {

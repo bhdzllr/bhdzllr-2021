@@ -21,8 +21,7 @@ $color-text--darker: #121212;
 $color-mark: #ffff00;
 $color-selection: #b3d4fc;
 
-$font-fallback: Helvetica, Arial, sans-serif;
-$font-stack:    'Helvetica Neue', $font-fallback;
+$font-stack: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 
 $width-site: 1280px;
 $grid-columns: 5;

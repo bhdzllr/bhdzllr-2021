@@ -1,4 +1,6 @@
 .slider {
+	@include scrollbar-style-horizontal;
+
 	display: flex;
 	flex-wrap: nowrap;
 	margin-bottom: 1rem;
@@ -7,6 +9,11 @@
 	overflow-x: auto;
 	overflow-y: hidden;
 	-webkit-overflow-scolling: touch;
+
+	&:focus,
+	&:active {
+		outline: none;
+	}
 
 	&::after {
 		content: ' ';
