@@ -170,17 +170,17 @@
 		width: 100%;
 		height: 100%;
 
-		background: linear-gradient(180deg, $color-background 0%, rgba(0, 0, 0, 0) 15%),
-		            linear-gradient(0deg, $color-background 0%, rgba(0, 0, 0, 0) 15%),
-		            linear-gradient(270deg, $color-background 0%, rgba(0, 0, 0, 0) 15%),
-		            linear-gradient(90deg, $color-background 0%, rgba(0, 0, 0, 0) 15%),
+		background: linear-gradient(180deg, $color-background 0%, rgba($color-background, 0) 15%),
+		            linear-gradient(0deg, $color-background 0%, rgba($color-background, 0) 15%),
+		            linear-gradient(270deg, $color-background 0%, rgba($color-background, 0) 15%),
+		            linear-gradient(90deg, $color-background 0%, rgba($color-background, 0) 15%),
 		            radial-gradient(closest-side, rgba(0, 101, 78, 0.6) 0%, $color-background 130%);
 
 		.article--card & {
-			background: linear-gradient(180deg, $color-card--full 0%, rgba(0, 0, 0, 0) 15%),
-			            linear-gradient(0deg, $color-card--full 0%, rgba(0, 0, 0, 0) 15%),
-			            linear-gradient(270deg, $color-card--full 0%, rgba(0, 0, 0, 0) 15%),
-			            linear-gradient(90deg, $color-card--full 0%, rgba(0, 0, 0, 0) 15%),
+			background: linear-gradient(180deg, $color-card--full 0%, rgba($color-card--full, 0) 15%),
+			            linear-gradient(0deg, $color-card--full 0%, rgba($color-card--full, 0) 15%),
+			            linear-gradient(270deg, $color-card--full 0%, rgba($color-card--full, 0) 15%),
+			            linear-gradient(90deg, $color-card--full 0%, rgba($color-card--full, 0) 15%),
 			            radial-gradient(closest-side, rgba(0, 101, 78, 0.6) 0%, $color-card--full 130%);
 		}
 	}
