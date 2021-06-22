@@ -1,4 +1,6 @@
 .title-bar {
+	display: block; // Override hidden attribute
+
 	background-color: $color-secondary;
 
 	color: $color-primary;

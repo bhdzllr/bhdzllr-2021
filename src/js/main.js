@@ -73,6 +73,10 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 			'./Terminal'
 		); */
 
+		if (document.querySelector('.js-title-bar')) {
+			document.querySelector('.js-title-bar').hidden = false;
+		}
+
 		addTerminalDefaultStyles();
 
 		const mailTerminal = new Terminal(document.querySelector('.js-mail-terminal'));

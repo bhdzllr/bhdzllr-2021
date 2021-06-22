@@ -98,16 +98,8 @@
 	}
 }
 
-.contact--no-js {
-	display: none;
-}
-
 .no-js {
-	.contact {
-		display: none;
-	}
-
-	.contact--no-js {
+	.contact__no-js {
 		display: block;
 
 		ul li::before {

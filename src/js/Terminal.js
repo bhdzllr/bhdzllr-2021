@@ -47,6 +47,8 @@ export class Terminal {
 	}
 
 	initDom() {
+		this.element.hidden = false;
+
 		this.form = document.createElement('form');
 		this.form.classList.add('terminal');
 
@@ -63,6 +65,8 @@ export class Terminal {
 
 		this.inputCustom = document.createElement('div');
 		this.inputCustom.classList.add('terminal__input-custom');
+		this.inputCustom.setAttribute('aria-hidden', 'true');
+		this.inputCustom.hidden = true;
 
 		this.inputCaretHelper = document.createElement('span');
 		this.inputCaretHelper.classList.add('terminal__input-helper');
@@ -73,13 +77,13 @@ export class Terminal {
 		this.inputCaretHelperSpan.innerHTML = '&nbsp;';
 
 		this.inputCaret = document.createElement('span');
-		this.inputCaret.setAttribute('aria-hidden', 'true');
 		this.inputCaret.classList.add('terminal__input-caret');
+		this.inputCaret.setAttribute('aria-hidden', 'true');
 
 		this.loader = document.createElement('span');
+		this.loader.classList.add(this.options.classNameLoader);
 		this.loader.setAttribute('aria-hidden', 'true');
 		this.loader.hidden = true;
-		this.loader.classList.add(this.options.classNameLoader);
 
 		this.inputWrapper.appendChild(this.input);
 		this.inputWrapper.appendChild(this.inputCustom);
@@ -374,7 +378,7 @@ export class Terminal {
 
 		if (!typer) {
 			for (const t of text) {
-				const outputElement = document.createElement('p');
+				const outputElement = document.createElement('output');
 				outputElement.textContent = t;
 			
 				if (options.className) outputElement.classList.add(options.className);
@@ -416,7 +420,7 @@ export class Terminal {
 
 	async typeOutput(text, className) {
 		let pos = 0;
-		const outputElement = document.createElement('p');
+		const outputElement = document.createElement('output');
 		if (className) outputElement.classList.add(className);
 
 		this.output.appendChild(outputElement);
@@ -489,7 +493,10 @@ export function addTerminalDefaultStyles() {
 			font-weight: bold;
 		}
 
+		output,
 		.terminal__screen-output {
+			display: block;
+
 			color: #666666;
 		}
 
@@ -510,6 +517,7 @@ export function addTerminalDefaultStyles() {
 		.terminal__input-custom {
 			position: relative;
 
+			display: block;
 			width: 100%;
 			min-height: 1.75em;
 
