@@ -15,9 +15,7 @@ import { Terminal, addTerminalDefaultStyles } from './Terminal';
 import { Reaction } from './Reaction';
 import { ItemSlider } from './ItemSlider';
 
-
 document.addEventListener('DOMContentLoaded', async function (e) {
-
 	const currentLang = document.documentElement.getAttribute('lang') ? document.documentElement.getAttribute('lang') : 'en';
 	const i18n = new I18n(currentLang, de);
 
@@ -51,6 +49,10 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
 		new Cube(document.querySelector('.js-cube'), options);
 
+		if (document.querySelector('.js-hologram-image')) {
+			document.querySelector('.js-hologram-image').hidden = false;
+		}
+
 		if (document.querySelector('.js-cube-tools')) {
 			const toolElements = document.querySelectorAll('.js-cube-tools li');
 
@@ -62,7 +64,6 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
 				setTimeout(() => toolElements[ri].classList.remove('flick'), 3000);
 			}, 3000);
-
 		}
 	}
 
@@ -224,6 +225,11 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 				}
 
 				galleryImage.addEventListener('click', function (e) {
+					// CSS is disabled, but JS is active, just follow image path
+					if (window.getComputedStyle(gallery).getPropertyValue('display') != 'flex') {
+						return;
+					}
+
 					e.preventDefault();
 					showDialog();
 				});

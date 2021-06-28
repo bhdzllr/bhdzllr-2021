@@ -97,6 +97,24 @@
 	}
 }
 
+/* Skip Link */
+
+.skip-link:focus {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	z-index: 1;
+
+	width: 300px;
+	padding: 0.75rem 0;
+
+	background-color: $color-black;
+	border-radius: 0 0 8px 8px;
+	transform: translateX(-50%);
+
+	text-align: center;
+}
+
 /* Body Layout */
 
 html {
@@ -322,9 +340,7 @@ main {
  *
  * Because of footer at bottom with flexbox and centering main with
  * `margin: 0 auto;` a width of 100% is needed. Therefore also
- * `box-sizing: border-box` is needed for smaller screens. On larger screens
- * a switch back to `box-sizing: content-box` is necessary to kepp all elements
- * in a line.
+ * `box-sizing: border-box` is needed for smaller screens.
  */
 
 main {
@@ -341,12 +357,8 @@ main {
 		line-height: 1.75;
 	}
 
-	@media #{$screen-min-lg} {
-		box-sizing: content-box;
-	}
-
 	&.container {
-		max-width: 760px; // 72ch
+		max-width: calc(760px + 4rem); // 72ch
 		padding-top: 1.25rem;
 		padding-bottom: 2rem;
 
@@ -358,7 +370,7 @@ main {
 	}
 
 	&.container--article {
-		max-width: 960px;
+		max-width: calc(960px + 4rem);
 	}
 
 	a,

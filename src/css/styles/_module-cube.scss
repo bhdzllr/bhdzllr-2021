@@ -1,4 +1,5 @@
-// Default values form JS Cube Module
+// Default values form JS Cube Module to correct transform
+// because of fixed width of cube-scene
 $degrees: 65;
 $spacing: 10;
 $tangent: 0.637;
@@ -8,7 +9,9 @@ $tangent: 0.637;
 		height: 260px;
 		margin: 2rem auto;
 
-		perspective: 1000px;
+		opacity: 0.1;
+		transform: scale(0.1);
+		animation: cube-in 0.5s forwards;
 
 		@media #{$screen-min-sm} {
 			height: 290px;
@@ -16,10 +19,7 @@ $tangent: 0.637;
 	}
 
 	.cube {
-		position: relative;
-
-		width: 100%;
-		height: 100%;
+		height: 100%; // Nicer look until JS is loaded
 
 		color: $color-primary;
 
@@ -136,12 +136,20 @@ $tangent: 0.637;
 	}
 	
 	.cube__section {
-		height: 100%;
+		position: absolute; // Nicer look until JS is loaded
+
+		height: 100%; // Nicer look until JS is loaded
 		padding: 0.5rem;
 		box-sizing: border-box;
 		// overflow: hidden;
 
 		border-top: none;
+
+		.no-js & {
+			position: relative;
+
+			height: auto;
+		}
 
 		> p,
 		> ul,
@@ -341,20 +349,46 @@ $tangent: 0.637;
 			transform: none;
 		}
 
+		&:nth-child(1),
+		&:nth-child(2) {
+			margin-bottom: 0 !important;
+		}
+
+		&:nth-child(1)::before,
+		&:nth-child(1)::after,
 		&:nth-child(2)::before,
-		&:nth-child(2)::after,
-		&:nth-child(3)::before,
-		&:nth-child(3)::after {
+		&:nth-child(2)::after {
 			content: none;
+		}
+
+		&:nth-child(2) {
+			position: relative;
 		}
 
 		&:nth-child(2) .cube__nav,
 		&:nth-child(3) .cube__nav {
 			display: none;
 		}
+	}
 
-		&:nth-child(2) {
-			position: relative;
+	.cube__hologram {
+		@supports (mask-image: url('')) {
+			@media #{$screen-min-md} {
+				mask-position: 128%;
+				mask-size: contain;
+			}
 		}
+	}
+}
+
+@keyframes cube-in {
+	0% {
+		opacity: 0.1;
+		transform: scale(0.1);
+	}
+
+	100% {
+		opacity: 1.0;
+		transform: scale(1.0);
 	}
 }

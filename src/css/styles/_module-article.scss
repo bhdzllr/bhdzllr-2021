@@ -59,10 +59,6 @@
 	position: relative;
 	z-index: 2;
 
-	a {
-		text-decoration: none;
-	}
-
 	.article--card &,
 	.article--list-item & {
 		font-size: 1.45rem;
@@ -91,6 +87,10 @@
 		.article--list-item & {
 			padding-top: 0;
 		}
+	}
+
+	a {
+		text-decoration: none;
 	}
 }
 
@@ -292,6 +292,11 @@
 	}
 }
 
+.article__footer {
+	padding-top: 1.5rem;
+	padding-bottom: 1.5rem;
+}
+
 .article__content,
 .article__footer {
 	.article--blog & {
@@ -327,11 +332,6 @@
 			color: currentColor;
 		}
 	}
-}
-
-.article__footer {
-	padding-top: 1.5rem;
-	padding-bottom: 1.5rem;
 }
 
 .article--blog {

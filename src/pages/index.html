@@ -8,16 +8,16 @@
 			<section class="cube__section card">
 				<div class="cube__nav">
 					<div class="cube__tab">
-						<button class="cube-nav-left js-cube-nav-left">
-							<span class="screen-reader-text">Rotate to Data</span>
-						</button>
-						<button class="cube-nav-right js-cube-nav-right">
-							<span class="screen-reader-text">Rotate to Skills</span>
-						</button>
+						<a href="#data" class="cube-nav-left js-cube-nav-left" hidden>
+							<span class="screen-reader-text">Skip to Data</span>
+						</a>
+						<a href="#tools" class="cube-nav-right js-cube-nav-right" hidden>
+							<span class="screen-reader-text">Skip to Skills</span>
+						</a>
 					</div>
 				</div>
 
-				<h2>WHOAMI</h2>
+				<h2 id="whoami">WHOAMI</h2>
 
 				<p>
 					Hello! I'm Bernhard, Full Stack Web Developer from Austria, working in Vienna, also having experience with Accessibility and Usability.
@@ -31,13 +31,13 @@
 			<section class="cube__section card">
 				<div class="cube__nav">
 					<div class="cube__tab">
-						<button class="cube-nav-right js-cube-nav-right">
-							<span class="screen-reader-text">Rotate to Intro</span>
-						</button>
+						<a href="#whoami" class="cube-nav-right js-cube-nav-right" hidden>
+							<span class="screen-reader-text">Skip to Intro</span>
+						</a>
 					</div>
 				</div>
 
-				<h2>Data</h2>
+				<h2 id="data">Data</h2>
 
 				<dl class="cube__dl">
 					<dt>ID:</dt>
@@ -58,20 +58,20 @@
 
 				<div class="cube__hologram">
 					<img src="/img/bhdzllr-hologram.png" alt="Bernhard" />
-					<img src="/img/bhdzllr-hologram.png" alt="Bernhard" aria-hidden="true" />
+					<img src="/img/bhdzllr-hologram.png" alt="Bernhard" class="js-hologram-image" aria-hidden="true" hidden />
 				</div>
 			</section>
 
 			<section class="cube__section card">
 				<div class="cube__nav">
 					<div class="cube__tab">
-						<button class="cube-nav-left js-cube-nav-left">
-							<span class="screen-reader-text">Rotate to Intro</span>
-						</button>
+						<a href="#whoami" class="cube-nav-left js-cube-nav-left" hidden>
+							<span class="screen-reader-text">Skip to Intro</span>
+						</a>
 					</div>
 				</div>
 
-				<h2>Tools</h2>
+				<h2 id="tools">Tools</h2>
 
 				<ul class="cube__tools list-simple js-cube-tools">
 					<li>HTML</li>

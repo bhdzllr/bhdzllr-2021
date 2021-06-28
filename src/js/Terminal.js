@@ -4,6 +4,10 @@ import 'whatwg-fetch';
 
 import { isElementInViewport } from './lib/utils/checks';
 
+/**
+ * Terminal
+ * This would work well as a web component too.
+ */
 export class Terminal {
 
 	constructor(element, options = {}) {
@@ -378,7 +382,7 @@ export class Terminal {
 
 		if (!typer) {
 			for (const t of text) {
-				const outputElement = document.createElement('output');
+				const outputElement = document.createElement('p');
 				outputElement.textContent = t;
 			
 				if (options.className) outputElement.classList.add(options.className);
@@ -420,7 +424,7 @@ export class Terminal {
 
 	async typeOutput(text, className) {
 		let pos = 0;
-		const outputElement = document.createElement('output');
+		const outputElement = document.createElement('p');
 		if (className) outputElement.classList.add(className);
 
 		this.output.appendChild(outputElement);

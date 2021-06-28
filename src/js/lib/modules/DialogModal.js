@@ -36,6 +36,7 @@ export class DialogModal {
 		this.overlay.classList.add('dm-overlay');
 		this.overlay.classList.add('js-dm-overlay');
 		this.overlay.classList.add('hidden');
+		this.overlay.hidden = true;
 
 		this.dialog = document.createElement('div');
 		this.dialog.classList.add('dm-dialog');
@@ -147,6 +148,7 @@ export class DialogModal {
 		}
 
 		this.overlay.classList.remove('hidden');
+		this.overlay.hidden = false;
 		this.isOpen = true;
 
 		this.focusFirstFocusableElement();
@@ -161,6 +163,7 @@ export class DialogModal {
 		}
 
 		this.overlay.classList.add('hidden');
+		this.overlay.hidden = true;
 		this.isOpen = false;
 
 		this.focusLastDocumentElement();

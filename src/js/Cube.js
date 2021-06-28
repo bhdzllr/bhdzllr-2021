@@ -43,12 +43,20 @@ export class Cube {
 	initListeners() {
 		const cubeNavLeftButtons = this.element.querySelectorAll('.js-cube-nav-left');
 		for (let i = 0; i < cubeNavLeftButtons.length; i++) {
-			cubeNavLeftButtons[i].addEventListener('click', (e) => this.rotateLeft());
+			cubeNavLeftButtons[i].hidden = false;
+			cubeNavLeftButtons[i].addEventListener('click', (e) => {
+				e.preventDefault();
+				this.rotateLeft()
+			});
 		}
 
 		const cubeNavRightButtons = this.element.querySelectorAll('.js-cube-nav-right');
 		for (let i = 0; i < cubeNavRightButtons.length; i++) {
-			cubeNavRightButtons[i].addEventListener('click', (e) => this.rotateRight());
+			cubeNavRightButtons.hidden = false;
+			cubeNavRightButtons[i].addEventListener('click', (e) => {
+				e.preventDefault();
+				this.rotateRight()
+			});
 		}
 
 		this.element.addEventListener('touchstart', (e) => this.touchStart(e), false);
@@ -227,6 +235,7 @@ export function addCubeDefaultStyles(options = {}) {
 	style.innerHTML = `
 		.cube-scene {
 			width: 85vw;
+			height: 500px;
 			margin: 0 auto;
 
 			perspective: ${options.perspective}px;
@@ -234,6 +243,11 @@ export function addCubeDefaultStyles(options = {}) {
 		}
  
 		.cube {
+			position: relative;
+
+			width: 100%;
+			height: 100%;
+
 			cursor: grab;
 			user-select: none;
 			transform-style: preserve-3d;
@@ -249,6 +263,7 @@ export function addCubeDefaultStyles(options = {}) {
 			position: absolute;
 
 			width: 100%;
+			height: 100%;
 		}
 
 		.cube__section:nth-child(1) {

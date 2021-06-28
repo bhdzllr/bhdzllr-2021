@@ -31,7 +31,7 @@
 		<link rel="manifest" href="/site.webmanifest" />
 		<meta name="theme-color" content="#172525" />
 
-		<script src="/js/lib/files/check.js"></script>
+		<script src="/js/lib/files/check.js" type="module"></script>
 
 		<link rel="preload" href="/fonts/OpenSans-Light.woff2" as="font" type="font/woff2" crossorigin />
 		<link rel="preload" href="/fonts/OpenSans-Regular.woff2" as="font" type="font/woff2" crossorigin />
@@ -40,6 +40,8 @@
 		<link type="application/atom+xml" rel="alternate" href="/feed.xml" title="@bhdzllr - Blog">
 	</head>
 	<body{{#if bodyClassList}} class="{{bodyClassList}}"{{/if}}>
+		<a href="#main" class="skip-link screen-reader-text screen-reader-text--focusable">Skip to main content</a>
+
 		<header id="site-header">
 			<div id="site-header-bar" class="container container--sh">
 				<a href="/" title="Start" id="site-branding"{{#ifEquals title 'Start'}} class="page-active"{{/ifEquals}}>
@@ -47,15 +49,13 @@
 				</a>
 
 				<!-- @todo
-					CSS Nesting weg?
-					No-JS/No-CSS + Test
-					Latest Startseite; Pfeile
+					RSS
 					Legal, Imprint
-					Cube Text Start Animation, Initial Load Redraw, Swap Cube Arrows?
+					Latest Startseite; Pfeile
+					Cube Text Start Animation
 					Analytics
 
-					Drop IE11 -> modules, just show No JS Fallback, Image Lazy Loading
-					Web Components -> Terminal, Dialog Modal
+					Web-Template -> JS Modules
 				-->
 
 				<nav id="site-nav">

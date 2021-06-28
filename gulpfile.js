@@ -84,6 +84,14 @@ handlebars.Handlebars.registerHelper({
 
 		if (!image) return;
 
+		let width = image.originalWidth;
+		let height = image.originalHeight;
+
+		if (width > 1200) {
+			height = height / (image.originalWidth / 1200);
+			width = 1200;
+		}
+
 		return new handlebars.Handlebars.SafeString(`
 			<img
 				src="${image.preview}"
@@ -91,10 +99,11 @@ handlebars.Handlebars.registerHelper({
 				data-src="${image.large}"
 				data-srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
 				sizes="(max-width: 480px) 100vw, 960px"			
-				width="${image.originalWidth}"
-				height="${image.originalHeight}"
+				width="${width}"
+				height="${height}"
 				decoding="async"
 				class="js-lazy-image${(typeof classList === 'string') ? ' ' + classList : ''}"
+				hidden
 			/>
 			<noscript>
 				<img
@@ -102,8 +111,8 @@ handlebars.Handlebars.registerHelper({
 					alt="${alt}"
 					srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
 					sizes="(max-width: 480px) 100vw, 960px"			
-					width="${image.originalWidth}"
-					height="${image.originalHeight}"
+					width="${width}"
+					height="${height}"
 					decoding="async"
 					${(typeof classList === 'string') ? 'class="' + classList + '"' : ''}
 				/>
@@ -129,6 +138,14 @@ handlebars.Handlebars.registerHelper({
 
 		if (!image) return;
 
+		let width = image.originalWidth;
+		let height = image.originalHeight;
+
+		if (width > 1200) {
+			height = height / (image.originalWidth / 1200);
+			width = 1200;
+		}
+
 		const factor = image.originalWidth / image.originalHeight;
 
 		return new handlebars.Handlebars.SafeString(`
@@ -137,8 +154,8 @@ handlebars.Handlebars.registerHelper({
 				data-alt="${alt}"
 				data-srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
 				data-sizes="(max-width: 480px) 100vw, 960px"
-				data-width="${image.originalWidth}"
-				data-height="${image.originalHeight}"
+				data-width="${width}"
+				data-height="${height}"
 				data-preview="${image.preview}"
 			>
 				<img
@@ -149,13 +166,14 @@ handlebars.Handlebars.registerHelper({
 					height="${200 / factor}"
 					decoding="async"
 					class="js-lazy-image"
+					hidden
 				/>
 				<noscript>
 					<img
 						src="${image.thumbnail}"
 						alt="${alt}"
 						width="200"
-						height="200"
+						height="${200 / factor}"
 						decoding="async"
 					/>
 				</noscript>
@@ -503,6 +521,9 @@ function scripts() {
 
 	src(srcFolder + '/js/lib/files/check.js')
 		.pipe(dest(distFolder + '/js/lib/files/'));
+
+	src(srcFolder + '/js/main-legacy.js')
+		.pipe(dest(distFolder + '/js/'));
 
 	return src(srcFolder + '/js/main.js')
 		.pipe(webpack(require('./webpack.config.js')))

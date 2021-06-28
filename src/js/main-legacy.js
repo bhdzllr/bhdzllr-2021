@@ -1,15 +1,25 @@
-export function lazyLoadImages({
-	className = 'js-lazy-image',
-	rootMargin = '100px',
-	threshold = [0.0],
-	loadCallback = null,
-} = {}) {
-	const images = document.querySelectorAll('.' + className);
+document.addEventListener('DOMContentLoaded', function () {
+
+	lazyLoadImages();
+
+});
+
+function lazyLoadImages(options) {
+	if (!options) options = {};
+
+	// var color = ('color' in options) ? options.color : 'yellow'
+
+	options.className    = options.className     || 'js-lazy-image';
+	options.rootMargin   = options.rootMargin    || '100px';
+	options.threshold    = options.threshold     || [0.0];
+	options.loadCallback = options.loadCallback  || null;
+
+	var images = document.querySelectorAll('.' + options.className);
 
 	// Fallback for loading all images
-	const fallback = function (images) {
-		for (let i = 0; i < images.length; i++) {
-			const image = images[i];
+	var fallback = function (images) {
+		for (var i = 0; i < images.length; i++) {
+			var image = images[i];
 
 			if (image.dataset.src) image.src = image.dataset.src;
 			if (image.dataset.srcset) image.srcset = image.dataset.srcset;
@@ -21,8 +31,8 @@ export function lazyLoadImages({
 	};
 
 	// Loading if printing
-	let isPrinting = false;
-	const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+	var isPrinting = false;
+	var isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 	if (!isSafari) {
 		window.onbeforeprint = function() {
 			isPrinting = true;
@@ -43,27 +53,27 @@ export function lazyLoadImages({
 		&& 'intersectionRatio' in (window).IntersectionObserverEntry.prototype
 		&& 'isIntersecting' in (window).IntersectionObserverEntry.prototype
 	) {
-		const intersectionObserver = new IntersectionObserver(function (entries) {
+		var intersectionObserver = new IntersectionObserver(function (entries) {
 			entries.forEach(function (entry) {
 				if (entry.isIntersecting) {
-					const image = entry.target;
+					var image = entry.target;
 
 					intersectionObserver.unobserve(image);
 
 					if (image.dataset.src) image.src = image.dataset.src;
 					if (image.dataset.srcset) image.srcset = image.dataset.srcset;
 
-					image.classList.remove(className);
+					image.classList.remove(options.className);
 
-					if (loadCallback) loadCallback(image);
+					if (options.loadCallback) options.loadCallback(image);
 				}
 			});
 		}, {
-			rootMargin: rootMargin,
-			threshold: threshold,
+			rootMargin: options.rootMargin,
+			threshold: options.threshold,
 		});
 
-		for (let i = 0; i < images.length; i++) {
+		for (var i = 0; i < images.length; i++) {
 			images[i].hidden = false;
 			intersectionObserver.observe(images[i]);
 		}
