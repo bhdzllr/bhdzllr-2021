@@ -69,14 +69,20 @@ handlebars.Handlebars.registerHelper({
 		switch (name) {
 			case 'blog':
 				return '/blog';
+			case 'blog-feed':
+				return '/blog/index.xml';
 			case 'work':
 				return '/projects';
 			case 'mail':
 				return '/contact';
 			case 'imprint':
-				return '/imprint.html';
+				return '/imprint';
+			case 'impressum':
+				return '/impressum';
 			case 'legal':
-				return '/legal.html';
+				return '/legal';
+			case 'rechtliches':
+				return '/rechtliches';
 		}
 	},
 	image: function (src, alt, classList) {
@@ -185,6 +191,9 @@ handlebars.Handlebars.registerHelper({
 	},
 	formatDate: function (date) {
 		return date.toISOString().split('T')[0];
+	},
+	formatPubDate: function (date) {
+		return date.toUTCString();
 	},
 	currentYear: function (options) {
 		return new Date().getFullYear();
@@ -346,7 +355,6 @@ function pages(cb) {
 		}, {
 			batch: getHandlebarsBatch(),
 		}))
-		.pipe(rename({ extname: '.html' }))
 		.pipe(dest(distFolder));
 
 	// Res
@@ -426,9 +434,7 @@ async function typesSubtask(type) {
 				.pipe(handlebars({}, {
 					batch: getHandlebarsBatch(),
 				}))
-				.pipe(rename({
-					extname: '.html',
-				}))
+				.pipe(rename({ extname: '.html' }))
 				.pipe(dest(type.dist))
 				.on('end', function () {
 					entriesType.sort(function(a, b) {
@@ -465,7 +471,21 @@ async function typesSubtask(type) {
 			.pipe(handlebars(value, {
 				batch: getHandlebarsBatch(),
 			}))
-			.pipe(rename({ extname: '.html' }))
+			.pipe(dest(type.dist));
+
+		return value;
+	}
+
+	function createRss(value) {
+		const xmlFile = type.src + '/index.xml';
+
+		if (!fs.existsSync(xmlFile)) return;
+
+		src(xmlFile)
+			.pipe(data(getHandlebarsDefaultData))
+			.pipe(handlebars(value, {
+				batch: getHandlebarsBatch(),
+			}))
 			.pipe(dest(type.dist));
 	}
 
@@ -484,6 +504,7 @@ async function typesSubtask(type) {
 
 	await createType()
 		.then(createIndex)
+		.then(createRss)
 		// .then(copyResources)
 		// .then(finishTask);
 }
@@ -555,6 +576,7 @@ function res(cb) {
 		src([
 				type.src + '/**/*',
 				'!' + type.src + '/index.html',
+				'!' + type.src + '/index.xml',
 				'!' + type.src + '/**/*.md',
 			])
 			.pipe(dest(type.dist));
@@ -654,7 +676,7 @@ function dev() {
 	], series(pages));
 
 	watch([
-		srcFolder + '/blog/**/*.{html,md}',
+		srcFolder + '/blog/**/*.{html,md,xml}',
 		srcFolder + '/projects/**/*.{html,md}',
 		srcFolder + '/templates/**/*.html',
 	], series(types));

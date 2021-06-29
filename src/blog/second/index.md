@@ -1,7 +1,7 @@
 ---
 id: second
-title: Post 2
-tagline: Lorem
+title: Pöst 2
+tagline: Lörem
 date: 2021-05-22
 categories:
   - Web Development
