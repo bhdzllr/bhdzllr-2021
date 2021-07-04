@@ -20,7 +20,7 @@ meta:
   description: Desc
 ---
 
-# {{content.title}}
+**{{article.title}}**
 
 start
 First post

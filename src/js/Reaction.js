@@ -1,5 +1,3 @@
-import 'whatwg-fetch';
-
 const template = document.createElement('template');
 template.innerHTML = `
 	<style>

@@ -1,6 +1,3 @@
-import 'regenerator-runtime/runtime';
-import 'whatwg-fetch';
-
 import { default as de } from './lang/de.json';
 
 import I18n from './lib/modules/I18n';

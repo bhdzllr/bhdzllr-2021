@@ -1,7 +1,3 @@
-import 'regenerator-runtime/runtime';
-import 'core-js/es/object/assign';
-import 'whatwg-fetch';
-
 import { isElementInViewport } from './lib/utils/checks';
 
 /**
