@@ -49,6 +49,8 @@
 	}
 }
 
+/* Scrollbar Style Horizontal */
+
 @mixin scrollbar-style-horizontal {
 	scrollbar-width: thin;
 	scrollbar-color: lighten($color-secondary, 15%), $color-secondary;

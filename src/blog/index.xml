@@ -11,11 +11,10 @@
 		{{#each entries}}
 		<item>
 			<title>{{this.title}}</title>
-			<description>{{this.tagline}}</description>
+			<description>{{this.tagline}}</description> <!-- this.contentAsHtml -->
 			<pubDate>{{formatPubDate this.date}}</pubDate>
 			<link>http://bhdzllr.local{{this.url}}</link>
 			<guid>http://bhdzllr.local{{this.url}}</guid>
-			<content>{{this.html}}</content>
 		</item>
 		{{/each}}
 		{{/if}}

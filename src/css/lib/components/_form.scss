@@ -3,6 +3,8 @@
  * Always set border radius for inputs (even if it is 0 for iOS)
  */
 
+@use 'sass:math';
+
 form > :last-child,
 fieldset > :last-child {
 	margin-bottom: 0;
@@ -234,7 +236,7 @@ fieldset > :last-child {
 		}
 
 		&:disabled + label::after {
-			@extend .btn:disabled;
+			@include button-disabled;
 		}
 	}
 
@@ -261,7 +263,7 @@ fieldset > :last-child {
 		@mixin slider-thumb {
 			width: $slider-thumb-size;
 			height: $slider-thumb-size;
-			margin-top: ($slider-track-height - $slider-thumb-size) / 2;
+			margin-top: math.div($slider-track-height - $slider-thumb-size, 2);
 
 			appearance: none;
 			-webkit-appearance: none;

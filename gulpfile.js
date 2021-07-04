@@ -22,13 +22,14 @@ const md = require('markdown-it')({
 		return `<pre class="hljs"><code>${md.utils.escapeHtml(str)}</code></pre>`;
 	},
 });
+const HTMLParser = require('node-html-parser');
 const glob = require('glob');
 const sharp = require('sharp');
 const handlebars = require('gulp-compile-handlebars');
 const layouts = require('handlebars-layouts');
 const mergeStream = require('merge-stream');
 const webpack = require('webpack-stream');
-const sass = require('gulp-sass');
+const sass = require('gulp-sass')(require('sass'));
 const postcss = require('gulp-postcss');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
@@ -383,6 +384,7 @@ async function typesSubtask(type) {
 			const entriesType = [];
 			const entriesFirst = [];
 			const entriesRest = [];
+			const entriesHtml = [];
 
 			src(type.src + '/**/*.md')
 				.pipe(data(function (file) {
@@ -409,13 +411,11 @@ async function typesSubtask(type) {
 						author="${data?.meta?.author ?? ''}"
 					}}{{#content "content"}}`;
 					const layoutEnd = `{{/content}}{{/extend}}`;
-					const templateData = { content: {} };
-					const body = layoutStart
-						+ md
-							.render(content)
-							.replace(/<hbs>/g, '')
-							.replace(/<\/hbs>/g, '')
-						+ layoutEnd;
+					const templateData = {};
+					const hbsContent = md.render(content)
+						.replace(/<hbs>/g, '')
+						.replace(/<\/hbs>/g, '');
+					const body = layoutStart + hbsContent + layoutEnd;
 
 					file.contents = new Buffer.from(body);
 					
@@ -434,9 +434,18 @@ async function typesSubtask(type) {
 				.pipe(handlebars({}, {
 					batch: getHandlebarsBatch(),
 				}))
+				.pipe(data(function (file) {
+					const doc = HTMLParser.parse(String(file.contents));
+					entriesHtml.push(doc.querySelector('.article__content').innerHTML);
+				}))
 				.pipe(rename({ extname: '.html' }))
 				.pipe(dest(type.dist))
 				.on('end', function () {
+					entriesType.forEach(function (entry, i) {
+						// @todo If used, make images available (path, lazy loading)
+						entriesType[i]['contentAsHtml'] = entriesHtml[i];
+					});
+
 					entriesType.sort(function(a, b) {
 						return b.date - a.date;
 					});

@@ -7,8 +7,6 @@ document.addEventListener('DOMContentLoaded', function () {
 function lazyLoadImages(options) {
 	if (!options) options = {};
 
-	// var color = ('color' in options) ? options.color : 'yellow'
-
 	options.className    = options.className     || 'js-lazy-image';
 	options.rootMargin   = options.rootMargin    || '100px';
 	options.threshold    = options.threshold     || [0.0];

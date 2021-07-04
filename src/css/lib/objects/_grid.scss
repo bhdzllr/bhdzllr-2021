@@ -2,6 +2,8 @@
  * ********** Grid **********
  */
 
+@use 'sass:math';
+
 @mixin container {
 	max-width: $width-site;
 	margin: 0 auto;
@@ -78,15 +80,15 @@
 	.grid--#{$i} .grid__element {
 		flex: 0 1 auto;
 		@if $i > 1 {
-			width: calc(#{100% / $i} - #{$grid-gutter * 2});
+			width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
 		} @else {
-			width: calc(#{100% / $i});
+			width: calc(math.div(100%, $i));
 		}
 	}
 
 	.grid--#{$i}.grid--no-gutter > *,
 	.grid--#{$i}.grid--no-gutter .grid__element {
-		width: calc(calc(#{100% / $i}));
+		width: calc(calc(math.div(100%, $i)));
 	}
 }
 
@@ -96,15 +98,15 @@
 		.grid--sm-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(#{100% / $i} - #{$grid-gutter * 2});
+				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
 			} @else {
-				width: calc(#{100% / $i});
+				width: calc(math.div(100%, $i));
 			}
 		}
 
 		.grid--sm-#{$i}.grid--no-gutter > *,
 		.grid--sm-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(#{100% / $i}));
+			width: calc(calc(math.div(100%, $i)));
 		}
 	}
 }
@@ -115,15 +117,15 @@
 		.grid--md-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(#{100% / $i} - #{$grid-gutter * 2});
+				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
 			} @else {
-				width: calc(#{100% / $i});
+				width: calc(math.div(100%, $i));
 			}
 		}
 
 		.grid--md-#{$i}.grid--no-gutter > *,
 		.grid--md-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(#{100% / $i}));
+			width: calc(calc(math.div(100%, $i)));
 		}
 	}
 }
@@ -134,15 +136,15 @@
 		.grid--lg-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(#{100% / $i} - #{$grid-gutter * 2});
+				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
 			} @else {
-				width: calc(#{100% / $i});
+				width: calc(math.div(100%, $i));
 			}
 		}
 
 		.grid--lg-#{$i}.grid--no-gutter > *,
 		.grid--lg-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(#{100% / $i}));
+			width: calc(calc(math.div(100%, $i)));
 		}
 	}
 }
@@ -153,15 +155,15 @@
 		.grid--xl-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(#{100% / $i} - #{$grid-gutter * 2});
+				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
 			} @else {
-				width: calc(#{100% / $i});
+				width: calc(math.div(100%, $i));
 			}
 		}
 
 		.grid--xl-#{$i}.grid--no-gutter > *,
 		.grid--xl-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(#{100% / $i}));
+			width: calc(calc(math.div(100%, $i)));
 		}
 	}
 }
@@ -199,28 +201,28 @@
 
 @for $i from 1 through $row-columns {
 	.col-#{$i} {
-		flex: 0 0 ((100% * $i) / $row-columns);
+		flex: 0 0 math.div(100% * $i, $row-columns);
 
-		max-width: (100% * $i) / $row-columns;
+		max-width: math.div(100% * $i, $row-columns);
 		margin-bottom: 0;
 	}
 
 	.col-offset-#{$i} {
-		margin-left: (100% * $i) / $row-columns;
+		margin-left: math.div(100% * $i, $row-columns);
 	}
 }
 
 @media #{$screen-min-sm} {
 	@for $i from 1 through $row-columns {
 		.col-sm-#{$i} {
-			flex: 0 0 ((100% * $i) / $row-columns);
+			flex: 0 0 math.div(100% * $i, $row-columns);
 
-			max-width: (100% * $i) / $row-columns;
+			max-width: math.div(100% * $i, $row-columns);
 			margin-bottom: 0;
 		}
 
 		.col-sm-offset-#{$i} {
-			margin-left: (100% * $i) / $row-columns;
+			margin-left: math.div(100% * $i, $row-columns);
 		}
 	}
 }
@@ -228,14 +230,14 @@
 @media #{$screen-min-md} {
 	@for $i from 1 through $row-columns {
 		.col-md-#{$i} {
-			flex: 0 0 ((100% * $i) / $row-columns);
+			flex: 0 0 math.div(100% * $i, $row-columns);
 
-			max-width: (100% * $i) / $row-columns;
+			max-width: math.div(100% * $i, $row-columns);
 			margin-bottom: 0;
 		}
 
 		.col-md-offset-#{$i} {
-			margin-left: (100% * $i) / $row-columns;
+			margin-left: math.div(100% * $i, $row-columns);
 		}
 	}
 }
@@ -243,14 +245,14 @@
 @media #{$screen-min-lg} {
 	@for $i from 1 through $row-columns {
 		.col-lg-#{$i} {
-			flex: 0 0 ((100% * $i) / $row-columns);
+			flex: 0 0 math.div(100% * $i, $row-columns);
 
-			max-width: (100% * $i) / $row-columns;
+			max-width: math.div(100% * $i, $row-columns);
 			margin-bottom: 0;
 		}
 
 		.col-lg-offset-#{$i} {
-			margin-left: (100% * $i) / $row-columns;
+			margin-left: math.div(100% * $i, $row-columns);
 		}
 	}
 }
@@ -258,14 +260,14 @@
 @media #{$screen-min-xl} {
 	@for $i from 1 through $row-columns {
 		.col-xl-#{$i} {
-			flex: 0 0 ((100% * $i) / $row-columns);
+			flex: 0 0 math.div(100% * $i, $row-columns);
 
-			max-width: (100% * $i) / $row-columns;;
+			max-width: math.div(100% * $i, $row-columns);;
 			margin-bottom: 0;
 		}
 
 		.col-xl-offset-#{$i} {
-			margin-left: (100% * $i) / $row-columns;
+			margin-left: math.div(100% * $i, $row-columns);
 		}
 	}
 }

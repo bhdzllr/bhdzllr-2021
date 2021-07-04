@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime';
+
 import { isElementInViewport } from './lib/utils/checks';
 
 /**

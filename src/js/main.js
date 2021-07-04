@@ -1,3 +1,5 @@
+import 'regenerator-runtime/runtime';
+
 import { default as de } from './lang/de.json';
 
 import I18n from './lib/modules/I18n';
