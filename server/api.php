@@ -1,5 +1,7 @@
 <?php
 
+use App\HttpException;
+use App\Result;
 use App\Helpers;
 
 $app = require 'app.php';
@@ -15,7 +17,7 @@ $app->post('mail', function () use ($app) {
 		throw new HttpException('Bad request Content-Type.', 400);
 	}
 
-	$data = json_decode($app->body);
+	$data = json_decode($app->getBody());
 
 	if (!$data) throw new HttpException('Bad request body.', 400);
 
@@ -114,5 +116,24 @@ $app->post('like&id={any}', function (string $id) use ($config) {
 
 	return $result;
 });
+
+require_once 'minilytics.php';
+$minilyticsConfig = new Minilytics\Config();
+$minilyticsConfig->addSite(
+	new Minilytics\Site(
+		'bhdzllr', '@bhdzllr', 'bhdzllr.com', [
+			'zeller.berny@aon.at',
+		],
+	)
+);
+$minilyticsConfig->addSite(
+	new Minilytics\Site(
+		'sug', 'SU Grabern', 'sugrabern.at', [
+			'zeller.berny@aon.at',
+			'e.semmelmeyer@gmx.at',
+		],
+	)
+);
+$app->setValue('minilyticsConfig', $minilyticsConfig);
 
 $app->run();

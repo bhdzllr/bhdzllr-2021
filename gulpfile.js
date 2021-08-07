@@ -555,6 +555,9 @@ function scripts() {
 	src(srcFolder + '/js/main-legacy.js')
 		.pipe(dest(distFolder + '/js/'));
 
+	src(srcFolder + '/js/main-analytics.js')
+		.pipe(dest(distFolder + '/js/'));
+
 	return src(srcFolder + '/js/main.js')
 		.pipe(webpack(require('./webpack.config.js')))
 		.pipe(dest(distFolder + '/'));
@@ -562,9 +565,8 @@ function scripts() {
 
 function server() {
 	return src([
-			'server/app.php',
-			'server/api.php',
-			'server/env.php',
+			'server/**/*.php',
+			'!server/env-production.php',
 			'!composer.json',
 			'!composer.lock',
 		])
