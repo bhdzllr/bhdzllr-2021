@@ -14,6 +14,7 @@ var Minilytics = (function () {
 		start: Date.now(),
 		end: 0,
 	};
+	var disableStr = 'disable-analytics';
 
 	var hash = Math.random();
 
@@ -81,6 +82,15 @@ var Minilytics = (function () {
 		) || (
 			navigator.msDoNotTrack && (navigator.msDoNotTrack == '1')
 		);
+	}
+
+	function isOptOutActive() {
+		if (document.cookie.indexOf(disableStr + '=true') > -1) {
+			window[disableStr] = true;
+			return true;
+		}
+
+		return false;
 	}
 
 	function isLocalhost() {
@@ -237,6 +247,7 @@ var Minilytics = (function () {
 		visit: function () {
 			if (isPageReloadedOrBackForward()) return;
 			if (isDoNotTrackActive()) return;
+			if (isOptOutActive()) return;
 			// if (isLocalhost()) return;
 			if (isBot()) return;
 
@@ -297,7 +308,31 @@ var Minilytics = (function () {
 
   			return;
 		},
+		initOptOutButton: function () {
+			if (!document.querySelector('.js-disable-analytics')) return;
+
+			var button = document.querySelector('.js-disable-analytics');
+
+			if (isOptOutActive()) {
+				button.setAttribute('disabled', true);
+				button.textContent = button.dataset.textDisabled;
+			} else {
+				button.addEventListener('click', function () {
+					document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+					window[disableStr] = true;
+					button.setAttribute('disabled', true);
+					button.textContent = button.dataset.textDisabled;
+					alert(button.dataset.textDisabledAlert);
+				});
+			}
+		},
 	}
 })();
 
 Minilytics.init();
+
+document.addEventListener('DOMContentLoaded', function () {
+
+	Minilytics.initOptOutButton();
+
+});

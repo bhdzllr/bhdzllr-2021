@@ -32,10 +32,19 @@ $app->post('minilytics-visit', function () use ($app) {
 	}
 
 	$config = $app->getValue('minilyticsConfig');
+
+	if (!$config->isSiteIdValid($json->siteId)) {
+		return Result::generateArray(
+			RESULT::ERROR,
+			'Bad request, site ID is invalid.',
+		);
+	}
+
 	$siteIds = $config->getSiteIds();
 
 	$validator = new Validator();
 	$visit = new Visit();
+	$visit->setTable($json->siteId . '_visits');
 	$visit->useConstraints($validator, ['site_ids' => $siteIds]);
 
 	$visit->siteId = $json->siteId;
@@ -69,12 +78,6 @@ $app->post('minilytics-visit', function () use ($app) {
 	];
 });
 
-$app->get('test', function () use ($app) {
-	$visit = Visit::findOne('guid', '55083615-F396-49CA-A851-23BBF5B4ED6E');
-	$visit->utmTerm = 0;
-	$visit->save();
-});
-
 $app->post('minilytics-visit-update', function () use ($app) {
 	$json = json_decode($app->getBody());
 
@@ -86,7 +89,16 @@ $app->post('minilytics-visit-update', function () use ($app) {
 		throw new HttpException('Bad request, one or more parameters are missing.', 400);
 	}
 
-	$visit = Visit::findOne('guid', $json->guid);
+	$config = $app->getValue('minilyticsConfig');
+
+	if (!$config->isSiteIdValid($json->siteId)) {
+		return Result::generateArray(
+			RESULT::ERROR,
+			'Bad request, site ID is invalid.',
+		);
+	}
+
+	$visit = Visit::findOne('guid', $json->guid, $json->siteId . '_visits');
 	$visit->duration = $json->duration;
 	$saved = $visit->save();
 
@@ -111,8 +123,18 @@ $app->post('minilytics-event', function () use ($app) {
 		throw new HttpException('Bad request, one or more parameters are missing.', 400);
 	}
 
+	$config = $app->getValue('minilyticsConfig');
+
+	if (!$config->isSiteIdValid($json->siteId)) {
+		return Result::generateArray(
+			RESULT::ERROR,
+			'Bad request, site ID is invalid.',
+		);
+	}
+
 	$validator = new Validator();
 	$event = new Event();
+	$event->setTable($json->siteId . '_events');
 	$event->useConstraints($validator);
 
 	$event->siteId = $json->siteId;
@@ -136,52 +158,72 @@ $app->get('minilytics-admin', function () use ($app) {
 
 	$config = $app->getValue('minilyticsConfig');
 	$sites = $config->getSites();
-	$migration = new Migration('.migrations_minilytics');
+	$migrationFile = $config->getMigrationFile();
+	$migration = new Migration($migrationFile);
 
 	$migration->run(
-		function (PDO $db) {
-			$queryVisits = 'CREATE TABLE `visits` (
-				`id`              BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-				`guid`            CHAR(36) NOT NULL,
-				`site_id`         VARCHAR(128) NOT NULL,
-				`path`            VARCHAR(1024) NOT NULL,
-				`unique`          BIT NOT NULL,
-				`referrer`        TEXT NULL,
-				`timezone`        TEXT NULL,
-				`browser_name`    VARCHAR(64) NOT NULL,
-				`browser_version` INT(5) UNSIGNED NOT NULL,
-				`touch`           BIT NOT NULL,
-				`device_width`    INT(5) UNSIGNED NOT NULL,
-				`device_height`   INT(5) UNSIGNED NOT NULL,
-				`utm_source`      VARCHAR(255) NULL,
-				`utm_medium`      VARCHAR(255) NULL,
-				`utm_campaign`    VARCHAR(255) NULL,
-				`utm_term`        VARCHAR(255) NULL,
-				`utm_content`     VARCHAR(255) NULL,
-				`duration`        MEDIUMINT UNSIGNED NULL,
-				`timestamp`       TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-			) CHARACTER SET utf8 COLLATE utf8_general_ci';
+		function (PDO $db) use ($sites) {
+			foreach ($sites as $site) {
+				$queryCheckVisits = 'SELECT 1 FROM `' . $site->id . '_visits`';
+				$queryVisits = 'CREATE TABLE `' . $site->id . '_visits` (
+					`id`              BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+					`guid`            CHAR(36) NOT NULL,
+					`site_id`         VARCHAR(128) NOT NULL,
+					`path`            VARCHAR(1024) NOT NULL,
+					`unique`          BIT NOT NULL,
+					`referrer`        TEXT NULL,
+					`timezone`        TEXT NULL,
+					`browser_name`    VARCHAR(64) NOT NULL,
+					`browser_version` INT(5) UNSIGNED NOT NULL,
+					`touch`           BIT NOT NULL,
+					`device_width`    INT(5) UNSIGNED NOT NULL,
+					`device_height`   INT(5) UNSIGNED NOT NULL,
+					`utm_source`      VARCHAR(255) NULL,
+					`utm_medium`      VARCHAR(255) NULL,
+					`utm_campaign`    VARCHAR(255) NULL,
+					`utm_term`        VARCHAR(255) NULL,
+					`utm_content`     VARCHAR(255) NULL,
+					`duration`        MEDIUMINT UNSIGNED NULL,
+					`timestamp`       TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+				) CHARACTER SET utf8 COLLATE utf8_general_ci';
 
-			$queryEvents = 'CREATE TABLE `events` (
-				`id`        BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-				`site_id`   VARCHAR(128) NOT NULL,
-				`type`      VARCHAR(128) NOT NULL,
-				`context`   TEXT NULL,
-				`timestamp` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-			) CHARACTER SET utf8 COLLATE utf8_general_ci';
+				$queryCheckEvents = 'SELECT 1 FROM `' . $site->id . '_events`';
+				$queryEvents = 'CREATE TABLE `' . $site->id . '_events` (
+					`id`        BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+					`site_id`   VARCHAR(128) NOT NULL,
+					`type`      VARCHAR(128) NOT NULL,
+					`context`   TEXT NULL,
+					`timestamp` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+				) CHARACTER SET utf8 COLLATE utf8_general_ci';
 
-			$db->exec($queryVisits);
-			$db->exec($queryEvents);
+				try {
+					$db->query($queryCheckVisits);
+				} catch (Exception $e) {
+					// Table not found, create it.
+					$db->exec($queryVisits);
+				}
+
+				try {
+					$db->query($queryCheckEvents);
+				} catch (Exception $e) {
+					// Table not found, create it.
+					$db->exec($queryEvents);
+				}
+			}
 		},
 	);
 
-	// @todo only run migration when not runned
 	// @todo Read and show data
 	// @todo Entry Page -> PHP (unique = true)
 	// @todo Engagement -> Time on page > 10 seconds -> PHP
 	// @todo Page views in the last minute -> PHP
 	// @todo Exit page => wenn keine Duration
+	// @todo Fallback tracking without JS?
 });
+
+function isSiteIdValid(string $siteId) {
+
+}
 
 class Visit extends ActiveRecord {
 
@@ -249,6 +291,7 @@ class Event extends ActiveRecord {
 class Config {
 
 	private array $sites = [];
+	private string $migrationFile = '.migrations_minilytics';
 
 	public function addSite(Site $site) {
 		$this->sites[] = $site;
@@ -260,6 +303,22 @@ class Config {
 
 	public function getSiteIds(): array {
 		return array_column($this->sites, 'id');
+	}
+
+	public function setMigrationFile(string $file) {
+		$this->migrationFile = $file;
+	}
+
+	public function getMigrationFile(): string {
+		return $this->migrationFile;
+	}
+
+	public function isSiteIdValid(string $siteId): bool {
+		$siteIds = $this->getSiteIds();
+
+		if (!in_array($siteId, $siteIds)) return false;
+
+		return true;
 	}
 
 }

@@ -519,17 +519,17 @@ class Migration {
 
 	use DatabaseFromEnvTrait;
 
-	private string $fileName = '.migrations';
+	private string $file = './.migrations';
 
-	public function __construct(?string $fileName) {
+	public function __construct(?string $file) {
 		$this->createDatabaseFromEnv();
 
-		if (isset($fileName)) $this->fileName = $fileName;
+		if (isset($file)) $this->file = $file;
 	}
 
 	public function run(callable ...$migrations) {
-		if (!file_exists('./' . $this->fileName)) fopen('./' . $this->fileName, 'w');
-		$handle = fopen('./' . $this->fileName, 'r');
+		if (!file_exists($this->file)) fopen($this->file, 'w');
+		$handle = fopen($this->file, 'r');
 		$currentVersion = fgets($handle);
 		fclose($handle);
 
@@ -556,7 +556,7 @@ class Migration {
 		// 	echo 'Migration done. New version: ' . $lastVersion;
 		// }
 
-		$handle = fopen('./' . $this->fileName, 'w+');
+		$handle = fopen($this->file, 'w+');
 		fwrite($handle, $lastVersion);
 		fclose($handle);
 
@@ -696,8 +696,10 @@ abstract class ActiveRecord implements JsonSerializable {
 		}
 	}
 
-	public static function find(int $id) {
+	public static function find(int $id, ?string $tableName = null) {
 		$entity = new static();
+		if ($tableName) $entity->setTable($tableName);
+
 		$table = $entity->getTable();
 		$primaryKey = $entity->getPrimaryKey();
 
@@ -721,8 +723,10 @@ abstract class ActiveRecord implements JsonSerializable {
 		}
 	}
 
-	public static function findWhere(string $fieldName, mixed $fieldValue, ?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null): ArrayObject {
+	public static function findWhere(string $fieldName, mixed $fieldValue, ?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null, ?string $tableName = null): ArrayObject {
 		$entity = new static();
+		if ($tableName) $entity->setTable($tableName);
+
 		$table = $entity->getTable();
 		$fields = $entity->getFields();
 
@@ -748,6 +752,7 @@ abstract class ActiveRecord implements JsonSerializable {
 
 		foreach ($statement->fetchAll() as $row) {
 			$entity = new static();
+			if ($tableName) $entity->setTable($tableName);
 			$entity->map($row);
 
 			$entities[] = $entity;
@@ -756,9 +761,15 @@ abstract class ActiveRecord implements JsonSerializable {
 		return $entities;
 	}
 
-	public static function findOne(string $fieldName, mixed $fieldValue) {
+	public static function findOne(string $fieldName, mixed $fieldValue, ?string $tableName = null) {
 		$entity = new static();
-		$entities = static::findWhere($fieldName, $fieldValue);
+		if ($tableName) {
+			$entity->setTable($tableName);
+			$entities = static::findWhere($fieldName, $fieldValue, null, 'ASC', null, null, $tableName);
+		} else {
+			$entities = static::findWhere($fieldName, $fieldValue);
+		}
+
 
 		if (count($entities)) {
 			$entity->map($entities[0]->getData());
@@ -769,6 +780,8 @@ abstract class ActiveRecord implements JsonSerializable {
 
 	public static function findAll(?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null) {
 		$entity = new static();
+		if ($tableName) $entity->setTable($tableName);
+
 		$table = $entity->getTable();
 
 		$query = "SELECT * FROM `$table`";
@@ -833,6 +846,10 @@ abstract class ActiveRecord implements JsonSerializable {
 		return $this->db;
 	}
 
+	public function setTable(string $table) {
+		$this->table = $table;
+	}
+
 	public function getTable(): string {
 		return (getenv('DB_TABLE_PREFIX') ?: '') . $this->table;
 	}
@@ -850,9 +867,8 @@ abstract class ActiveRecord implements JsonSerializable {
 			if (is_numeric($rowKey)) continue;
 
 			$key = $this->convertKey($rowKey);
-
 			$setter = $key;
-			$this->data[$setter] = !empty($data[$rowKey]) ? $data[$rowKey] : null;
+			$this->data[$setter] = isset($data[$rowKey]) ? $data[$rowKey] : null;
 
 			if (is_numeric($this->data[$setter])) {
 				if (strpos($this->data[$setter], '.') !== false) {

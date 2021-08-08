@@ -119,18 +119,11 @@ $app->post('like&id={any}', function (string $id) use ($config) {
 
 require_once 'minilytics.php';
 $minilyticsConfig = new Minilytics\Config();
+$minilyticsConfig->setMigrationFile(getenv('MINILYTICS_MIGRATION_FILE'));
 $minilyticsConfig->addSite(
 	new Minilytics\Site(
 		'bhdzllr', '@bhdzllr', 'bhdzllr.com', [
 			'zeller.berny@aon.at',
-		],
-	)
-);
-$minilyticsConfig->addSite(
-	new Minilytics\Site(
-		'sug', 'SU Grabern', 'sugrabern.at', [
-			'zeller.berny@aon.at',
-			'e.semmelmeyer@gmx.at',
 		],
 	)
 );

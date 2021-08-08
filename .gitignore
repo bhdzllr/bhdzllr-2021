@@ -4,3 +4,4 @@ ssh.json
 node_modules/
 dist/
 storage/
+server/.migrations_minilytics
