@@ -264,7 +264,11 @@ $tangent: 0.637;
 		max-height: 100%;
 		overflow: hidden;
 
+		opacity: 0;
 		transform: translateY(-50%);
+		animation-name: fade-in;
+		animation-duration: 2.5s;
+		animation-fill-mode: forwards;
 
 		@supports (mask-image: url('')) {
 			mask-image: url('/img/bhdzllr-hologram-mask.png');
@@ -327,6 +331,16 @@ $tangent: 0.637;
 
 	100% {
 		margin-top: -8px;
+	}
+}
+
+@keyframes fade-in {
+	0% {
+		opacity: 0;
+	}
+
+	100% {
+		opacity: 1;
 	}
 }
 

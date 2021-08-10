@@ -33,6 +33,23 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 		// window['_paq'] = _paq;
 	});
 
+	if (document.querySelector('.js-typer-animation')) {
+		const typerElements = document.querySelectorAll('.js-typer-animation');
+
+		typerElements.forEach(async function (element) {
+			element.style.position = 'relative';
+			element.innerHTML = `<span style="opacity: 0;">${element.textContent}</span>`;
+
+			const span = document.createElement('span');
+			span.style.position = 'absolute';
+			span.style.top = '0';
+			span.style.left = '0';
+			element.appendChild(span);
+
+			await typer(element, span);
+		});
+	}
+
 	if (document.querySelector('.js-cube')) {
 		/* let cube = await import(
 			/* webpackChunkName: 'cube' * /
@@ -52,8 +69,16 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 			document.querySelector('.js-hologram-image').hidden = false;
 		}
 
+		if (document.querySelector('.js-cube-data')) {
+			const dataHeadingAndElements = document.querySelectorAll('.js-cube-data-heading, .js-cube-data > *');
+			liner(dataHeadingAndElements);
+		}
+
 		if (document.querySelector('.js-cube-tools')) {
+			const toolsHeadingAndElements = document.querySelectorAll('.js-cube-tools-heading,.js-cube-tools li');
 			const toolElements = document.querySelectorAll('.js-cube-tools li');
+
+			liner(toolsHeadingAndElements);
 
 			setInterval(function () {
 				let ri = Math.floor(Math.random() * toolElements.length);
@@ -63,6 +88,8 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
 				setTimeout(() => toolElements[ri].classList.remove('flick'), 3000);
 			}, 3000);
+
+
 		}
 	}
 
@@ -219,7 +246,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 				`;
 
 				const showDialog = function () {
-					galleryDialog.dialog.querySelector('bhdzllr-item-slider').setAttribute('pos', i); // Wie in Komponente abbilden????
+					galleryDialog.dialog.querySelector('bhdzllr-item-slider').setAttribute('pos', i);
 					galleryDialog.show();
 				}
 
@@ -268,3 +295,40 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 	}
 
 });
+
+async function typer(oldElement, newElement) {
+	let text = oldElement.textContent;
+	let pos = 0;
+	let charactersPerDuration = oldElement.dataset.characters ?? 1;
+	let durationPerCharacter = oldElement.dataset.duration ?? 0;
+
+	return new Promise((resolve) => {
+		const i = setInterval(() => {
+			newElement.textContent += text.substr(pos, charactersPerDuration);
+
+			if (pos == text.length) {
+				clearInterval(i);
+				resolve();
+			}
+
+			pos = pos + charactersPerDuration;
+		}, durationPerCharacter);
+	});
+}
+
+async function liner(elements) {
+	let i = 0;
+
+	elements.forEach(async function (element) {
+		element.style.opacity = '0';
+	});
+
+	const interval = setInterval(() => {
+		elements[i].style.transition = 'opacity 0.5s ease';
+		elements[i].style.opacity = '1';
+
+		if (i == (elements.length - 1)) clearInterval(interval);
+
+		i++;
+	}, 200);
+}
