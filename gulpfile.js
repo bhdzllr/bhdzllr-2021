@@ -337,6 +337,11 @@ function getPageTypes() {
 					type: 'number',
 					required: true,
 				},
+				'action': {
+					type: 'string',
+					required: false,
+					format: 'url',
+				},
 			}),
 		},
 	];
@@ -633,6 +638,13 @@ async function responsiveImages(cb) {
 			});
 		}
 
+		if (['.png'].includes(imageExtension)) {
+			sharpImage.jpeg({
+				palette: true,
+				quality: 70,
+			});
+		}
+
 		if (suffix == '-preview') {
 			sharpImage.blur();
 		}
@@ -646,7 +658,7 @@ async function responsiveImages(cb) {
 		return imageNameResized;
 	};
 
-	const imageNames = glob.sync(srcFolder + '/**/*.{jpg,jpeg}');
+	const imageNames = glob.sync(srcFolder + '/!(img)/**/*.{jpg,jpeg,png}');
 
 	for (imageName of imageNames) {
 		const imageDistFolder = imageName.replace(path.basename(imageName), '').replace(srcFolder, distFolder);
