@@ -37,16 +37,16 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 		const typerElements = document.querySelectorAll('.js-typer-animation');
 
 		typerElements.forEach(async function (element) {
-			element.style.position = 'relative';
-			element.innerHTML = `<span style="opacity: 0;">${element.textContent}</span>`;
+			// element.style.position = 'relative';
+			// element.innerHTML = `<span style="opacity: 0;">${element.textContent}</span>`;
 
-			const span = document.createElement('span');
-			span.style.position = 'absolute';
-			span.style.top = '0';
-			span.style.left = '0';
-			element.appendChild(span);
+			// const span = document.createElement('span');
+			// span.style.position = 'absolute';
+			// span.style.top = '0';
+			// span.style.left = '0';
+			// element.appendChild(span);
 
-			await typer(element, span);
+			await typer(element);
 		});
 	}
 
@@ -166,7 +166,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 				})
 				.then(response => response.json())
 				.then(responseData => {
-					if (responseData.status == 200) {
+					if (responseData.message && responseData.message == 'OK') {
 						mailTerminal.addOutput([
 							'Mail command finished.',
 							'Thank you for your message.',
@@ -296,17 +296,29 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
 });
 
-async function typer(oldElement, newElement) {
-	let text = oldElement.textContent;
+async function typer(element) {
+	let text = element.textContent;
 	let pos = 0;
-	let charactersPerDuration = oldElement.dataset.characters ?? 1;
-	let durationPerCharacter = oldElement.dataset.duration ?? 0;
+	let charactersPerDuration = element.dataset.characters ?? 1;
+	let durationPerCharacter = element.dataset.duration ?? 0;
+
+	element.style.position = 'relative';
+	element.innerHTML = `<span style="opacity: 0;">${element.innerHTML}</span>`;
+
+	const span = document.createElement('span');
+	span.style.position = 'absolute';
+	span.style.top = '0';
+	span.style.left = '0';
+	element.appendChild(span);
 
 	return new Promise((resolve) => {
 		const i = setInterval(() => {
-			newElement.textContent += text.substr(pos, charactersPerDuration);
+			span.textContent += text.substr(pos, charactersPerDuration);
 
 			if (pos == text.length) {
+				span.parentNode.removeChild(span);
+				element.querySelector('span').style.opacity = '1';
+
 				clearInterval(i);
 				resolve();
 			}

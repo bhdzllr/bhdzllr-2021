@@ -1443,7 +1443,7 @@ class App extends Router {
 
 		$this->contextPath = getenv('APP_CONTEXT_PATH');
 
-		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? Route::GET;;
+		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? Route::GET;
 		$this->uri = $_SERVER['REQUEST_URI'];
 		$this->headers = getallheaders();
 
@@ -1483,7 +1483,7 @@ class App extends Router {
 				];
 			}
 
-			$result->setbody(
+			$result->setBody(
 				Result::generateArray(
 					Result::ERROR,
 					$e->getMessage(),

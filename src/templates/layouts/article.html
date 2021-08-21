@@ -20,6 +20,10 @@
 						<span>{{this}}</span>
 						{{/each}}
 					</p>
+
+					{{#if article.action}}
+					<a href="{{article.action}}" target="_blank" class="article__action more-link btn btn--primary">Visit Project</a>
+					{{/if}}
 				</header>
 
 				<div class="article__content">

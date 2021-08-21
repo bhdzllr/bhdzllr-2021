@@ -25,6 +25,29 @@
 	}
 }
 
+.gallery--4-3 {
+	a {
+		position: relative;
+
+		padding-top: 21.75%;
+
+		@media #{$screen-min-sm} {
+			padding-top: 15.75%;
+		}
+
+		@media #{$screen-min-md} {
+			padding-top: 12.75%;
+		}
+	}
+
+	img {
+		position: absolute;
+		top: 50%;
+
+		transform: translateY(-50%);
+	}
+}
+
 .gallery__loader {
 	position: relative;
 

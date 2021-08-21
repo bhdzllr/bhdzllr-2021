@@ -64,7 +64,7 @@ $app->post('mail', function () use ($app) {
 })->before(function ($app) {
 	Helpers::checkRateLimitCookie($app, 'rate-limit-mail');
 })->after(function ($app, $result) {
-	Helpers::setRateLimitCookie($result->status, 'rate-limit-mail');
+	Helpers::setRateLimitCookie($result->getStatus(), 'rate-limit-mail');
 
 	return $result;
 });
@@ -112,7 +112,7 @@ $app->post('like&id={any}', function (string $id) use ($config) {
 })->before(function ($app) {
 	Helpers::checkRateLimitCookie($app, 'rate-limit-like');
 })->after(function ($app, $result) {
-	Helpers::setRateLimitCookie($result->status, 'rate-limit-like', 25);
+	Helpers::setRateLimitCookie($result->getStatus(), 'rate-limit-like', 25);
 
 	return $result;
 });

@@ -143,6 +143,7 @@ export class ItemSlider extends HTMLElement {
 		this.lastDistancePercentages = 0;
 		this.lastDirection = null;
 		this.slideAdjusted = false;
+		this.isSliding = false;
 
 		this.text = {
 			previous: 'Previous',
@@ -161,8 +162,8 @@ export class ItemSlider extends HTMLElement {
 		this.btnLeft.setAttribute('aria-label', this.text.previous);
 		this.btnRight.setAttribute('aria-label', this.text.next);
 
-		this.btnLeft.addEventListener('click', () => this.slideLeft());
-		this.btnRight.addEventListener('click', () => this.slideRight());
+		this.btnLeft.addEventListener('click', () => { if (!this.isSliding) this.slideLeft() });
+		this.btnRight.addEventListener('click', () => { if (!this.isSliding) this.slideRight() });
 
 		const undraggableElements = this.querySelectorAll(options.undraggableElementsSelector);
 		for (let i = 0; i < undraggableElements.length; i++) {
@@ -173,6 +174,7 @@ export class ItemSlider extends HTMLElement {
 
 		this.touchEndHandler = this.touchEnd.bind(this);
 		this.touchMoveHandler = this.touchMove.bind(this);
+		this.arrowKeysHandler = this.keyDown.bind(this);
 
 		this.panel.addEventListener('touchstart', (e) => this.touchStart(e));
 		this.panel.addEventListener('touchmove', (e) => this.touchScrolling(e), { passive: false });
@@ -182,6 +184,8 @@ export class ItemSlider extends HTMLElement {
 		this.panel.addEventListener('mousedown', (e) => this.touchStart(e));
 		window.addEventListener('mouseup', this.touchEndHandler);
 		window.addEventListener('mousemove', this.touchMoveHandler);
+
+		window.addEventListener('keydown', this.arrowKeysHandler);
 	}
 
 	disconnectedCallback() {
@@ -190,6 +194,8 @@ export class ItemSlider extends HTMLElement {
 
 		window.removeEventListener('mouseup', this.touchEndHandler);
 		window.removeEventListener('mousemove', this.touchMoveHandler);
+
+		window.removeEventListener('keydown', this.handleArrowKeys);
 	}
 
 	attributeChangedCallback(name, oldValue, newValue) {
@@ -245,6 +251,8 @@ export class ItemSlider extends HTMLElement {
 	slide() {
 		if (isNaN(this.pos)) return;
 
+		this.isSliding = true;
+
 		if (!this.slideAdjusted) {
 			if (this.pos > (this.count - this.cells)) {
 				// Remove empty space at end, triggers function again
@@ -265,6 +273,8 @@ export class ItemSlider extends HTMLElement {
 		this.slideAdjusted = false;
 
 		this.updateButtons();
+
+		setTimeout(() => this.isSliding = false, options.transitionDuration);
 	}
 
 	updateButtons() {
@@ -297,6 +307,19 @@ export class ItemSlider extends HTMLElement {
 		if (e.type.indexOf('touch') > -1) return e.touches[0].clientX;
 
 		return e.clientX;
+	}
+
+	keyDown(e) {
+		switch (e.key) {
+			case 'ArrowLeft':
+				if (this.pos == 0) break;
+				this.slideLeft();
+				break;
+			case 'ArrowRight':
+				if (this.pos == this.count - 1) break;
+				this.slideRight();
+				break;
+		}
 	}
 
 	touchStart(e) {

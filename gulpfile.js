@@ -187,8 +187,13 @@ handlebars.Handlebars.registerHelper({
 			</a>
 		`);
 	},
-	gallery: function (options) {
-		return new handlebars.Handlebars.SafeString(`<div class="gallery js-gallery">${options.fn(this)}</div>`);
+	gallery: function (className, options) {
+		if (typeof className === 'object') options = className;
+
+		return new handlebars.Handlebars.SafeString(`<div class="gallery${className ? ' ' + className : ''} js-gallery">${options.fn(this)}</div>`);
+	},
+	gallery43: function (options) {
+		return new handlebars.Handlebars.SafeString(`<div class="gallery gallery--4-3 js-gallery">${options.fn(this)}</div>`);
 	},
 	formatDate: function (date) {
 		return date.toISOString().split('T')[0];
@@ -622,8 +627,15 @@ function res(cb) {
 
 async function responsiveImages(cb) {
 	const resize = function (imagePath, distFolder, width, suffix) {
-		const imageExtension = path.extname(imagePath);
-		const imageName = path.basename(imagePath).replace(imageExtension, '');
+		let imageExtension = path.extname(imagePath);
+		let imageName = path.basename(imagePath).replace(imageExtension, '');
+
+		// PNG to JPG
+		// if (imageName.includes(' (jpg)')) {
+		// 	imageExtension = '.jpg';
+		// 	imageName = imageName.replace(' (jpg)', '');
+		// }
+
 		const imageNameResized = distFolder + imageName + suffix + imageExtension;
 
 		let sharpImage = sharp(imagePath)
@@ -635,13 +647,12 @@ async function responsiveImages(cb) {
 		if (['.jpg', '.jpeg'].includes(imageExtension)) {
 			sharpImage.jpeg({
 				quality: 60,
+				force: true,
 			});
-		}
-
-		if (['.png'].includes(imageExtension)) {
-			sharpImage.jpeg({
+		} else if (['.png'].includes(imageExtension)) {
+			sharpImage.png({
 				palette: true,
-				quality: 70,
+				quality: 80,
 			});
 		}
 

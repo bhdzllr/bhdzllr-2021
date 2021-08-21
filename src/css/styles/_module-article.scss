@@ -281,6 +281,17 @@
 	}
 }
 
+.article__image ~ .article__action {
+	@media #{$screen-min-md} {
+		position: absolute;
+		bottom: 1rem;
+		left: 50%;
+		z-index: 1;
+
+		transform: translateX(-50%);
+	}
+}
+
 .article__content {
 	position: relative;
 	z-index: 2;
