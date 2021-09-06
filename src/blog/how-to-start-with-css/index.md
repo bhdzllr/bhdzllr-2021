@@ -157,20 +157,20 @@ To understand web layouts it is important to know two things: the box model and 
 In CSS all elements are shaped like boxes. Every box could be described with properties like width, height, marign, padding, border or position. By default the full width and height of a box does not calculate form all values. Only the content defines the width or height. For example if an element had a width of 200 pixels, a margin of 10 pixels, a padding of 10 pixels and a border of 1 pixel the box is 222 pixels broad because the margin is outside of the box and padding and border is included.
 
 <hbs>
-{{image "/blog/how-to-start-with-css/box-model-content-box.png" 'Box with default box-sizing "content-box" and a width of 222 pixels.'}}
+{{image "/blog/how-to-start-with-css/box-model-content-box.png" "Box with default box-sizing 'content-box' and a width of 222 pixels."}}
 </hbs>
 
 This behaviour can be change with the property `box-sizing`. As mentioned the default value is `content-box`. To make the example box 200 pixels broad we can set the value `border-box`. This will result in a box that has 200 pixels. The padding and border are now included in the box.
 
 <hbs>
-{{image "/blog/how-to-start-with-css/box-model-border-box.png" 'Box with box-sizing "border-box" and a width of 200 pixels.'}}
+{{image "/blog/how-to-start-with-css/box-model-border-box.png" "Box with box-sizing 'border-box' and a width of 200 pixels."}}
 </hbs>
 
 Another important detail is that the margins of two boxes collapse. This means that the bigger margin is the margin between the boxes and not both margins together. So if two boxes each have a margin of 10 pixels, the margin between them is not 20 pixels, instead is 10 pixels because they collapse.
 
 <figure>
   <hbs>
-  {{image "/blog/how-to-start-with-css/box-model-collapsing-margins.png" 'Two boxes. First box with default box-sizing "content-box" has a width of 222 pixels. Second box with box-sizing "border-box" has a width of 200 pixels.'}}
+  {{image "/blog/how-to-start-with-css/box-model-collapsing-margins.png" "Two boxes. First box with default box-sizing 'content-box' has a width of 222 pixels. Second box with box-sizing 'border-box' has a width of 200 pixels."}}
   </hbs>
   <figcaption>Two boxes with different "box-sizing" and collpasing margins (<a href="box-model-demo.html">Box Model Demo</a>).</figcaption>
 </figure>
@@ -208,7 +208,7 @@ Relative positioned elements are similar to static elements but they can be shif
 
 <figure>
   <hbs>
-  {{image "/blog/how-to-start-with-css/positioning-relative.png" 'Three boxes in the document flow. The second box has a top and left offset of 50 pixels by using relative position.'}}
+  {{image "/blog/how-to-start-with-css/positioning-relative.png" "Three boxes in the document flow. The second box has a top and left offset of 50 pixels by using relative position."}}
   </hbs>
   <figcaption>The second box is offset by using relative positioning with the properties "top" and "left", each 50 pixels. There is a space between the first and the third box, because the second box is not removed from the document flow (<a href="positioning-demo.html">Positioning Demo</a>).</figcaption>
 </figure>
@@ -221,7 +221,7 @@ An absolute positioned element is removed from the document flow and creats a ne
 
 <figure>
   <hbs>
-  {{image "/blog/how-to-start-with-css/positioning-absolute.png" 'Three boxes, the second box has a top and left offset of 50 pixels by using absolute positioning.'}}
+  {{image "/blog/how-to-start-with-css/positioning-absolute.png" "Three boxes, the second box has a top and left offset of 50 pixels by using absolute positioning."}}
   </hbs>
   <figcaption>The second box is offset by using absolute positioning with the properties "top" and "left". Because the box is positioned absolute, it is removed from the document flow and the third box appears right after the first box. Because all three boxes are wrapped with another box that is positioned relative, the absolute positioning is applied from the wrapper box. If there were no wrapping box in this example, absolute positioning would be applied from the document body. (<a href="positioning-demo.html">Positioning Demo</a>).</figcaption>
 </figure>
@@ -232,7 +232,7 @@ Fixed elements are similar to absolute positioned elements, they are removed fro
 
 <figure>
   <hbs>
-  {{image "/blog/how-to-start-with-css/positioning-fixed.png" 'Three boxes, the second box has a top and left offset of 50 pixels by using fixed positioning. This box always sticks to this position and scrolls withing the viewport.'}}
+  {{image "/blog/how-to-start-with-css/positioning-fixed.png" "Three boxes, the second box has a top and left offset of 50 pixels by using fixed positioning. This box always sticks to this position and scrolls withing the viewport."}}
   </hbs>
   <figcaption>The second box is offset by using fixed positioning with the properties "top" and "left". Because the box is positioned fixed, it is removed from the document flow and the third box appears right after the first box. The fixed box sticks to its position and scrolls withing the viewport (<a href="positioning-demo.html">Positioning Demo</a>).</figcaption>
 </figure>
@@ -245,7 +245,7 @@ Sticky elements are similar to relative elements. The element scrolls until the 
 
 <figure>
   <hbs>
-  {{image "/blog/how-to-start-with-css/positioning-sticky.png" 'Four boxes, the first remains visible at the top of the document when the upper edge is reached throught scrolling. '}}
+  {{image "/blog/how-to-start-with-css/positioning-sticky.png" "Four boxes, the first remains visible at the top of the document when the upper edge is reached throught scrolling."}}
   </hbs>
   <figcaption>This box stays on top of the page and scrolls in the viewport when the upper edge is reached through scrolling. The screenshot shows that the fixed box is above the sticky box. With the property "z-index" the sticky box can be moved to the foreground so that it is displayed in front of all other boxes (<a href="positioning-demo.html">Positioning Demo</a>).</figcaption>
 </figure>

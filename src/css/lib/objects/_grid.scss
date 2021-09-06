@@ -80,15 +80,15 @@
 	.grid--#{$i} .grid__element {
 		flex: 0 1 auto;
 		@if $i > 1 {
-			width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
+			width: calc(#{math.div(100%, $i)} - #{$grid-gutter * 2});
 		} @else {
-			width: calc(math.div(100%, $i));
+			width: math.div(100%, $i);
 		}
 	}
 
 	.grid--#{$i}.grid--no-gutter > *,
 	.grid--#{$i}.grid--no-gutter .grid__element {
-		width: calc(calc(math.div(100%, $i)));
+		width: math.div(100%, $i);
 	}
 }
 
@@ -98,15 +98,15 @@
 		.grid--sm-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
+				width: calc(#{math.div(100%, $i)} - #{$grid-gutter * 2});
 			} @else {
-				width: calc(math.div(100%, $i));
+				width: math.div(100%, $i);
 			}
 		}
 
 		.grid--sm-#{$i}.grid--no-gutter > *,
 		.grid--sm-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(math.div(100%, $i)));
+			width: math.div(100%, $i);
 		}
 	}
 }
@@ -117,15 +117,15 @@
 		.grid--md-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
+				width: calc(#{math.div(100%, $i)} - #{$grid-gutter * 2});
 			} @else {
-				width: calc(math.div(100%, $i));
+				width: math.div(100%, $i);
 			}
 		}
 
 		.grid--md-#{$i}.grid--no-gutter > *,
 		.grid--md-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(math.div(100%, $i)));
+			width: math.div(100%, $i);
 		}
 	}
 }
@@ -136,15 +136,15 @@
 		.grid--lg-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
+				width: calc(#{math.div(100%, $i)} - #{$grid-gutter * 2});
 			} @else {
-				width: calc(math.div(100%, $i));
+				width: math.div(100%, $i);
 			}
 		}
 
 		.grid--lg-#{$i}.grid--no-gutter > *,
 		.grid--lg-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(math.div(100%, $i)));
+			width: math.div(100%, $i);
 		}
 	}
 }
@@ -155,15 +155,15 @@
 		.grid--xl-#{$i} .grid__element {
 			flex: 0 1 auto;
 			@if $i > 1 {
-				width: calc(math.div(100%, $i) - #{$grid-gutter * 2});
+				width: calc(#{math.div(100%, $i)} - #{$grid-gutter * 2});
 			} @else {
-				width: calc(math.div(100%, $i));
+				width: math.div(100%, $i);
 			}
 		}
 
 		.grid--xl-#{$i}.grid--no-gutter > *,
 		.grid--xl-#{$i}.grid--no-gutter .grid__element {
-			width: calc(calc(math.div(100%, $i)));
+			width: math.div(100%, $i);
 		}
 	}
 }
