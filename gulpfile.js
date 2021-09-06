@@ -111,7 +111,7 @@ handlebars.Handlebars.registerHelper({
 				alt="${alt}"
 				data-src="${image.large}"
 				data-srcset="${image.medium} 480w, ${image.large} 960w, ${image.xlarge} 1200w"
-				sizes="(max-width: 480px) 100vw, 960px"			
+				data-sizes="(max-width: 480px) 100vw, 960px"			
 				width="${width}"
 				height="${height}"
 				decoding="async"

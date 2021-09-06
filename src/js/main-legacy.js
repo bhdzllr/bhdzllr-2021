@@ -21,6 +21,7 @@ function lazyLoadImages(options) {
 
 			if (image.dataset.src) image.src = image.dataset.src;
 			if (image.dataset.srcset) image.srcset = image.dataset.srcset;
+			if (image.dataset.sizes) image.sizes = image.dataset.sizes;
 
 			image.classList.remove(options.className);
 
@@ -60,6 +61,7 @@ function lazyLoadImages(options) {
 
 					if (image.dataset.src) image.src = image.dataset.src;
 					if (image.dataset.srcset) image.srcset = image.dataset.srcset;
+					if (image.dataset.sizes) image.sizes = image.dataset.sizes;
 
 					image.classList.remove(options.className);
 
