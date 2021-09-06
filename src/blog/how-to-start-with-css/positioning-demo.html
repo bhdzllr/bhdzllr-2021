@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+		<title>Positioning Demo - How to start with CSS - @bhdzllr</title>
+
+		<meta name="description" content="CSS Box Model Demo" />
+		<meta name="robots" content="index, follow" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+
+				background: #ffffff;
+				
+				color: #222222;
+				font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+				font-size: 1em;
+				line-height: 1.625em;
+			}
+
+			body {
+				padding: 1em;
+			}
+
+			.box {
+				padding: 1em;
+				margin-bottom: 1em;
+
+				background-color: #cccccc;
+			}
+
+			.box:last-of-type {
+				margin-bottom: 0;
+			}
+
+			.box > .box {
+				background-color: #999999;
+			}
+
+			.box--inline {
+				display: inline-block;
+				margin-bottom: 0;
+			}
+
+			.box--relative {
+				position: relative;
+				top: 50px;
+				left: 50px;
+
+				background-color: #999999;
+			}
+
+			.absolute-wrapper {
+				position: relative;
+			}
+
+			.box--absolute {
+				position: absolute;
+				top: 50px;
+				left: 50px;
+
+				background-color: #999999;
+			}
+
+			.box--fixed {
+				position: fixed;
+				top: 50px;
+				left: 50px;
+
+				background-color: #999999;
+				border: 1px solid #ff0000;
+			}
+
+			.box--sticky {
+				position: sticky;
+				top: 0;
+				z-index: 1;
+			}
+		</style>
+	</head>
+	<body>
+
+		<h1>Positioning Demo</h1>
+
+		<h2>position: sticky</h2>
+
+		<div class="box box--sticky">
+			This box stays on top of the page and scrolls in the viewport when the upper edge is reached through scrolling.
+		</div>
+
+		<h2>position: static</h2>
+
+		<div class="box">
+			Box 1
+
+			<div class="box">Box 1.1</div>
+			<div class="box box--inline">Box 1.2 (display: inline-block)</div>
+			<div class="box box--inline">Box 1.3 (display: inline-block)</div>
+			<div class="box box--inline">Box 1.4 (display: inline-block)</div>
+		</div>
+
+		<div class="box">
+			Box 2
+
+			<div class="box">Box 2.1</div>
+			<div class="box">Box 2.2</div>
+		</div>
+
+		<h2>position: relative</h2>
+
+		<div class="box">Box 1</div>
+		<div class="box box--relative">Box 2</div>
+		<div class="box">Box 3</div>
+
+		<h2>position: absolute</h2>
+
+		<div class="absolute-wrapper">
+			<div class="box">Box 1</div>
+			<div class="box box--absolute">Box 2</div>
+			<div class="box">Box 3</div>
+		</div>
+
+		<h2>position: fixed</h2>
+
+		<div class="box">Box 1</div>
+		<div class="box box--fixed">Box 2 (Fixed)</div>
+		<div class="box">Box 3</div>
+
+		<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+		<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+		<br /><br /><br /><br /><br /><br /><br /><br /><br /><br />
+
+		<p>End of Demo</p>
+
+	</body>
+</html>

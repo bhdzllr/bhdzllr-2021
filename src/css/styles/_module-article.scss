@@ -388,3 +388,13 @@
 		margin-left: 0;
 	}
 }
+
+p code {
+	display: inline-block;
+	padding: 0.35rem 0.25rem 0.15rem;
+
+	background-color: $color-gray-2;
+
+	font-family: $font-mono;
+	line-height: 1;
+}

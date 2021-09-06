@@ -446,7 +446,7 @@ export class Terminal {
 	}
 
 	scrollToInput() {
-		// if (isElementInViewport(this.inputCustom)) return; // Problem on iOS with keyboard
+		if (window.innerWidth > 768 && isElementInViewport(this.inputCustom)) return; // if (isElementInViewport(this.inputCustom)) return; // Problem on iOS with keyboard
 
 		this.form.scrollIntoView({
 			behavior: 'smooth',

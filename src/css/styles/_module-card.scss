@@ -44,3 +44,11 @@
 		background-size: 1.5rem;
 	}
 }
+
+.card--color-full {
+	background-color: $color-card--full;
+
+	&::before {
+		background-color: $color-card--full;
+	}
+}

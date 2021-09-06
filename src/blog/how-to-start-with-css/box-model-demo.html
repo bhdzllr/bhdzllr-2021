@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+		<title>Box Model Demo - How to start with CSS - @bhdzllr</title>
+
+		<meta name="description" content="CSS Box Model Demo" />
+		<meta name="robots" content="index, follow" />
+
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+
+				background: #ffffff;
+				
+				color: #222222;
+				font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+				font-size: 1em;
+				line-height: 1.625em;
+			}
+
+			.wrapper {
+				max-width: 242px;
+				margin: 0 auto;
+				padding: 6rem;
+			}
+
+			.box {
+				width: 200px;
+				height: 200px;
+				margin: 10px;
+				padding: 10px;
+
+				background-color: #cccccc;
+				border: 1px solid #999999;
+			}
+
+			.box--border {
+				box-sizing: border-box;
+			}
+		</style>
+	</head>
+	<body>
+
+		<div class="wrapper">
+			<div class="box box--content">
+				Box 1<br />
+				content-box
+			</div>
+
+			<div class="box box--border">
+				Box 2<br />
+				border-box
+			</div>
+		</div>
+
+	</body>
+</html>

@@ -1,18 +1,43 @@
 .hljs {
 	@extend .extended;
+	@extend .extended--space;
 
 	display: block;
-	padding: 0.5em;
 	overflow-x: auto;
 
-	background: #233c39;
+	background-color: #233c39;
 
 	font-size: inherit;
 
 	@media #{$screen-min-sm} {
-		padding: 1.5rem;
 
 		font-size: 1rem;
+	}
+
+	@media #{$screen-min-lg} {
+		padding-right: 7rem;
+		padding-left: 7rem;
+	}
+
+	mark {
+		// position: relative;
+
+		// display: block;
+
+		background: none;
+		background-color: rgba(255, 255, 255, 0.15);
+
+		color: inherit;
+
+		// &::before {
+		// 	position: absolute;
+
+		// 	content: '';
+		// 	display: block;
+		// 	height: 100%;
+		// 	width: 3px;
+		// 	background-color: red;
+		// }
 	}
 }
 

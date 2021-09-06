@@ -15,7 +15,13 @@ const md = require('markdown-it')({
 	highlight: function (str, lang) {
 		if (lang && hljs.getLanguage(lang)) {
 			try {
-				return `<pre class="hljs hljs--${lang}"><code>${hljs.highlight(str, { language: lang, ignore_illegals: true }).value}</code></pre>`;
+				let html = hljs
+					.highlight(str, { language: lang, ignore_illegals: true })
+					.value
+					.replaceAll(/\/\*\*\*/g, '</mark>')
+					.replaceAll(/\*\*\*/g, '<mark>');
+
+				return `<pre class="hljs hljs--${lang}"><code>${html}</code></pre>`;
 			} catch (__) {}
 		}
 
