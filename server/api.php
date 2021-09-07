@@ -125,7 +125,14 @@ $minilyticsConfig->addSite(
 		'bhdzllr', '@bhdzllr', 'bhdzllr.com', [
 			'zeller.berny@aon.at',
 		],
-	)
+	),
+);
+$minilyticsConfig->addSite(
+	new Minilytics\Site(
+		'sug', 'SU Grabern', 'sugrabern.at', [
+			'zeller.berny@aon.at',
+		],
+	),
 );
 $app->setValue('minilyticsConfig', $minilyticsConfig);
 

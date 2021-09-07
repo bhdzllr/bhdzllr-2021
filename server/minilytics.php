@@ -78,6 +78,10 @@ $app->post('minilytics-visit', function () use ($app) {
 	];
 });
 
+$app->options('minilytics-visit', function () use ($app) {
+	return;
+});
+
 $app->post('minilytics-visit-update', function () use ($app) {
 	$json = json_decode($app->getBody());
 
@@ -220,10 +224,6 @@ $app->get('minilytics-admin', function () use ($app) {
 	// @todo Exit page => wenn keine Duration
 	// @todo Fallback tracking without JS?
 });
-
-function isSiteIdValid(string $siteId) {
-
-}
 
 class Visit extends ActiveRecord {
 

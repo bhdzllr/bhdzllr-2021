@@ -1734,6 +1734,7 @@ class AppAfterInterceptor {
 			}
 		}
 
+		$this->result->setHeader('Access-Control-Allow-Headers', 'Content-Type');
 		$this->result->setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, HEAD, OPTIONS');
 	}
 
