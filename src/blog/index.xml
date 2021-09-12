@@ -11,7 +11,7 @@
 		{{#each entries}}
 		<item>
 			<title>{{this.title}}</title>
-			<description>{{this.tagline}}</description>
+			<description>{{this.contentAsHtml}}</description>
 			<pubDate>{{formatPubDate this.date}}</pubDate>
 			<link>http://bhdzllr.local{{this.url}}</link>
 			<guid>http://bhdzllr.local{{this.url}}</guid>

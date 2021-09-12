@@ -1,1 +1,0 @@
-<description>{{this.contentAsHtml}}</description>
