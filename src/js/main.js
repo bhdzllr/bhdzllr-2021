@@ -339,6 +339,12 @@ async function liner(elements) {
 		elements[i].style.transition = 'opacity 0.5s ease';
 		elements[i].style.opacity = '1';
 
+		const currentElement = elements[i];
+		setTimeout(() => {
+			currentElement.style.transition = '';
+			currentElement.style.opacity = '';
+		}, 500);
+
 		if (i == (elements.length - 1)) clearInterval(interval);
 
 		i++;
