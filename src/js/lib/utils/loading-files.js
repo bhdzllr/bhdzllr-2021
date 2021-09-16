@@ -1,4 +1,25 @@
 /**
+ * Style loading
+ */
+export function loadStyle(href, media = 'all', id, onLoadCallback) {
+	if (id && document.querySelector(`#${id}`)) return;
+
+	const style = document.createElement('link');
+
+	style.rel = 'stylesheet';
+	style.href = href;
+	style.media = media;
+
+	document.getElementByTagNAme('head')[0].appendChild(style);
+
+	if (onLoadCallback) {
+		style.addEventListener('load', function () {
+			onLoadCallback();
+		});
+	}
+}
+
+/**
  * Load a JavaScript file
  *
  * The callback stack is used to collect all callback functions
