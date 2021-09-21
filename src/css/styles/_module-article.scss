@@ -61,6 +61,8 @@
 
 	.article--card &,
 	.article--list-item & {
+		margin-top: 1.5rem;
+
 		font-size: 1.45rem;
 		color: $color-primary;
 	}
@@ -103,6 +105,8 @@
 
 	.article--card &,
 	.article--list-item & {
+		margin-bottom: 0;
+
 		color: $color-white;
 		font-size: 1rem;
 	}

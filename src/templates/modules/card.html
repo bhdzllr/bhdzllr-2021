@@ -16,7 +16,7 @@
 		{{image article.image article.imageAlt}}
 	</div>
 	{{/if}}
-	<h2 class="article__title">{{article.title}}</h2>
+	<h{{#if level}}{{level}}{{else}}2{{/if}} class="article__title">{{article.title}}</h{{#if level}}{{level}}{{else}}2{{/if}}>
 	<p class="article__tagline">{{article.tagline}}</p>
 	<a href="{{article.url}}" class="stretched-link stretched-link--screen-reader-text">
 		<span class="screen-reader-text article__link-text">Show Project</span>

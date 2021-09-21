@@ -115,7 +115,7 @@
 			</div> -->
 			<ol class="list-simple slider" tabindex="-1">
 			{{#each entries.blog.first}}
-				{{> card article=this}}
+				{{> card article=this level=3}}
 			{{/each}}
 			</ol>
 			{{/if}}
@@ -135,7 +135,7 @@
 			{{#if entries.project.first}}
 			<ol class="list-simple slider" tabindex="-1">
 			{{#each entries.project.first}}
-				{{> card article=this}}
+				{{> card article=this level=3}}
 			{{/each}}
 			</ol>
 			{{/if}}
