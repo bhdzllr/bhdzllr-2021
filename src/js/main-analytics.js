@@ -15,6 +15,7 @@ var Minilytics = (function () {
 		end: 0,
 	};
 	var disableStr = 'disable-analytics';
+	var lastPath;
 
 	var hash = Math.random();
 
@@ -25,7 +26,8 @@ var Minilytics = (function () {
 				history.onpushstate({ state: state });
 			}
 		
-			Minilytics.visit();
+			if (lastPath != location.pathname) Minilytics.visit();
+			lastPath = location.pathname;
 
 			return pushState.apply(history, arguments);
 		};
@@ -233,6 +235,7 @@ var Minilytics = (function () {
 				id = scriptElement.dataset.id;
 				isHashRouting = scriptElement.dataset.hashRouting ? true : false;
 				timeOnPage.start = Date.now();
+				lastPath = location.pathname;
 
 				if (!url || !id) throw 'Missing script attributes.';
 			} catch (e) {
