@@ -1002,7 +1002,6 @@ abstract class ActiveRecord implements JsonSerializable {
 
 }
 
-// @todo Maybe add View with Areas and "generateRouteByName", Move some Helpers to View, maybe as Trait to avoid dependencies
 class View {
 
 	use SanitizerTrait;
@@ -1560,6 +1559,7 @@ class App extends Router {
 		if ($route->getInterceptorBefore()) ($route->getInterceptorBefore())($this);
 
 		$result = ($route->getAction())(...$route->getParameters());
+		// @todo Wenn Rückgabe View -> Routen injecten für routeByName, siehe RouteTransporter
 		if (!$result instanceof Result) $result = new Result($result);
 
 		if ($route->getInterceptorAfter()) $result = ($route->getInterceptorAfter())($this, $result);
