@@ -4,6 +4,7 @@ title: Facebook Pages for WordPress
 tagline: A WordPress plugin to publish posts directly on Facebook Pages.
 date: 2018-05-04
 image: /projects/facebook-pages-for-wordpress/facebook-pages-for-wordpress-settings.png
+imageAlt: Facebook pages for WordPress plugin settings page
 year: 2017
 action: https://github.com/bhdzllr/facebook-pages-for-wordpress
 categories:
