@@ -1,4 +1,4 @@
-export default class LocalStorage {
+export class LocalStorage {
 
 	set(key, value) {
 		if (value !== null && typeof value === 'object') {

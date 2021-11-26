@@ -2,7 +2,7 @@ import 'regenerator-runtime/runtime';
 
 import { default as de } from './lang/de.json';
 
-import I18n from './lib/modules/I18n';
+import { I18n } from './lib/modules/I18n';
 import { AnalyticsOptOut, addAnalyticsCode } from './lib/modules/Analytics';
 import { DialogModal, addDialogModalDefaultStyles } from './lib/modules/DialogModal';
 import { lazyLoadImages } from './lib/utils/loading-images';

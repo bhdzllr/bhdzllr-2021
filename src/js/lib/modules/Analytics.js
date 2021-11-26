@@ -1,4 +1,4 @@
-export default class AnalyticsOptOut {
+export class AnalyticsOptOut {
 
 	constructor(button, i18n, disableString = 'disable-analytics') {
 		this.button = button;
@@ -31,9 +31,9 @@ export default class AnalyticsOptOut {
 }
 
 export function addAnalyticsCode(codeCallback, disableString = 'disable-analytics') {
-	var doNotTrack = (navigator.doNotTrack && (navigator.doNotTrack == '1' || navigator.doNotTrack == 'yes')) || (window.doNotTrack && (window.doNotTrack == '1')) || (navigator.msDoNotTrack && (navigator.msDoNotTrack == '1'));
+	const doNotTrack = (navigator.doNotTrack && (navigator.doNotTrack == '1' || navigator.doNotTrack == 'yes')) || (window.doNotTrack && (window.doNotTrack == '1')) || (navigator.msDoNotTrack && (navigator.msDoNotTrack == '1'));
 
-	if (doNotTrack || document.cookie.indexOf(disableString + '=true') > -1 || document.cookie.indexOf(disableString + '=true') > -1) {
+	if (doNotTrack || document.cookie.indexOf(disableString + '=true') > -1) {
 		window[disableString] = true;
 	} else {
 		codeCallback();

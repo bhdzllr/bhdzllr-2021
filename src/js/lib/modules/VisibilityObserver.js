@@ -3,7 +3,7 @@
  * 
  * @see {@link https://developer.mozilla.org/de/docs/Web/API/Page_Visibility_API|MDN}
  */
-export default class VisibilityObserver {
+export class VisibilityObserver {
 
 	constructor(hiddenCallback = null, visibleCallback = null) {
 		this.hiddenCallback = hiddenCallback;

@@ -1,4 +1,4 @@
-export default class I18n {
+export class I18n {
 	
 	constructor(currentLang = 'en', langStrings) {
 		this.currentLang = currentLang;

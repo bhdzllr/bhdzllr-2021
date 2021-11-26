@@ -1,0 +1,8 @@
+.btn,
+a.btn {
+	color: $color-text--i;
+
+	&:disabled {
+		color: $color-text--darker;
+	}
+}

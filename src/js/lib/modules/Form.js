@@ -1,4 +1,4 @@
-export default class Form {
+export class Form {
 	
 	constructor(formElement, submittedCallback) {
 		this.formElement = formElement;

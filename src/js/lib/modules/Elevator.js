@@ -1,4 +1,4 @@
-export default class Elevator {
+export class Elevator {
 
 	constructor(element) {
 		this.element = element
