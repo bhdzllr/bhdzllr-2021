@@ -293,7 +293,6 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 			});
 		}
 	}
-
 });
 
 async function typer(element) {

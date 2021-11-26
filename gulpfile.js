@@ -582,6 +582,7 @@ function scripts() {
 function server() {
 	return src([
 			'server/**/*.php',
+			'server/**/*.js',
 			'!server/env-production.php',
 			'!composer.json',
 			'!composer.lock',
@@ -730,7 +731,8 @@ function dev() {
 	], series(scripts));
 
 	watch([
-		'server/**/*.php'
+		'server/**/*.php',
+		'server/**/*.js',
 	], series(server));
 }
 

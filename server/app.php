@@ -9,6 +9,181 @@ use \ArrayObject;
 use \JsonSerializable;
 use \Exception;
 use \Throwable;
+use \ReflectionClass;
+use \ReflectionException;
+
+trait DITrait {
+
+	/** @var array Mapped entries. */
+	protected $mappedEntries = [];
+
+	/** @var array Binded parameters applied on class creation. */
+	protected $bindedParams = [];
+
+	/** @var array List of shared instances. */
+	protected $sharedEntries = [];
+
+	/**
+	 * Set a shared instance that is always injected when the class is requested.
+	 *
+	 * @param string $id       Identifier or class for the instance.
+	 * @param mixed  $instance The instance of the identifier or class.
+	 */
+	public function set(string $id, $instance = null) {
+		$this->sharedEntries[$id] = $instance;
+	}
+
+	/**
+	 * Map a class name to another class name, e. g. an Interface to an implementation.
+	 *
+	 * @param string $fromClass The requested class.
+	 * @param string $toClass   The implementation that should be returned from the container.
+	 */
+	public function map(string $fromClass, string $toClass) {
+		$this->mappedEntries[$fromClass] = $toClass;
+	}
+
+	/**
+	 * Bind parameters to class.
+	 *
+	 * @param string $id          Identifier or class name (FQCN) for class to bind parameters.
+	 * @param array  $parameters  (optional) Parameters for class as value array.
+	 * @param array  $identifiers (optional) Identifiers to bind more classes.
+	 */
+	public function bind(string $id, ?array $parameters = []) {
+		$this->bindedParams[$id] = $parameters;
+	}
+
+	/**
+	 * Finds an entry of the container by its identifier and returns it.
+	 *
+	 * @param string $id Identifier of the entry to look for.
+	 *
+	 * @throws ExceptionInterface  No entry was found for **this** identifier.
+	 * @throws ContainerExceptionInterface Error while retrieving the entry.
+	 *
+	 * @return mixed Entry.
+	 */
+	public function get($id) {
+		if ($this->has($id)) return $this->resolve($id);
+
+		throw new Exception('No entry or class found for "' . $id . '".');
+	}
+
+	/**
+	 * Returns true if the container can return an entry for the given identifier.
+	 * Returns false otherwise.
+	 *
+	 * `has($id)` returning true does not mean that `get($id)` will not throw an exception.
+	 * It does however mean that `get($id)` will not throw a `ExceptionInterface`.
+	 *
+	 * @param string $id Identifier of the entry to look for.
+	 *
+	 * @return bool
+	 */
+	public function has($id) {
+		return class_exists($id);
+	}
+
+	/**
+	 * Resolve class dependencies.
+	 *
+	 * @todo Check for isArray(), isCallable(), isDefaultValueAvailable(),
+	 *       isOptional(), etc. if parameter is not a class.
+	 * 
+	 * @param string $id Class to resolve.
+	 * 
+	 * @return object Object of class.
+	 */
+	public function resolve(string $id) {
+		if (isset($this->mappedEntries[$id])) $id = $this->mappedEntries[$id];
+		if (isset($this->sharedEntries[$id])) return $this->sharedEntries[$id];
+
+		try {
+			$reflectionClass = new ReflectionClass($id);
+		} catch (ReflectionException $e) {
+			exit($e->getMessage());
+		}
+
+		$namespace = $reflectionClass->getNamespaceName();
+		$constructor = $reflectionClass->getConstructor();
+
+		if (!$constructor || !$constructor->getParameters()) {
+			// Class has no constructor, just create and return it.
+			$instance = new $id;
+			if (isset($this->sharedEntries[$id])) $this->sharedEntries[$id] = $instance;
+			return $instance;
+		}
+
+		$parameters = $constructor->getParameters();
+		$dependencies = [];
+
+		$bindedParams = isset($this->bindedParams[$id]) ? $this->bindedParams[$id] : null;	
+
+		// Loop over constructor parameters.
+		foreach ($parameters as $parameter) {
+			try {
+				// If parameter belongs to binded class with parameter.
+				if (isset($bindedParams)) {
+					if (isset($bindedParams[$parameter->getPosition()])) {
+						// Set parameter
+						$dependencies[] = $bindedParams[$parameter->getPosition()];
+						continue;
+					} elseif ($parameter->isOptional()) {
+						// If no parameter given, but parameter is optional.
+						if ($parameter->getDefaultValue()) {
+							$dependencies[] = $parameter->getDefaultValue();
+						} else {
+							$dependencies[] = null;
+						}
+
+						continue;
+					} else {
+						// If no parameter given and parameter not optional.
+						throw new ReflectionException('Error binding parameters to class "' . $id . '".');
+					}
+
+					continue;
+				}
+			} catch (ReflectionException $e) {
+				exit($e->getMessage());
+			}
+
+			// Parameter is not a class.
+			if (is_null($this->getParameterClassName($parameter))) {
+				$dependencies[] = null;
+				continue;
+			}
+
+			// Parameter is a class dependency, recursively call resolve().
+			$dependencies[] = $this->resolve(
+				$parameter->getType()->getName()
+			);
+		}
+
+		// Return reflected class, instantiated with all dependencies.
+		$instance = $reflectionClass->newInstanceArgs($dependencies);
+		if (isset($this->sharedEntries[$id])) $this->sharedEntries[$id] = $instance;
+		return $instance;
+	}
+
+	/**
+	 * From Laravel "Illuminate/Container/Util.php"
+	 *
+	 * Get the class name of the given parameter's type, if possible.
+	 *
+	 * From Reflector::getParameterClassName() in Illuminate\Support.
+	 *
+	 * @param  \ReflectionParameter  $parameter
+	 * @return string|null
+	 */
+	private function getParameterClassName($parameter) {
+		$type = $parameter->getType();
+
+		return ($type && !$type->isBuiltin()) ? $type->getName() : null;
+	}
+
+}
 
 trait InterceptorTrait {
 
@@ -79,7 +254,7 @@ trait DatabaseFromEnvTrait {
 					$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 				}
 			} catch (PDOException $e) {
-				throw new PDOException($e);
+				throw new PDOException($e->getMessage());
 			}
 		}
 	}
@@ -128,13 +303,9 @@ class I18n {
 	private array $lines = [];
 	private string $locale = 'en';
 
-	public function __construct(string $file, ?string $locale = 'en') {
-		$this->lines[$locale] = include $file;
-		$this->locale = $locale;
-	}
-
 	public function load(string $file, ?string $locale = 'en') {
 		$this->lines[$locale] = include $file;
+		$this->locale = $locale;
 	}
 
 	public function setLocale(string $locale) {
@@ -527,6 +698,10 @@ class Migration {
 		if (isset($file)) $this->file = $file;
 	}
 
+	public function __destruct() {
+		unset($this->db);
+	}
+
 	public function run(callable ...$migrations) {
 		if (!file_exists($this->file)) fopen($this->file, 'w');
 		$handle = fopen($this->file, 'r');
@@ -571,8 +746,7 @@ class Migration {
 
 abstract class ActiveRecord implements JsonSerializable {
 
-	use DatabaseFromEnvTrait;
-
+	public static PDO $db;
 	protected Validator $validator;
 	protected array $data = [];
 	protected string $table;
@@ -588,8 +762,6 @@ abstract class ActiveRecord implements JsonSerializable {
 		if (empty($this->fields)) {
 			throw new Exception('No fields for table set.');
 		}
-
-		$this->createDatabaseFromEnv();
 
 		return $this;
 	}
@@ -608,6 +780,14 @@ abstract class ActiveRecord implements JsonSerializable {
 
 	public function __isset(string $name): bool {
 		return isset($this->data[$name]);
+	}
+
+	public static function setDatabase(PDO $db) {
+		self::$db = $db;
+	}
+
+	public function getDatabase(): PDO {
+		return self::$db;
 	}
 
 	public function save(): bool {
@@ -638,7 +818,7 @@ abstract class ActiveRecord implements JsonSerializable {
 			. implode(", ", $questionMarks)
 			. ")";
 
-		$statement = $this->db->prepare($query);
+		$statement = $this->getDatabase()->prepare($query);
 
 		foreach ($values as $i => $value) {
 			$statement->bindValue(($i + 1), $value, $this->getDataType($value));
@@ -668,7 +848,7 @@ abstract class ActiveRecord implements JsonSerializable {
 			. " SET `" . implode('` = ?, `', $fields) . "` = ?"
 			. " WHERE `$this->primaryKey` = ?";
 
-		$statement = $this->db->prepare($query);
+		$statement = $this->getDatabase()->prepare($query);
 
 		foreach ($values as $i => $value) {
 			$statement->bindValue(($i + 1), $value, $this->getDataType($value));
@@ -686,7 +866,7 @@ abstract class ActiveRecord implements JsonSerializable {
 	public function delete() {
 		$query = "DELETE FROM `$this->table` WHERE `$this->primaryKey` = :id";
 
-		$statement = $this->db->prepare($query);
+		$statement = $this->getDatabase()->prepare($query);
 		$statement->bindParam(':id', $this->{$this->primaryKey}, PDO::PARAM_INT);
 
 		try {
@@ -778,7 +958,7 @@ abstract class ActiveRecord implements JsonSerializable {
 		}
 	}
 
-	public static function findAll(?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null) {
+	public static function findAll(?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null, ?string $tableName = null) {
 		$entity = new static();
 		if ($tableName) $entity->setTable($tableName);
 
@@ -835,15 +1015,7 @@ abstract class ActiveRecord implements JsonSerializable {
 	}
 
 	public function lastInsertId() {
-		return $this->db->lastInsertId();
-	}
-
-	public function setDatabase(PDO $db) {
-		$this->db = $db;
-	}
-
-	public function getDatabase(): PDO {
-		return $this->db;
+		return $this->getDatabase()->lastInsertId();
 	}
 
 	public function setTable(string $table) {
@@ -998,6 +1170,20 @@ abstract class ActiveRecord implements JsonSerializable {
 		}
 
 		throw new Exception('ActiveRecord can not work with type [' . $type . '] of value [' . $value . '], please write own statement.'); 
+	}
+
+}
+
+class DatabaseFromEnv {
+
+	use DatabaseFromEnvTrait;
+
+	public function __construct() {
+		$this->createDatabaseFromEnv();
+	}
+
+	public function getDatabase(): PDO {
+		return $this->db;
 	}
 
 }
@@ -1229,7 +1415,7 @@ class Route {
 	private string $locale;
 	private bool $onlyRouteInterceptor = false;
 	private array $excludedAppInterceptors = [];
-	private string $name;
+	private ?string $name = null;
 
 	public function __construct(string $method, string $uri, callable $action) {
 		if (!in_array(
@@ -1305,7 +1491,7 @@ class Route {
 		return $this->locale ?? null;
 	}
 
-	public function getName(): string {
+	public function getName(): ?string {
 		return $this->name;
 	}
 
@@ -1397,12 +1583,64 @@ class Router {
 		$this->locales = $locales;
 	}
 
+	/**
+	 * Return route URI by name.
+	 *
+	 * @param string $name       Route name.
+	 * @param array  $parameters (optional) Parameters to apply to rule, just a list of parameters..
+	 *
+	 * @return string URI for named route.
+	 */
+	public function generateRouteByName(?string $name = null, array $parameters = []) {
+		$pattern = '{\w+\??}';
+		$routeUri = $this->getRoute()->getUri() ?? '/';
+
+		// If a name is handed to the method, search for the route
+		if ($name) {
+			foreach ($this->routes as $methodRoutes) {
+				foreach ($methodRoutes as $methodRoute) {
+					if ($methodRoute->getName() == $name) {
+						// $route = $methodRoute;
+						$routeUri = $methodRoute->getUri();
+						break;
+					}
+				}
+			}
+		}
+
+		// If the current route has a locale set, use it
+		if ($this->getRoute()->getLocale()) {
+			$localeReplacement = '/' . $this->getRoute()->getLocale();
+		} else {
+			$localeReplacement = '';
+		}
+
+		// Replace locale pattern
+		$routeUri = str_replace('/{locale}',  $localeReplacement, $routeUri);
+		$routeUri = str_replace('/{locale?}', $localeReplacement, $routeUri);
+
+		// Get the route
+		try {
+			$uri = preg_replace_callback('(' . $pattern . ')', function ($matches) use (&$parameters) {
+				return array_shift($parameters);
+			}, $routeUri);
+
+			return $uri;
+		} catch (Exception $e) {
+			exit($e->getMessage());
+		}
+
+		return;
+	}
+
 }
 
 class App extends Router {
 
 	use InterceptorTrait;
 	use HeaderTrait;
+
+	private DIContainer $container;
 
 	private string $host;
 	private string $fullUrl;
@@ -1418,7 +1656,9 @@ class App extends Router {
 
 	private array $value = [];
 
-	public function __construct() {
+	public function __construct(DIContainer $container) {
+		$this->container = $container;
+
 		$this->loadEnv('.env');
 		$this->init();
 	}
@@ -1548,6 +1788,10 @@ class App extends Router {
 		if (!isset($this->value[$name])) return;
 
 		return $this->value[$name];
+	}
+
+	public function getContainer(): DIContainer {
+		return $this->container;
 	}
 
 	public function run() {
@@ -1753,8 +1997,17 @@ class AppAfterInterceptor {
 
 }
 
+class DIContainer {
+
+	use DITrait;
+
+}
+
 return (function () {
-	$app = new App();
+	$container = new DIContainer();
+	$container->set('App\DIContainer', $container);
+
+	$app = new App($container);
 
 	$app->before(new AppBeforeInterceptor());
 	$app->after(new AppAfterInterceptor());

@@ -259,6 +259,12 @@ var Minilytics = (function () {
 			var path = location.pathname;
 
 			var referrer = document.referrer.split('/')[2];
+			var referrerPath = '/' + document.referrer.
+				split('?')[0]
+				.split('#')[0]
+				.split('/')
+				.splice(3)
+				.join('/');
 
 			var unique = (!referrer || referrer != location.hostname) ? true : false;
 
@@ -286,7 +292,7 @@ var Minilytics = (function () {
 				term: null,
 				content: null,
 			};
-			utm.source = getUrlParameter('utm_source') ? getUrlParameter('utm_source') : getUrlParameter('ref');
+			utm.source = getUrlParameter('utm_source') || getUrlParameter('source') || getUrlParameter('ref');
 			utm.medium = getUrlParameter('utm_medium');
 			utm.campaign = getUrlParameter('utm_campaign');
 			utm.term = getUrlParameter('utm_term');
@@ -297,6 +303,7 @@ var Minilytics = (function () {
 				path: path,
 				unique: unique,
 				referrer: referrer,
+				referrerPath: referrerPath,
 				timezone: timezone,
 				browserName: browser.name,
 				browserVersion: browser.version,
@@ -311,10 +318,12 @@ var Minilytics = (function () {
 
   			return;
 		},
-		initOptOutButton: function () {
-			if (!document.querySelector('.js-disable-analytics')) return;
+		initOptOutButton: function (selector) {
+			selector = selector || '.js-disable-analytics';
 
-			var button = document.querySelector('.js-disable-analytics');
+			if (!document.querySelector(selector)) return;
+
+			var button = document.querySelector(selector);
 
 			if (isOptOutActive()) {
 				button.setAttribute('disabled', true);

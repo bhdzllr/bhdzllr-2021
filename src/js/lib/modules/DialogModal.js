@@ -1,13 +1,17 @@
 import { isFocusable } from '../utils/accessibility';
 
+/**
+ * Dialog Modal
+ * Maybe this would work well as a web component too.
+ */
 export class DialogModal {
 
 	constructor({
 		contentAsHtml,
+		ariaLabelledBy = '',
 		showOnCreation = false,
 		showCallback = null,
 		hideCallback = null,
-		ariaLabelledBy = '',
 		hideRootScrollbars = true,
 	}) {
 		this.contentAsHtml = contentAsHtml;
@@ -28,6 +32,8 @@ export class DialogModal {
 		this.initDom();
 		this.initListeners();
 
+		this.setContentAsHtml(this.contentAsHtml);
+
 		if (this.showOnCreation) this.show();
 	}
 
@@ -45,8 +51,6 @@ export class DialogModal {
 		this.dialog.setAttribute('aria-modal', 'true'); // Tell screenreaders that content behind the modal is not interactive
 		this.dialog.setAttribute('aria-labelledby', this.ariaLabelledBy); // Tell screenreaders the ID of the title element
 	
-		this.setContentAsHtml(this.contentAsHtml);
-
 		this.btnClose = document.createElement('button');
 		this.btnClose.classList.add('dm-btn-close');
 		this.btnClose.classList.add('js-dm-btn-close');
@@ -208,6 +212,7 @@ export function initDialogsModalWithTemplate() {
 
 		for (let i = 0; i < dialogModalTriggers.length; i++) {
 			const target = dialogModalTriggers[i].dataset.dm;
+			const ariaLabelledBy = dialogModalTriggers[i].dataset.ariaLabelledBy ?? '';
 
 			if (document.querySelector(target)) {
 				const template = document.querySelector(target);
@@ -215,7 +220,10 @@ export function initDialogsModalWithTemplate() {
 				const tempDiv = document.createElement('div');
 				tempDiv.appendChild(templateClone);
 
-				const dialogModal = new DialogModal({ contentAsHtml: tempDiv.innerHTML });
+				const dialogModal = new DialogModal({
+					contentAsHtml: tempDiv.innerHTML,
+					ariaLabelledBy: ariaLabelledBy,
+				});
 
 				dialogModalTriggers[i].addEventListener('click', function (e) {
 					e.preventDefault();
