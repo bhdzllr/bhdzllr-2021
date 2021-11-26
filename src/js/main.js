@@ -3,7 +3,7 @@ import 'regenerator-runtime/runtime';
 import { default as de } from './lang/de.json';
 
 import { I18n } from './lib/modules/I18n';
-import { AnalyticsOptOut, addAnalyticsCode } from './lib/modules/Analytics';
+// import { AnalyticsOptOut, addAnalyticsCode } from './lib/modules/Analytics';
 import { DialogModal, addDialogModalDefaultStyles } from './lib/modules/DialogModal';
 import { lazyLoadImages } from './lib/utils/loading-images';
 import { addOutlineHandler } from './lib/utils/accessibility';
@@ -23,15 +23,15 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 	addOutlineHandler();
 	beautifyFileInputs(i18n);
 
-	if (document.querySelector('.js-analytics-opt-out')) {
-		new AnalyticsOptOut(document.querySelector('.js-analytics-opt-out'), i18n);	
-	}
-
-	addAnalyticsCode(function () {
-		// Analytics Code to inject
-		// Don't forget to make global variables available because of uglify, e. g. with:
-		// window['_paq'] = _paq;
-	});
+	// Not needed, Minilytics takes care of this
+	// if (document.querySelector('.js-analytics-opt-out')) {
+	// 	new AnalyticsOptOut(document.querySelector('.js-analytics-opt-out'), i18n);	
+	// }
+	// addAnalyticsCode(function () {
+	// 	// Analytics Code to inject
+	// 	// Don't forget to make global variables available because of uglify, e. g. with:
+	// 	// window['_paq'] = _paq;
+	// });
 
 	if (document.querySelector('.js-typer-animation')) {
 		const typerElements = document.querySelectorAll('.js-typer-animation');
