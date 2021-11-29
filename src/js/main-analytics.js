@@ -87,7 +87,7 @@ var Minilytics = (function () {
 	}
 
 	function isOptOutActive() {
-		if (document.cookie.indexOf(disableString + '=true') > -1) {
+		if (isDoNotTrackActive() || document.cookie.indexOf(disableString + '=true') > -1) {
 			window[disableString] = true;
 			return true;
 		}
@@ -326,14 +326,14 @@ var Minilytics = (function () {
 			var button = document.querySelector(selector);
 
 			if (isOptOutActive()) {
-				button.setAttribute('disabled', true);
+				button.disabled = true;
 				button.textContent = button.dataset.textDisabled;
 			} else {
 				button.disabled = false;
 				button.addEventListener('click', function () {
 					document.cookie = disableString + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
 					window[disableString] = true;
-					button.setAttribute('disabled', true);
+					button.disabled = true;
 					button.textContent = button.dataset.textDisabled;
 					alert(button.dataset.textDisabledAlert);
 				});
