@@ -32,13 +32,14 @@ export function loadStyle(href, media = 'all', id, onLoadCallback) {
  * @param {string} src Path to script
  * @param {string} id (Optional) ID for the script to prevent multiple scripts.
  * @param {Function} onLoadCallback (Optional) Required "id" parameter. Callack when script is loaded.
+ * @param {Object} attributes (Optional) Key/value object for attributes to be appended to the script tag.
  */
-export function loadScript(src, id, onLoadCallback) {
-	if (!window.LazyScripts) {
+export function loadScript(src, id, onLoadCallback, attributes) {
+	if (!window.lazyScripts) {
 		/**
-		 * Script loading global object with "LazyScripts" namespace.
+		 * Script loading global object with "lazyScripts" namespace.
 		 */
-		window.LazyScripts = {
+		window.lazyScripts = {
 			/**
 			 * Script loading callback Stack.
 			 * Object with "id" and "callback".
@@ -59,6 +60,8 @@ export function loadScript(src, id, onLoadCallback) {
 	}
 
 	const lazyScripts = window.lazyScripts;
+	const defaultAttributes = { async: true, defer: true };
+	attributes = Object.assign({}, defaultAttributes, attributes);
 
 	if (id && document.querySelector(`#${id}`)) {
 		if (onLoadCallback && !lazyScripts.executedCallbacksById.indexOf(id) == -1) {
@@ -78,14 +81,16 @@ export function loadScript(src, id, onLoadCallback) {
 	const script = document.createElement('script');
 
 	script.src = src;
-	script.async = true;
-	script.defer = true;
 	if (id) script.id = id;
 	if (id && onLoadCallback) {
 		lazyScripts.scriptCallbackStack.push({
 			id: id,
 			callback: onLoadCallback
 		});
+	}
+
+	for (const [key, value] of Object.entries(attributes)) {
+		script.setAttribute(key, value);
 	}
 
 	script.addEventListener('load', function () {

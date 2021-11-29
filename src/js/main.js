@@ -3,9 +3,10 @@ import 'regenerator-runtime/runtime';
 import { default as de } from './lang/de.json';
 
 import { I18n } from './lib/modules/I18n';
-// import { AnalyticsOptOut, addAnalyticsCode } from './lib/modules/Analytics';
+import { AnalyticsOptOut, addAnalyticsCode } from './lib/modules/Analytics';
 import { DialogModal, addDialogModalDefaultStyles } from './lib/modules/DialogModal';
 import { lazyLoadImages } from './lib/utils/loading-images';
+import { loadScript } from './lib/utils/loading-files';
 import { addOutlineHandler } from './lib/utils/accessibility';
 import { beautifyFileInputs } from './lib/utils/beautification';
 
@@ -23,15 +24,20 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 	addOutlineHandler();
 	beautifyFileInputs(i18n);
 
-	// Not needed, Minilytics takes care of this
-	// if (document.querySelector('.js-analytics-opt-out')) {
-	// 	new AnalyticsOptOut(document.querySelector('.js-analytics-opt-out'), i18n);	
-	// }
-	// addAnalyticsCode(function () {
-	// 	// Analytics Code to inject
-	// 	// Don't forget to make global variables available because of uglify, e. g. with:
-	// 	// window['_paq'] = _paq;
-	// });
+	// Minilytics takes care of this, but do it to prevent loading the file and save some time
+	if (document.querySelector('.js-analytics-opt-out')) {
+		new AnalyticsOptOut(document.querySelector('.js-analytics-opt-out'), i18n);	
+	}
+	addAnalyticsCode(function () {
+		loadScript('/js/main-analytics.js', 'js-minilytics', () => {
+			Minilytics.initOptOutButton();
+		}, {
+			async: false,
+			defer: false,
+			'data-url': '/server/api.php',
+			'data-id': 'bhdzllr',
+		});
+	});
 
 	if (document.querySelector('.js-typer-animation')) {
 		const typerElements = document.querySelectorAll('.js-typer-animation');

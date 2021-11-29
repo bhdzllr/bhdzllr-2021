@@ -17,6 +17,7 @@ export class AnalyticsOptOut {
 			this.button.disabled = true;
 			this.button.textContent = this.i18n.get('analyticsOptOut.alreadyDeactivated', 'Analysis already disabled');
 		} else {
+			this.button.disabled = false;
 			this.button.addEventListener('click', () => {
 				disableAnalytics(this.disableString);
 

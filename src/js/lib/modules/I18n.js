@@ -30,7 +30,11 @@ export class I18n {
 
 }
 
-export function findLocale(element) {
+export function findLocale(element, fallbackLocale = 'en') {
 	const closestElement = element.closest('[lang]');
-	return closestElement ? closestElement.lang : 'de';
+	if (closestElement) return closestElement.lang
+	if (document.body.lang) return document.body.lang;
+	if (document.documentElement.lang) return document.documentElement.lang;
+
+	return fallbackLocale;
 }

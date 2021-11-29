@@ -14,7 +14,7 @@ var Minilytics = (function () {
 		start: Date.now(),
 		end: 0,
 	};
-	var disableStr = 'disable-analytics';
+	var disableString = 'disable-analytics';
 	var lastPath;
 
 	var hash = Math.random();
@@ -87,8 +87,8 @@ var Minilytics = (function () {
 	}
 
 	function isOptOutActive() {
-		if (document.cookie.indexOf(disableStr + '=true') > -1) {
-			window[disableStr] = true;
+		if (document.cookie.indexOf(disableString + '=true') > -1) {
+			window[disableString] = true;
 			return true;
 		}
 
@@ -319,7 +319,7 @@ var Minilytics = (function () {
   			return;
 		},
 		initOptOutButton: function (selector) {
-			selector = selector || '.js-disable-analytics';
+			selector = selector || '.js-analytics-opt-out';
 
 			if (!document.querySelector(selector)) return;
 
@@ -329,9 +329,10 @@ var Minilytics = (function () {
 				button.setAttribute('disabled', true);
 				button.textContent = button.dataset.textDisabled;
 			} else {
+				button.disabled = false;
 				button.addEventListener('click', function () {
-					document.cookie = disableStr + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
-					window[disableStr] = true;
+					document.cookie = disableString + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
+					window[disableString] = true;
 					button.setAttribute('disabled', true);
 					button.textContent = button.dataset.textDisabled;
 					alert(button.dataset.textDisabledAlert);

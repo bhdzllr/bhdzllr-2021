@@ -63,6 +63,46 @@ handlebars.Handlebars.registerHelper({
 	html: function (value) {
 		return new handlebars.Handlebars.SafeString(value);
 	},
+	ogImage: function (baseUrl, defaultImage, article) {
+		if (article && (article.imageSocial || article.image)) {
+			return baseUrl + (article.imageSocial ?? article.image)
+		}
+
+		return baseUrl + defaultImage;
+	},
+	ogImageAlt: function (defaultAlt, article) {
+		if (article && (article.imageSocialAlt || article.imageAlt)) {
+			return article.imageSocialAlt ?? article.imageAlt;
+		}
+
+		return defaultAlt;
+	},
+	ogImageWidth: function (defaultWidth, article) {
+		if (article && (article.imageSocial || article.image)) {
+			const imageSrc = article.imageSocial ?? article.image;
+			const image = images.find(image => image.original == imageSrc);
+			if (!image) {
+				console.warn('[OG Image Width]: Image not found, returning default width.');
+				return defaultWidth;
+			}
+			return image.originalWidth;
+		}
+
+		return defaultWidth;
+	},
+	ogImageHeight: function (defaultHeight, article) {
+		if (article && (article.imageSocial || article.image)) {
+			const imageSrc = article.imageSocial ?? article.image;
+			const image = images.find(image => image.original == imageSrc);
+			if (!image) {
+				console.warn('[OG Image Height]: Image not found, returning default height.');
+				return defaultHeight;
+			}
+			return image.originalHeight;
+		}
+
+		return defaultHeight;
+	},
 	ifEquals: function (a, b, options) {
 		return (a == b) ? options.fn(this) : options.inverse(this);
 	},
@@ -82,14 +122,10 @@ handlebars.Handlebars.registerHelper({
 				return '/projects';
 			case 'mail':
 				return '/contact';
-			case 'imprint':
-				return '/imprint';
 			case 'impressum':
 				return '/impressum';
 			case 'legal':
 				return '/legal';
-			case 'rechtliches':
-				return '/rechtliches';
 		}
 	},
 	image: function (src, alt, classList) {
@@ -284,6 +320,14 @@ function getPageTypes() {
 			required: false,
 		},
 		'imageAlt': {
+			type: 'string',
+			required: false,
+		},
+		'imageSocial': {
+			type: 'string',
+			required: false,
+		},
+		'imageSocialAlt': {
 			type: 'string',
 			required: false,
 		},

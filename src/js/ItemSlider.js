@@ -323,6 +323,8 @@ export class ItemSlider extends HTMLElement {
 	}
 
 	touchStart(e) {
+		if (this.isSliding) return;
+
 		this.isTouchMoving = true;
 		this.touchStartX = this.getTouchX(e);
 		this.touchStartTime = Date.now();
