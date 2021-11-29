@@ -16,8 +16,10 @@ export class AnalyticsOptOut {
 
 			this.button.disabled = true;
 			this.button.textContent = this.i18n.get('analyticsOptOut.alreadyDeactivated', 'Analysis already disabled');
+			this.button.setAttribute('aria-pressed', 'true');
 		} else {
 			this.button.disabled = false;
+			this.button.setAttribute('aria-pressed', 'false');
 			this.button.addEventListener('click', () => {
 				disableAnalytics(this.disableString);
 

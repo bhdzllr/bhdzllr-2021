@@ -328,8 +328,10 @@ var Minilytics = (function () {
 			if (isOptOutActive()) {
 				button.disabled = true;
 				button.textContent = button.dataset.textDisabled;
+				button.setAttribute('aria-pressed', 'true');
 			} else {
 				button.disabled = false;
+				button.setAttribute('aria-pressed', 'false');
 				button.addEventListener('click', function () {
 					document.cookie = disableString + '=true; expires=Thu, 31 Dec 2099 23:59:59 UTC; path=/';
 					window[disableString] = true;
