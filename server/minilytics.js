@@ -51,7 +51,10 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
 		renderLoading();
 		await loadData(filterDateFrom.value, filterDateTo.value);
-		setTimeout(() => render(), 300);
+		setTimeout(() => {
+			render();
+			loadLiveCountAndRefresh();
+		}, 300);
 	});
 });
 

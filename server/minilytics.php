@@ -612,8 +612,9 @@ $app->post('minilytics-visit', function () use ($app) {
 	$visit->referrer = $json->referrer ?? null;
 	$visit->referrerPath = $json->referrerPath ?? null;
 	$visit->timezone = $json->timezone ?? null;;
-	$visit->browserName = $json->browserName;
-	$visit->browserVersion = $json->browserVersion;
+	$visit->browserName = $json->browserName ?? null;
+	$visit->browserVersion = isset($json->browserVersion) ? intval($json->browserVersion) : null;
+  $visit->os = $json->os ?? null;
 	$visit->touch = $json->touch;
 	$visit->deviceWidth = $json->deviceWidth;
 	$visit->deviceHeight = $json->deviceHeight;
@@ -732,8 +733,9 @@ $app->get('minilytics-admin', function () use ($app) {
 					`referrer`        TEXT NULL,
 					`referrer_path`   TEXT NULL,
 					`timezone`        TEXT NULL,
-					`browser_name`    VARCHAR(64) NOT NULL,
-					`browser_version` INT(5) UNSIGNED NOT NULL,
+					`browser_name`    VARCHAR(64) NULL,
+					`browser_version` INT(5) UNSIGNED NULL,
+          `os`              VARCHAR(255) NULL,
 					`touch`           BIT NOT NULL,
 					`device_width`    INT(5) UNSIGNED NOT NULL,
 					`device_height`   INT(5) UNSIGNED NOT NULL,
@@ -1029,6 +1031,8 @@ $app->post('minilytics-data&site={any}', function (string $id) use ($app, $timez
 		}
 
 		// Browser Name with Version
+    $browserVersion = $visit->browserVersion;
+    if (!$browserVersion) $browserVersion = '0';
 		$browserVersionFull = $browserName . ' ' . $visit->browserVersion;
 		$browserVersionKey = array_search($browserVersionFull, array_column($result['browserVersions'], 'name'));
 		if ($browserVersionKey !== false) {
@@ -1300,6 +1304,7 @@ class Visit extends ActiveRecord {
 		'timezone',
 		'browser_name' => 'browserName',
 		'browser_version' => 'browserVersion',
+    'os',
 		'touch',
 		'device_width' => 'deviceWidth',
 		'device_height' => 'deviceHeight',
