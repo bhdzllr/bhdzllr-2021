@@ -78,6 +78,11 @@
 
 	bhdzllr-item-slider {
 		margin: 0 auto;
+
+		&:focus,
+		&:active {
+			outline: none;
+		}
 	}
 
 	img {

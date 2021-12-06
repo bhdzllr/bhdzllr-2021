@@ -5,6 +5,7 @@
 @mixin outline {
 	outline: 2px solid $color-text;
 	outline-offset: 2px;
+	z-index: 1;
 }
 
 .is-tabbing,

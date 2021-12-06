@@ -30,9 +30,8 @@ export class DialogModal {
 		this.isOpen = false;
 
 		this.initDom();
-		this.initListeners();
-
 		this.setContentAsHtml(this.contentAsHtml);
+		this.initListeners();
 
 		if (this.showOnCreation) this.show();
 	}
