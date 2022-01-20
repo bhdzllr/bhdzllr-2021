@@ -214,7 +214,7 @@ trait InterceptorTrait {
 
 trait HeaderTrait {
 
-	private array $headers = ['Content-Type' => 'text/html'];
+	private array $headers = [];
 
 	public function getHeaders(): array {
 		return $this->headers;
@@ -1314,14 +1314,16 @@ class View {
 	public function renderAreas(): string {
 		ob_start();
 
-		foreach ($this->areas as $areaName => $area) {
-			$this->area($areaName);
+		if (isset($this->areas)) {
+			foreach ($this->areas as $areaName => $area) {
+				$this->area($areaName);
+			}
 		}
 
-		$this->html = ob_get_contents();
+		$content = ob_get_contents();
 		ob_end_clean();
 
-		return $this->html;
+		return $content;
 	}
 
 	public function render(): string {
@@ -1335,10 +1337,10 @@ class View {
 
 		include $this->layout['file'];
 
-		$this->html = ob_get_contents();
+		$content = ob_get_contents();
 		ob_end_clean();
 
-		return $this->html;
+		return $content;
 	}
 
 	public function __toString(): string {
@@ -1814,6 +1816,7 @@ class App extends Router {
 
 	public function render(Result $result) {
 		$body = $result->getBody();
+		$derivedContentType = 'text/html; charset=utf-8';
 		$output = '';
 
 		if (is_null($body)) {
@@ -1821,14 +1824,13 @@ class App extends Router {
 		} else if (is_string($body) || (is_object($body) && method_exists($body , '__toString'))) {
 			$output = $body;
 		} else if (is_object($body) || is_array($body)) {
-			if (strpos($result->getHeader('Content-Type'), 'application/json') === false) {
-				$result->setHeader('Content-Type', 'application/json');
-			}
-
+			$derivedContentType = 'application/json';
 			$output = json_encode($body);
 		} else {
 			throw new HttpException('Action returns wrong type.', 500);
 		}
+
+		if (!$result->getHeader('Content-Type')) $result->setHeader('Content-Type', $derivedContentType);
 
 		http_response_code($result->getStatus());
 

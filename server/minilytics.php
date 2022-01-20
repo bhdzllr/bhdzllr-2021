@@ -593,10 +593,10 @@ $app->post('minilytics-visit', function () use ($app) {
 	$config = $app->getValue('minilyticsConfig');
 
 	if (!$config->isSiteIdValid($json->siteId)) {
-		return Result::generateArray(
-			RESULT::ERROR,
+		return new Result(Result::generateArray(
+			RESULT::INVALID,
 			'Bad request, site ID is invalid.',
-		);
+		), 400);
 	}
 
 	$siteIds = $config->getSiteIds();
@@ -627,11 +627,11 @@ $app->post('minilytics-visit', function () use ($app) {
 	$saved = $visit->save();
 
 	if (!$saved) {
-		return Result::generateArray(
+		return new Result(Result::generateArray(
 			RESULT::INVALID,
 			'Bad request, one or more parameters are invalid.',
 			$visit->getErrors(),
-		);
+		), 400);
 	}
 
 	return [
@@ -653,10 +653,10 @@ $app->post('minilytics-visit-update', function () use ($app) {
 	$config = $app->getValue('minilyticsConfig');
 
 	if (!$config->isSiteIdValid($json->siteId)) {
-		return Result::generateArray(
-			RESULT::ERROR,
+		return new Result(Result::generateArray(
+			RESULT::INVALID,
 			'Bad request, site ID is invalid.',
-		);
+		), 400);
 	}
 
 	$visit = Visit::findOne('guid', $json->guid, $json->siteId . '_visits');
@@ -664,11 +664,11 @@ $app->post('minilytics-visit-update', function () use ($app) {
 	$saved = $visit->save();
 
 	if (!$saved) {
-		return Result::generateArray(
-			RESULT::ERROR,
+		return new Result(Result::generateArray(
+			RESULT::INVALID,
 			'Bad request.',
 			$visit->getErrors(),
-		);
+		), 400);
 	}
 
 	return Result::generateArray();
@@ -687,10 +687,10 @@ $app->post('minilytics-event', function () use ($app) {
 	$config = $app->getValue('minilyticsConfig');
 
 	if (!$config->isSiteIdValid($json->siteId)) {
-		return Result::generateArray(
-			RESULT::ERROR,
+		return new Result(Result::generateArray(
+			RESULT::INVALID,
 			'Bad request, site ID is invalid.',
-		);
+		), 400);
 	}
 
 	$validator = new Validator();
@@ -704,11 +704,11 @@ $app->post('minilytics-event', function () use ($app) {
 	$saved = $event->save();
 
 	if (!$saved) {
-		return Result::generateArray(
+		return new Result(Result::generateArray(
 			RESULT::INVALID,
 			'Bad request, one or more parameters are invalid.',
 			$event->getErrors(),
-		);
+		), 400);
 	}
 
 	return Result::generateArray();
