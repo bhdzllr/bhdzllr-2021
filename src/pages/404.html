@@ -1,0 +1,64 @@
+{{#extend "layouts/main-container" title="Page not found - 404" bodyClassList="page-not-found"}}
+{{#content "inline-style"}}
+<style>
+	h1 {
+		position: relative;
+
+		font-size: 9rem;
+		text-shadow: 5px 7px 10px #000000;
+	}
+
+	h1::before,
+	h1::after {
+		position: absolute;
+		top: 0;
+		left: 0;
+
+		content: attr(data-text);
+		width: 100%;
+		height: 100%;
+		overflow: hidden;
+
+		animation-name: glitch;
+		animation-duration: 2.5s;
+		animation-timing-function: linear;
+		animation-iteration-count: infinite;
+		animation-direction: alternate;
+	}
+
+	h1::before {
+		left: -2px;
+
+		animation-delay: 0.5s;
+
+		text-shadow: -1px 0 blue; 
+	}
+
+	h1::after {
+		left: 2px;
+
+		text-shadow: 1px 0 red; 
+	}
+
+	.subtitle {
+		font-size: 1.5rem;
+	}
+</style>
+{{/content}}
+{{#content "content"}}
+
+<article class="text-center">
+	<header>
+		<h1 data-text="404">404</h1>
+		<p class="subtitle">Oops, this is not the page you are looking for.</p>
+	</header>
+
+	<p>
+		Page not found. The requested page does not exist, does no longer exists, or has been moved.
+		Please use the menu at the top of this page or<br />
+		<a href="/">go back to the home page</a>.
+	</p>
+</article>
+
+{{/content}}
+{{/extend}}
