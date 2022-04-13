@@ -3,6 +3,7 @@ const OVERVIEW_TABLE_MAX_ROWS = 10;
 let root;
 let siteId;
 let data;
+let dialogs = [];
 
 document.addEventListener('DOMContentLoaded', async function (e) {
 	root = document.querySelector('.js-root');
@@ -383,15 +384,15 @@ function renderTable(result, mapping, caption, rows) {
 }
 
 function renderDetailsButton(result, dialogModalSelector) {
-	if (result.length <= OVERVIEW_TABLE_MAX_ROWS) return '';
+	if (result.length == 0) return '';
 
 	return `<button class="details-button" data-dm="${dialogModalSelector}">Details</button>`;
 }
 
-function renderDetailsDialogModal(className, contenetAsHtml) {
+function renderDetailsDialogModal(className, contentAsHtml, ariaLabelledBy) {
 	return `
-		<template class="${className}">
-			${contenetAsHtml}
+		<template class="${className}" data-aria-labelledby="${ariaLabelledBy}">
+			${contentAsHtml}
 		</template>
 	`;
 }
@@ -403,16 +404,16 @@ function renderPages() {
 		${renderTable(data.pages, {
 			name: 'Page',
 			visits: 'Views',
-			unique: 'Visitors',
+			unique: 'Entries',
 		}, null, OVERVIEW_TABLE_MAX_ROWS)}
 
 		${renderDetailsButton(data.pages, '.js-dm-pages')}
 		${renderDetailsDialogModal('js-dm-pages',
-			`<h1>Pages</h1>` +
+			`<h1 id="dm-pages">Pages</h1>` +
 			renderTable(data.pages, {
 				name: 'Page',
 				visits: 'Views',
-				unique: 'Visitors',
+				unique: 'Entries',
 				duration: function (item) {
 					if (!item) return 'Duration';
 
@@ -424,7 +425,8 @@ function renderPages() {
 					if (total == 0) return `-`;
 					return formatToMinutesAndSeconds(total / item.context.length);
 				},
-			})
+			}),
+			'dm-pages',
 		)}
 	`;
 }
@@ -449,12 +451,13 @@ function renderSources() {
 
 				${renderDetailsButton(data.referrers, '.js-dm-sources-referrer')}
 				${renderDetailsDialogModal('js-dm-sources-referrer',
-					`<h1>Referrers</h1>` +
+					`<h1 id="dm-referrers">Referrers</h1>` +
 					renderTable(data.referrers, {
 						name: 'Referrer',
 						visits: 'Views',
 						unique: 'Visitors',
-					})
+					}),
+					'dm-referrers',
 				)}
 			</section>
 
@@ -468,12 +471,13 @@ function renderSources() {
 
 				${renderDetailsButton(data.utmSources, '.js-dm-sources-source') }
 				${renderDetailsDialogModal('js-dm-sources-source',
-					`<h1>UTM Sources</h1>` +
+					`<h1 id="dm-sources-sources">UTM Sources</h1>` +
 					renderTable(data.utmSources, {
 						name: 'UTM Source',
 						visits: 'Views',
 						unique: 'Visitors',
-					})
+					}),
+					'dm-sources-sources',
 				)}
 			</section>
 
@@ -487,12 +491,13 @@ function renderSources() {
 
 				${renderDetailsButton(data.utmMediums, '.js-dm-sources-medium')}
 				${renderDetailsDialogModal('js-dm-sources-medium',
-					`<h1>UTM Mediums</h1>` +
+					`<h1 id="dm-sources-mediums">UTM Mediums</h1>` +
 					renderTable(data.utmMediums, {
 						name: 'UTM Medium',
 						visits: 'Views',
 						unique: 'Visitors',
-					})
+					}),
+					'dm-sources-medium',
 				)}
 			</section>
 
@@ -506,12 +511,13 @@ function renderSources() {
 
 				${renderDetailsButton(data.utmCampaigns, '.js-dm-sources-campaign')}
 				${renderDetailsDialogModal('js-dm-sources-campaign',
-					`<h1>UTM Campaigns</h1>` +
+					`<h1 id="dm-sources-campaign">UTM Campaigns</h1>` +
 					renderTable(data.utmCampaigns, {
 						name: 'UTM Campaign',
 						visits: 'Views',
 						unique: 'Visitors',
-					})
+					}),
+					'dm-sources-campaign',
 				)}
 			</section>
 		</bhdzllr-tabs>
@@ -529,7 +535,7 @@ function renderCountries() {
 
 		${renderDetailsButton(data.countries, '.js-dm-countries')}
 		${renderDetailsDialogModal('js-dm-countries',
-			`<h1>Countries</h1>` +
+			`<h1 id="dm-countries">Countries</h1>` +
 			renderTable(data.countries, {
 				name: 'Country',
 				visits: function (item) {
@@ -540,7 +546,8 @@ function renderCountries() {
 					if (!item) return 'Visitors';
 					return `${item.unique} ${formatToPercentageString((item.unique * 100) / data.visits.unique)}`;
 				},
-			})
+			}),
+			'dm-countries',
 		)}
 	`;
 }
@@ -569,7 +576,7 @@ function renderDevices() {
 
 				${renderDetailsButton(data.devices, '.js-dm-devices')}
 				${renderDetailsDialogModal('js-dm-devices',
-					`<h1>Devices</h1>` +
+					`<h1 id="dm-devices">Devices</h1>` +
 					renderTable(data.devices, {
 						name: function (item) {
 							if (!item) return 'Screen size';
@@ -583,7 +590,8 @@ function renderDevices() {
 							if (!item) return 'Visitors';
 							return `${item.unique} ${formatToPercentageString((item.unique * 100) / data.visits.unique)}`;
 						},
-					})
+					}),
+					'dm-devices',
 				)}
 			</section>
 
@@ -597,7 +605,7 @@ function renderDevices() {
 
 				${renderDetailsButton(data.browserNames, '.js-dm-browser-names')}
 				${renderDetailsDialogModal('js-dm-browser-names',
-					`<h1>Browser Names</h1>` +
+					`<h1 id="dm-browser-names">Browser Names</h1>` +
 					renderTable(data.browserNames, {
 						name: 'Browser',
 						visits: function (item) {
@@ -608,7 +616,8 @@ function renderDevices() {
 							if (!item) return 'Visitors';
 							return `${item.unique} ${formatToPercentageString((item.unique * 100) / data.visits.unique)}`;
 						},
-					})
+					}),
+					'dm-browser-names',
 				)}
 			</section>
 
@@ -622,7 +631,7 @@ function renderDevices() {
 
 				${renderDetailsButton(data.browserVersions, '.js-dm-browser-versions') }
 				${renderDetailsDialogModal('js-dm-browser-versions',
-					`<h1>Browser Version</h1>` +
+					`<h1 id="dm-browser-versions">Browser Version</h1>` +
 					renderTable(data.browserVersions, {
 						name: 'Browser',
 						visits: function (item) {
@@ -633,7 +642,8 @@ function renderDevices() {
 							if (!item) return 'Visitors';
 							return `${item.unique} ${formatToPercentageString((item.unique * 100) / data.visits.unique)}`;
 						},
-					})
+					}),
+					'dm-browser-versions',
 				)}
 			</section>
 		</bhdzllr-tabs>
@@ -706,8 +716,9 @@ function renderEvents() {
 
 		${renderDetailsButton(data.events, '.js-dm-events')}
 		${renderDetailsDialogModal('js-dm-events',
-			`<h1>Events</h1>` +
-			renderEventsTable(data.events)
+			`<h1 id="dm-events">Events</h1>` +
+			renderEventsTable(data.events),
+			'dm-events',
 		)}
 	`;
 }
@@ -776,7 +787,10 @@ function render() {
 	`;
 
 	addDialogModalDefaultStyles();
-	initDialogsModalWithTemplate();
+	for (const dialog of dialogs) {
+		dialog.remove();
+	}
+	dialogs = initDialogsModalWithTemplate();
 
 	setTimeout(() => window.scrollTo(0, 0)); // Render jump fix
 }
@@ -851,10 +865,10 @@ class DialogModal {
 
 	constructor({
 		contentAsHtml,
+		ariaLabelledBy = null,
 		showOnCreation = false,
 		showCallback = null,
 		hideCallback = null,
-		ariaLabelledBy = '',
 		hideRootScrollbars = true,
 	}) {
 		this.contentAsHtml = contentAsHtml;
@@ -875,7 +889,9 @@ class DialogModal {
 		this.initDom();
 		this.initListeners();
 
-		if (this.showOnCreation) this.show();
+		this.setContentAsHtml(this.contentAsHtml);
+
+		if (this.showOnCreation) setTimeout(() => this.show());
 	}
 
 	initDom() {
@@ -890,10 +906,8 @@ class DialogModal {
 		this.dialog.classList.add('js-dm-dialog');
 		this.dialog.setAttribute('role', 'dialog');
 		this.dialog.setAttribute('aria-modal', 'true'); // Tell screenreaders that content behind the modal is not interactive
-		this.dialog.setAttribute('aria-labelledby', this.ariaLabelledBy); // Tell screenreaders the ID of the title element
+		if (this.ariaLabelledBy) this.dialog.setAttribute('aria-labelledby', this.ariaLabelledBy); // Tell screenreaders the ID of the title element
 	
-		this.setContentAsHtml(this.contentAsHtml);
-
 		this.btnClose = document.createElement('button');
 		this.btnClose.classList.add('dm-btn-close');
 		this.btnClose.classList.add('js-dm-btn-close');
@@ -923,14 +937,13 @@ class DialogModal {
 		});
 
 		document.addEventListener('keyup', (e) => {
-			if (e.keyCode != 27) return;
+			const keyCode = e.which || e.keyCode;
+
+			if (keyCode != 27) return;
 
 			let overlay = document.querySelector('.js-dm-overlay');
 			if (overlay) this.hide();
 		});
-
-		this.handleFirstFocusableElementHandler = this.handleFirstFocusableElement.bind(this);
-		this.handleLastFocusableElementHandler = this.handleLastFocusableElement.bind(this);
 	}
 
 	setContentAsHtml(contentAsHtml) {
@@ -943,6 +956,9 @@ class DialogModal {
 
 		this.firstFocusableElement = childNodes[0];
 		this.lastFocusableElement = childNodes[childNodes.length - 1];
+
+		this.handleFirstFocusableElementHandler = this.handleFirstFocusableElement.bind(this);
+		this.handleLastFocusableElementHandler = this.handleLastFocusableElement.bind(this);
 
 		this.setFirstFocusableElement(this.firstFocusableElement);
 		this.setLastFocusableElement(this.lastFocusableElement);
@@ -961,14 +977,18 @@ class DialogModal {
 	}
 
 	handleFirstFocusableElement(e) {
-		if (e.shiftKey && e.keyCode == 9) {
+		const keyCode = e.which || e.keyCode;
+
+		if (e.shiftKey && keyCode == 9) {
 			e.preventDefault();
 			this.focusLastFocusableElement();
 		}
 	}
 
 	handleLastFocusableElement(e) {
-		if (e.keyCode == 9 && !(e.shiftKey && e.keyCode == 9)) {
+		const keyCode = e.which || e.keyCode;
+
+		if (keyCode == 9 && !(e.shiftKey && keyCode == 9)) {
 			e.preventDefault();
 			this.focusFirstFocusableElement();
 		}
@@ -1050,6 +1070,8 @@ class DialogModal {
 }
 
 function initDialogsModalWithTemplate() {
+	const dialogsModal = [];
+
 	if (document.querySelector('[data-dm]')) {
 		const dialogModalTriggers = document.querySelectorAll('[data-dm]');
 
@@ -1058,11 +1080,17 @@ function initDialogsModalWithTemplate() {
 
 			if (document.querySelector(target)) {
 				const template = document.querySelector(target);
-				const templateClone = document.importNode(template.content, true);
+				const templateClone = template.content.cloneNode(true);
+				const ariaLabelledBy = template.dataset.ariaLabelledby
 				const tempDiv = document.createElement('div');
 				tempDiv.appendChild(templateClone);
 
-				const dialogModal = new DialogModal({ contentAsHtml: tempDiv.innerHTML });
+				const dialogModal = new DialogModal({
+					contentAsHtml: tempDiv.innerHTML,
+					ariaLabelledBy: ariaLabelledBy,
+				});
+
+				dialogsModal.push(dialogModal);
 
 				dialogModalTriggers[i].addEventListener('click', function (e) {
 					e.preventDefault();
@@ -1071,6 +1099,8 @@ function initDialogsModalWithTemplate() {
 			}
 		}
 	}
+
+	return dialogsModal;
 }
 
 function addDialogModalDefaultStyles() {
@@ -1259,9 +1289,6 @@ class Tabs extends HTMLElement {
 	onKeyDown(e) {
 		if (e.altKey) return;
 		if (e.keyCode == KEYCODE.TAB) return;
-
-		e.preventDefault();
-
 		if (e.target.getAttribute('role') !== 'tab') return;
 
 		const tabs = this.getTabs();
