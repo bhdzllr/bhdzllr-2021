@@ -1748,6 +1748,10 @@ class App extends Router {
 		return $this->queryParams;
 	}
 
+	public function setParsedBody(array $parsedBody) {
+		$this->parsedBody = $parsedBody;
+	}
+
 	public function getParsedBody(): array {
 		return $this->parsedBody;
 	}
@@ -1906,7 +1910,7 @@ class AppBeforeInterceptor {
 
 		$token = $this->app->getHeader($this->csrfTokenHeader)
 			? $this->app->getHeader($this->csrfTokenHeader)
-			: $this->app->parsedBody[$this->csrfTokenName] ?? null;
+			: $this->app->getParsedBody()[$this->csrfTokenName] ?? null;
 
 		if (!$token || !Session::hasValidToken($token)) {
 			throw new HttpException('CSRF Violation', 400);
@@ -1917,7 +1921,7 @@ class AppBeforeInterceptor {
 		$contentType = explode(';', $this->app->getHeader('Content-Type'))[0];
 
 		if ($contentType == 'application/x-www-form-urlencoded' || $contentType == 'multipart/form-data') {
-			$post = $this->app->parsedBody;
+			$post = $this->app->getParsedBody();
 
 			foreach ($post as $key => $value) {
 				if (!in_array($key, $this->xssFilterExceptions, true)) {
@@ -1926,7 +1930,7 @@ class AppBeforeInterceptor {
 			}
 
 			$_POST = $post;
-			$this->app->parsedBody = $post;
+			$this->app->setParsedBody($post);
 		}
 	}
 
