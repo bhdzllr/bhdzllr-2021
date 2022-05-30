@@ -1196,8 +1196,8 @@ class View {
 	private array $areas;
 	private I18n $i18n;
 
-	public function withLayout(string $file, array|ActiveRecord $arrayOrRecord, bool $sanitize = true): self {
-		if ($sanitize) {
+	public function withLayout(string $file, array|ActiveRecord|null $arrayOrRecord = null, bool $sanitize = true): self {
+		if ($arrayOrRecord && $sanitize) {
 			$data = $this->sanitizeTemplateData($arrayOrRecord);
 		} else {
 			$data = $arrayOrRecord;
@@ -1209,8 +1209,8 @@ class View {
 		return $this;
 	}
 
-	public function withArea(string $file, array|ActiveRecord $arrayOrRecord, ?string $areaName = 'main', ?bool $sanitize = true): self {
-		if ($sanitize) {
+	public function withArea(string $file, array|ActiveRecord|null $arrayOrRecord = null, ?string $areaName = 'main', ?bool $sanitize = true): self {
+		if ($arrayOrRecord && $sanitize) {
 			$data = $this->sanitizeTemplateData($arrayOrRecord);
 		} else {
 			$data = $arrayOrRecord;
