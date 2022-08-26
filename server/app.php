@@ -678,6 +678,10 @@ class Validator {
 		return $this->errors;
 	}
 
+	public function reset() {
+		$this->errors = [];
+	}
+
 	public function isValid() {
 		if (count($this->errors) > 0) return false;
 
@@ -692,7 +696,7 @@ class Migration {
 
 	private string $file = './.migrations';
 
-	public function __construct(?string $file) {
+	public function __construct(?string $file = null) {
 		$this->createDatabaseFromEnv();
 
 		if (isset($file)) $this->file = $file;
@@ -1110,13 +1114,15 @@ abstract class ActiveRecord implements JsonSerializable {
 	public function isValid(): bool {
 		if (!isset($this->validator)) return true;
 
+		$this->validator->reset();
+
 		$this->constraints($this->validator, $this->constraintsContext);
 
 		return $this->validator->isValid();
 	}
 
 	public function getErrors(): array {
-		if (!$this->validator) return [];
+		if (!isset($this->validator)) return [];
 		return $this->validator->getErrors();
 	}
 
@@ -1205,6 +1211,14 @@ class View {
 
 		$this->layout['file'] = $file;
 		$this->layout['data'] = $data;
+
+		return $this;
+	}
+
+	public function withLayoutData(array $data = [], ?bool $sanitze = true) {
+		if ($sanitize) $data = $this->sanitzeTemplateData($data);
+
+		$this->layout['data'] = array_merge($this->layout['data'], $data);
 
 		return $this;
 	}
@@ -1309,6 +1323,14 @@ class View {
 
 	private function getI18n(string $key, ?string $fallback = null, ...$args) {
 		return $this->i18n->get($key, $fallback, ...$args);
+	}
+
+	private function component(string $className, ?array $params = []): ?string {
+		$component = new $className($params);
+
+		if (!($component instanceof View)) return null;
+
+		return $component->render();
 	}
 
 	public function renderAreas(): string {
@@ -1513,6 +1535,16 @@ class Router {
 
 		if ($this->contextPath) $uri = '/' . trim($this->contextPath, '/\\') . $uri;
 
+		if (gettype($callable) === 'array') {
+			$class = $callable[0];
+			$action = $callable[1] ?? 'index';
+			$object = $this->container->resolve($class);
+
+			if (!method_exists($object, $action)) throw new HttpException('Not Found.', 404);
+
+			$callable = [$object, $action];
+		}
+
 		$this->routes[$method][] = new Route($method, $uri, $callable);
 		return end($this->routes[$method]);
 	}
@@ -1642,7 +1674,7 @@ class App extends Router {
 	use InterceptorTrait;
 	use HeaderTrait;
 
-	private DIContainer $container;
+	protected DIContainer $container;
 
 	private string $host;
 	private string $fullUrl;
@@ -1809,7 +1841,6 @@ class App extends Router {
 		if ($route->getInterceptorBefore()) ($route->getInterceptorBefore())($this);
 
 		$result = ($route->getAction())(...$route->getParameters());
-		// @todo Wenn Rückgabe View -> Routen injecten für routeByName, siehe RouteTransporter
 		if (!$result instanceof Result) $result = new Result($result);
 
 		if ($route->getInterceptorAfter()) $result = ($route->getInterceptorAfter())($this, $result);
