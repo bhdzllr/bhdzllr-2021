@@ -1420,6 +1420,30 @@ class Result {
 
 }
 
+class ResultVariations {
+
+	private array $variations = [];
+
+	public function add(string $contentType, Result $result) {
+		$this->variations[$contentType] = $result;
+
+		return $this;
+	}
+
+	public function has(string $contentType): bool {
+		return isset($this->variations[$contentType]);
+	}
+
+	public function get(?string $contentType = null): array|Result {
+		if ($contentType && $this->variations[$contentType]) {
+			return $this->variations[$contentType];
+		}
+
+		return $this->variations;
+	}
+
+}
+
 class Route {
 
 	use InterceptorTrait;
@@ -1746,7 +1770,7 @@ class App extends Router {
 		}
 
 		if (
-			$this->getHeader('Accept') == 'application/json' 
+			$this->getHeader('Accept') == 'application/json'
 			|| $this->getHeader('Content-Type') == 'application/json'
 		) {
 			if ($isDebugMode) {
@@ -1841,6 +1865,20 @@ class App extends Router {
 		if ($route->getInterceptorBefore()) ($route->getInterceptorBefore())($this);
 
 		$result = ($route->getAction())(...$route->getParameters());
+
+		if ($result instanceof ResultVariations) {
+			$accept = $this->getHeader('Accept');
+
+			if ($accept && $result->has($accept)) {
+				$result = $result->get($accept);
+			} else {
+				$variations = $result->get();
+				$result = reset($variations);
+			}
+
+			if (!$result) throw new HttpException('Not Found.', 404);
+		}
+
 		if (!$result instanceof Result) $result = new Result($result);
 
 		if ($route->getInterceptorAfter()) $result = ($route->getInterceptorAfter())($this, $result);
