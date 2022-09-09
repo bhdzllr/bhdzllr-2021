@@ -54,12 +54,12 @@ The project startet in June 2014 with a idea presentation with the mayor of Grab
 
 <hbs>
 {{#gallery43}}
-	{{galleryImage '/projects/graberner-geschichten/graberner-geschichten-start-desktop.png' 'Screenshot Graberner GeschichteN Website home page on desktop device'}}
+  {{galleryImage '/projects/graberner-geschichten/graberner-geschichten-start-desktop.png' 'Screenshot Graberner GeschichteN Website home page on desktop device'}}
   {{galleryImage '/projects/graberner-geschichten/graberner-geschichten-stories-desktop.png' 'Screenshot Graberner GeschichteN Website stories on desktop device'}}
-	{{galleryImage '/projects/graberner-geschichten/graberner-geschichten-news-1-desktop.png' 'Screenshot Graberner GeschichteN Website news on desktop device'}}
-	{{galleryImage '/projects/graberner-geschichten/graberner-geschichten-news-2-desktop.png' 'Screenshot Graberner GeschichteN Website news on desktop device'}}
+  {{galleryImage '/projects/graberner-geschichten/graberner-geschichten-news-1-desktop.png' 'Screenshot Graberner GeschichteN Website news on desktop device'}}
+  {{galleryImage '/projects/graberner-geschichten/graberner-geschichten-news-2-desktop.png' 'Screenshot Graberner GeschichteN Website news on desktop device'}}
   {{galleryImage '/projects/graberner-geschichten/graberner-geschichten-stories-mobile.png' 'Screenshot Graberner GeschichteN stories on mobile device'}}
-  {{galleryImage '/projects/graberner-geschichten/graberner-geschichten-news-mobile.png' 'Screenshot Graberner GeschichteN news on mobile device '}}
+  {{galleryImage '/projects/graberner-geschichten/graberner-geschichten-news-mobile.png' 'Screenshot Graberner GeschichteN news on mobile device'}}
 {{/gallery43}}
 </hbs>
 

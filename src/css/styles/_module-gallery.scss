@@ -48,7 +48,23 @@
 	}
 }
 
-.gallery__loader {
+.gallery-detail-image {
+	display: flex;
+	align-items: center;
+	max-height: calc(100vh - 8rem);
+
+	img {
+		display: block;
+		width: auto;
+		max-width: 100%;
+		height: auto;
+		max-height: 100%;
+		margin: 0 auto;
+		box-sizing: border-box;
+	}
+}
+
+.image-loader {
 	position: relative;
 
 	&::after {
@@ -83,19 +99,5 @@
 		&:active {
 			outline: none;
 		}
-	}
-
-	img {
-		display: block;
-		// width: auto;
-		// max-width: 100%;
-		// height: auto;
-		// max-height: calc(100vh - 7rem);
-		margin: 0 auto;
-		box-sizing: border-box;
-
-		// &.js-lazy-image {
-		// 	width: 100%;
-		// }
 	}
 }

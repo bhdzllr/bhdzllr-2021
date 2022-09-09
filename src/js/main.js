@@ -223,7 +223,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 				showCallback: () => {
 					lazyLoadImages({
 						loadCallback: (image) => {
-							image.parentElement.classList.remove('gallery__loader');
+							image.parentElement.classList.remove('image-loader');
 						},
 					});
 				},
@@ -234,9 +234,10 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 
 			for (let i = 0; i < galleryImages.length; i++) {
 				const galleryImage = galleryImages[i];
+				const landscape = parseInt(galleryImage.dataset.width) > parseInt(galleryImage.dataset.height);
 
 				gallerySliderContent += `
-					<div class="gallery__loader" data-text="Loading ...">
+					<div class="gallery-detail-image image-loader" data-text="Loading ...">
 						<img
 							src="${galleryImage.dataset.preview}"
 							alt="${galleryImage.dataset.alt}"
@@ -245,6 +246,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 							sizes="${galleryImage.dataset.sizes}"
 							width="${galleryImage.dataset.width}"
 							height="${galleryImage.dataset.height}"
+							style="${landscape ? `width: ${galleryImage.dataset.width}px;` : `height: ${galleryImage.dataset.height}px`}"
 							decoding="async"
 							class="js-lazy-image"
 						/>
