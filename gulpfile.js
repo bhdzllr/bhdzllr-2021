@@ -676,46 +676,48 @@ function res(cb) {
 	cb();
 }
 
-async function responsiveImages(cb) {
-	const resize = function (imagePath, distFolder, width, suffix) {
-		let imageExtension = path.extname(imagePath);
-		let imageName = path.basename(imagePath).replace(imageExtension, '');
+async function imageVariations(cb) {
+	const resize = function (imagePath, width, suffix, dryRun) {
+		const imageExtension = path.extname(imagePath);
+		const imageName = path.basename(imagePath).replace(imageExtension, '');
+		const imageDistFolder = imagePath.replace(path.basename(imageName) + imageExtension, '');
+		const imageNameResized = imageDistFolder + imageName + suffix + imageExtension;
 
-		// PNG to JPG
-		// if (imageName.includes(' (jpg)')) {
-		// 	imageExtension = '.jpg';
-		// 	imageName = imageName.replace(' (jpg)', '');
-		// }
+		if (!dryRun) {
+			// PNG to JPG
+			// if (imageName.includes(' (jpg)')) {
+			// 	imageExtension = '.jpg';
+			// 	imageName = imageName.replace(' (jpg)', '');
+			// }
 
-		const imageNameResized = distFolder + imageName + suffix + imageExtension;
+			let sharpImage = sharp(imagePath)
+				.resize({
+					width: width,
+					withoutEnlargement: true,
+				});
 
-		let sharpImage = sharp(imagePath)
-			.resize({
-				width: width,
-				withoutEnlargement: true,
-			});
+			if (['.jpg', '.jpeg'].includes(imageExtension)) {
+				sharpImage.jpeg({
+					quality: 60,
+					force: true,
+				});
+			} else if (['.png'].includes(imageExtension)) {
+				sharpImage.png({
+					palette: true,
+					quality: 80,
+				});
+			}
 
-		if (['.jpg', '.jpeg'].includes(imageExtension)) {
-			sharpImage.jpeg({
-				quality: 60,
-				force: true,
-			});
-		} else if (['.png'].includes(imageExtension)) {
-			sharpImage.png({
-				palette: true,
-				quality: 80,
-			});
+			if (suffix == '-preview') {
+				sharpImage.blur();
+			}
+
+			sharpImage
+				.toFile(imageNameResized)
+				.catch(function (err) {
+					console.log('Sharp ' + err);
+				});
 		}
-
-		if (suffix == '-preview') {
-			sharpImage.blur();
-		}
-
-		sharpImage
-			.toFile(imageNameResized)
-			.catch(function (err) {
-				console.log('Sharp ' + err);
-			});
 
 		return imageNameResized;
 	};
@@ -723,30 +725,41 @@ async function responsiveImages(cb) {
 	const imageNames = glob.sync(srcFolder + '/!(img)/**/*.{jpg,jpeg,png}');
 
 	for (imageName of imageNames) {
-		const imageDistFolder = imageName.replace(path.basename(imageName), '').replace(srcFolder, distFolder);
+		const imageCheckExtension = path.extname(imageName);
+		const imageCheckName = path.basename(imageName).replace(imageCheckExtension, '');
+		const imageCheck = imageName.replace(imageCheckName + imageCheckExtension, imageCheckName + '-preview' + imageCheckExtension);
 
-		if (!fs.existsSync(imageDistFolder)) {
-			fs.mkdirSync(imageDistFolder, { recursive: true }, (err) => {
-				if (err) throw err;
-			});
+		// Skip already generated image variations
+		if (
+			imageName.includes('-preview.')
+			|| imageName.includes('-thumbnail.')
+			|| imageName.includes('-480.')
+			|| imageName.includes('-960.')
+			|| imageName.includes('-1200.')
+		) {
+			continue;
 		}
 
+		// Skip image if image with suffix '-preview' exists
+		let dryRun = false;
+		if (imageNames.includes(imageCheck)) dryRun = true;;
+
 		const imageOriginalMetadata = await sharp(imageName).metadata();
-		const imagePreview = resize(imageName, imageDistFolder, 25, '-preview');
-		const imageThumbnail = resize(imageName, imageDistFolder, 200, '-thumbnail');
-		const imageMedium = resize(imageName, imageDistFolder, 480, '-480');
-		const imageLarge = resize(imageName, imageDistFolder, 960, '-960');
-		const imageXLarge = resize(imageName, imageDistFolder, 1200, '-1200');
+		const imagePreview = resize(imageName, 25, '-preview', dryRun);
+		const imageThumbnail = resize(imageName, 200, '-thumbnail', dryRun);
+		const imageMedium = resize(imageName, 480, '-480', dryRun);
+		const imageLarge = resize(imageName, 960, '-960', dryRun);
+		const imageXLarge = resize(imageName, 1200, '-1200', dryRun);
 
 		images.push({
 			original: imageName.replace(srcFolder, ''),
 			originalWidth: imageOriginalMetadata.width,
 			originalHeight: imageOriginalMetadata.height,
-			preview: imagePreview.replace(distFolder, ''),
-			thumbnail: imageThumbnail.replace(distFolder, ''),
-			medium: imageMedium.replace(distFolder, ''),
-			large: imageLarge.replace(distFolder, ''),
-			xlarge: imageXLarge.replace(distFolder, ''),
+			preview: imagePreview.replace(srcFolder, ''),
+			thumbnail: imageThumbnail.replace(srcFolder, ''),
+			medium: imageMedium.replace(srcFolder, ''),
+			large: imageLarge.replace(srcFolder, ''),
+			xlarge: imageXLarge.replace(srcFolder, ''),
 		});
 	}
 
@@ -803,7 +816,8 @@ function deployDown() {
 	return del([distFolder + '/package.tar']);
 }
 
-exports.default = series(clean, responsiveImages, types, parallel(pages, styles, scripts, server, res), dev);
+exports.default = series(clean, imageVariations, types, parallel(pages, styles, scripts, server, res), dev);
 exports.dev = exports.default;
-exports.dist = series(clean, responsiveImages, types, parallel(pages, styles, scripts, server, res));
+exports.dist = series(clean, imageVariations, types, parallel(pages, styles, scripts, server, res));
 exports.deploy = series(deployUp, deployRemote, deployDown);
+exports.imageVariations = imageVariations;

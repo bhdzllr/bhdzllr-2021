@@ -7,9 +7,10 @@
     "node": "16.17.0"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "gulp dev",
     "build": "gulp dist",
+    "images": "gulp imageVariations",
+    "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "gulp deploy"
   },
   "author": "bhdzllr",
