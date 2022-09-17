@@ -39,21 +39,9 @@ const sass = require('gulp-sass')(require('sass'));
 const postcss = require('gulp-postcss');
 const rename = require('gulp-rename');
 const sourcemaps = require('gulp-sourcemaps');
-const tar = require('gulp-tar');
-const GulpSSH = require('gulp-ssh');
 
 const distFolder = 'dist';
 const srcFolder = 'src';
-const sshConfig = require('./ssh.json');
-const ssh = new GulpSSH({
-	ignoreErrors: false,
-	sshConfig: {
-		host: sshConfig.host,
-		port: sshConfig.port,
-		username: sshConfig.username,
-		// privateKey: fs.readFileSync(sshConfig.privateKey),
-	}
-});
 
 const images = [];
 const entries = {};
@@ -793,31 +781,7 @@ function dev() {
 	], series(server));
 }
 
-function deployUp() {
-	if (sshConfig.host === '0.0.0.0')
-		return console.error('Unable to deploy, SSH config in file "ssh.json" needed, see "ssh.exmaple.json".');
-
-	return src(distFolder + '/**/*', { base: '.' }) // base '.' to use whole dist folder
-		.pipe(tar('package.tar'))
-		.pipe(dest(distFolder))
-		.pipe(ssh.dest('/home/user/dist'));
-}
-
-function deployRemote() {
-	return ssh.shell([
-			'tar -xvf package.tar',
-			'rsync -av --delete /home/user/dist/ /var/www/html/',
-			'rm package.tar',
-			'rm -r /home/user/dist',
-		], { filePath: 'deploy-shell.log' });
-}
-
-function deployDown() {
-	return del([distFolder + '/package.tar']);
-}
-
 exports.default = series(clean, imageVariations, types, parallel(pages, styles, scripts, server, res), dev);
 exports.dev = exports.default;
 exports.dist = series(clean, imageVariations, types, parallel(pages, styles, scripts, server, res));
-exports.deploy = series(deployUp, deployRemote, deployDown);
 exports.imageVariations = imageVariations;
