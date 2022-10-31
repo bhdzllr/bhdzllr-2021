@@ -31,6 +31,7 @@ const md = require('markdown-it')({
 const HTMLParser = require('node-html-parser');
 const glob = require('glob');
 const sharp = require('sharp');
+const nodeHtmlToImage = require('node-html-to-image');
 const handlebars = require('gulp-compile-handlebars');
 const layouts = require('handlebars-layouts');
 const mergeStream = require('merge-stream');
@@ -43,7 +44,8 @@ const sourcemaps = require('gulp-sourcemaps');
 const distFolder = 'dist';
 const srcFolder = 'src';
 
-const images = [];
+const imagesVariations = [];
+const imagesTeasers = [];
 const entries = {};
 
 handlebars.Handlebars.registerHelper(layouts(handlebars.Handlebars));
@@ -53,7 +55,14 @@ handlebars.Handlebars.registerHelper({
 	},
 	ogImage: function (baseUrl, defaultImage, article) {
 		if (article && (article.imageSocial || article.image)) {
-			return baseUrl + (article.imageSocial ?? article.image)
+			const imageSrc = article.imageSocial ?? article.image;
+			let image = imagesTeasers.find(image => image.original == imageSrc);
+
+			if (!image) image = imagesVariations.find(image => image.original == imageSrc);
+
+			if (image && (image.src || image.xlarge)) {
+				return baseUrl + (image.src ?? image.xlarge);
+			}
 		}
 
 		return baseUrl + defaultImage;
@@ -68,12 +77,16 @@ handlebars.Handlebars.registerHelper({
 	ogImageWidth: function (defaultWidth, article) {
 		if (article && (article.imageSocial || article.image)) {
 			const imageSrc = article.imageSocial ?? article.image;
-			const image = images.find(image => image.original == imageSrc);
+			let image = imagesTeasers.find(image => image.original == imageSrc);
+
+			if (!image) image = imagesVariations.find(image => image.original == imageSrc);
+
 			if (!image) {
 				console.warn('[OG Image Width]: Image not found, returning default width.');
 				return defaultWidth;
 			}
-			return image.originalWidth;
+
+			return image.width ?? image.originalWidth;
 		}
 
 		return defaultWidth;
@@ -81,12 +94,16 @@ handlebars.Handlebars.registerHelper({
 	ogImageHeight: function (defaultHeight, article) {
 		if (article && (article.imageSocial || article.image)) {
 			const imageSrc = article.imageSocial ?? article.image;
-			const image = images.find(image => image.original == imageSrc);
+			let image = imagesTeasers.find(image => image.original == imageSrc);
+
+			if (!image) image = imagesVariations.find(image => image.original == imageSrc);
+
 			if (!image) {
 				console.warn('[OG Image Height]: Image not found, returning default height.');
 				return defaultHeight;
 			}
-			return image.originalHeight;
+
+			return image.height ?? image.originalHeight;
 		}
 
 		return defaultHeight;
@@ -117,7 +134,7 @@ handlebars.Handlebars.registerHelper({
 		}
 	},
 	image: function (src, alt, classList) {
-		const image = images.find(image => image.original == src);
+		const image = imagesVariations.find(image => image.original == src);
 
 		if (!image) return;
 
@@ -157,21 +174,21 @@ handlebars.Handlebars.registerHelper({
 		`);
 	},
 	imageWidth: function (src) {
-		const image = images.find(image => image.original == src);
+		const image = imagesVariations.find(image => image.original == src);
 
 		if (!image) return;
 
 		return image.originalWidth;
 	},
 	imageHeight: function (src) {
-		const image = images.find(image => image.original == src);
+		const image = imagesVariations.find(image => image.original == src);
 
 		if (!image) return;
 
 		return image.originalHeight;
 	},
 	galleryImage: function (src, alt) {
-		const image = images.find(image => image.original == src);
+		const image = imagesVariations.find(image => image.original == src);
 
 		if (!image) return;
 
@@ -390,6 +407,113 @@ function getPageTypes() {
 	];
 }
 
+async function generateImageVariation(imagePath, width, suffix, dryRun, text = null) {
+	try {
+		const imageExtension = path.extname(imagePath);
+		const imageName = path.basename(imagePath).replace(imageExtension, '');
+		const imageDistFolder = imagePath.replace(path.basename(imageName) + imageExtension, '');
+		const imageNameResized = imageDistFolder + imageName + suffix + imageExtension;
+
+		if (!dryRun) {
+			// PNG to JPG
+			// if (imageName.includes(' (jpg)')) {
+			// 	imageExtension = '.jpg';
+			// 	imageName = imageName.replace(' (jpg)', '');
+			// }
+
+			const options = {
+				width: width,
+				withoutEnlargement: true,
+			};
+			let sharpImage;
+
+			if (suffix == '-teaser' && text) {
+				options.height = 620;
+				sharpImage = sharp(imagePath).resize(options);
+
+				const image = await nodeHtmlToImage({
+					html: `
+						<html>
+							<head>
+								<style>
+									body {
+										display: flex;
+										align-items: flex-end;
+										justify-content: flex-start;
+										width: ${options.width}px;
+										height: ${options.height}px;
+										margin: 0;
+										padding: 2rem;
+										box-sizing: border-box;
+
+										background: linear-gradient(0deg, rgba(23, 37, 37, 0.8) 0%, rgba(0, 101, 78, 0.6) 100%); 
+
+										color: #00ddaa;
+										font-family: 'Open Sans', 'Open Sans Local', Helvetica, Arial, sans-serif;
+										font-size: 5rem;
+										font-weight: 700;
+										line-height: 1.5;
+									}
+
+									span {
+										padding: 0 1.5rem;
+										box-decoration-break: clone;
+										-webkit-box-decoration-break: clone;
+
+										background-color: #222222;
+									}
+								</style>
+							</head>
+							<body>
+								<div>
+									<span>${text}</span>
+								</div>
+							</body>
+						</html>
+					`,
+					transparent: true,
+				});
+				const imageBuffer = Buffer.from(image);
+
+				sharpImage
+					.composite([
+						{
+							input: imageBuffer,
+						}
+					]);
+			} else {
+				sharpImage = sharp(imagePath).resize(options);
+			}
+
+			if (['.jpg', '.jpeg'].includes(imageExtension)) {
+				sharpImage.jpeg({
+					quality: 60,
+					force: true,
+				});
+			} else if (['.png'].includes(imageExtension)) {
+				sharpImage.png({
+					palette: true,
+					quality: 80,
+				});
+			}
+
+			if (suffix == '-preview') {
+				sharpImage.blur();
+			}
+
+			sharpImage
+				.toFile(imageNameResized)
+				.catch(function (err) {
+					throw new Error('Sharp ' + err);
+				});
+		}
+
+		return imageNameResized;
+	} catch (e) {
+		console.log('Error while generating image variation: ', e);
+	}
+}
+
 function clean() {
 	return del([
 		distFolder,
@@ -435,7 +559,7 @@ async function typesSubtask(type) {
 			const entriesHtml = [];
 
 			src(type.src + '/**/*.md')
-				.pipe(data(function (file) {
+				.pipe(data(async function (file) {
 					const { data, content, errors } = fm(String(file.contents), {
 						'schema': {
 							'properties': type.schema
@@ -447,6 +571,25 @@ async function typesSubtask(type) {
 						for (error of errors) {
 							console.error(`Front Matter Warning with Property "${error.property}": ${error.message} in file "${error.filepath}"`);
 						}
+					}
+
+					if (data.imageSocial) {
+						const imageNames = glob.sync(srcFolder + '/!(img)/**/*-teaser.{jpg,jpeg,png}');
+						const imageCheckExtension = path.extname(data.imageSocial);
+						const imageCheckName = path.basename(data.imageSocial).replace(imageCheckExtension, '');
+						const imageCheck = data.imageSocial.replace(imageCheckName + imageCheckExtension, imageCheckName + '-teaser' + imageCheckExtension);
+
+						let dryRun = false;
+						if (imageNames.includes(imageCheck)) dryRun = true;
+
+						const imageTeaser = await generateImageVariation(srcFolder + data.imageSocial, 1200, '-teaser', dryRun, data.title);
+
+						imagesTeasers.push({
+							original: data.imageSocial.replace(srcFolder, ''),
+							src: imageTeaser.replace(srcFolder, ''),
+							width: 1200,
+							height: 620,
+						});
 					}
 
 					if (!data.meta) data.meta = {};
@@ -665,51 +808,6 @@ function res(cb) {
 }
 
 async function imageVariations(cb) {
-	const resize = function (imagePath, width, suffix, dryRun) {
-		const imageExtension = path.extname(imagePath);
-		const imageName = path.basename(imagePath).replace(imageExtension, '');
-		const imageDistFolder = imagePath.replace(path.basename(imageName) + imageExtension, '');
-		const imageNameResized = imageDistFolder + imageName + suffix + imageExtension;
-
-		if (!dryRun) {
-			// PNG to JPG
-			// if (imageName.includes(' (jpg)')) {
-			// 	imageExtension = '.jpg';
-			// 	imageName = imageName.replace(' (jpg)', '');
-			// }
-
-			let sharpImage = sharp(imagePath)
-				.resize({
-					width: width,
-					withoutEnlargement: true,
-				});
-
-			if (['.jpg', '.jpeg'].includes(imageExtension)) {
-				sharpImage.jpeg({
-					quality: 60,
-					force: true,
-				});
-			} else if (['.png'].includes(imageExtension)) {
-				sharpImage.png({
-					palette: true,
-					quality: 80,
-				});
-			}
-
-			if (suffix == '-preview') {
-				sharpImage.blur();
-			}
-
-			sharpImage
-				.toFile(imageNameResized)
-				.catch(function (err) {
-					console.log('Sharp ' + err);
-				});
-		}
-
-		return imageNameResized;
-	};
-
 	const imageNames = glob.sync(srcFolder + '/!(img)/**/*.{jpg,jpeg,png}');
 
 	for (imageName of imageNames) {
@@ -721,6 +819,7 @@ async function imageVariations(cb) {
 		if (
 			imageName.includes('-preview.')
 			|| imageName.includes('-thumbnail.')
+			|| imageName.includes('-teaser.')
 			|| imageName.includes('-480.')
 			|| imageName.includes('-960.')
 			|| imageName.includes('-1200.')
@@ -730,16 +829,16 @@ async function imageVariations(cb) {
 
 		// Skip image if image with suffix '-preview' exists
 		let dryRun = false;
-		if (imageNames.includes(imageCheck)) dryRun = true;;
+		if (imageNames.includes(imageCheck)) dryRun = true;
 
 		const imageOriginalMetadata = await sharp(imageName).metadata();
-		const imagePreview = resize(imageName, 25, '-preview', dryRun);
-		const imageThumbnail = resize(imageName, 200, '-thumbnail', dryRun);
-		const imageMedium = resize(imageName, 480, '-480', dryRun);
-		const imageLarge = resize(imageName, 960, '-960', dryRun);
-		const imageXLarge = resize(imageName, 1200, '-1200', dryRun);
+		const imagePreview = await generateImageVariation(imageName, 25, '-preview', dryRun);
+		const imageThumbnail = await generateImageVariation(imageName, 200, '-thumbnail', dryRun);
+		const imageMedium = await generateImageVariation(imageName, 480, '-480', dryRun);
+		const imageLarge = await generateImageVariation(imageName, 960, '-960', dryRun);
+		const imageXLarge = await generateImageVariation(imageName, 1200, '-1200', dryRun);
 
-		images.push({
+		imagesVariations.push({
 			original: imageName.replace(srcFolder, ''),
 			originalWidth: imageOriginalMetadata.width,
 			originalHeight: imageOriginalMetadata.height,

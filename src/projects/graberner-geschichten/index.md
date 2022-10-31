@@ -5,6 +5,7 @@ tagline: An Austrian history project that documents stories of the town Grabern 
 date: 2016-01-15
 image: /projects/graberner-geschichten/graberner-geschichten.jpg
 imageAlt: Graberner Geschichten Website Screenshot
+imageSocial: /projects/graberner-geschichten/graberner-geschichten.jpg
 year: 2016
 action: https://www.grabernergeschichten.at/
 categories:

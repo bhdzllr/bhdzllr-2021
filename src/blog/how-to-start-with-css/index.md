@@ -5,6 +5,7 @@ tagline: Learn about the CSS box model and how to position elements.
 date: 2021-09-06
 image: /blog/how-to-start-with-css/css-source-code.jpg
 imageAlt: CSS source code
+imageSocial: /blog/how-to-start-with-css/css-source-code.jpg
 categories:
   - Web Development
 tags:
