@@ -65,6 +65,13 @@ handlebars.Handlebars.registerHelper({
 			}
 		}
 
+		if (article && article.imageSocialGeneric) {
+			const genericImage = article.url + article.id + '.jpg';
+			let image = imagesTeasers.find(image => image.original == genericImage);
+
+			if (image) return baseUrl + image.src;
+		}
+
 		return baseUrl + defaultImage;
 	},
 	ogImageAlt: function (defaultAlt, article) {
@@ -336,6 +343,10 @@ function getPageTypes() {
 			type: 'string',
 			required: false,
 		},
+		'imageSocialGeneric': {
+			type: 'boolean',
+			required: false,
+		},
 		'categories': {
 			type: 'array',
 			required: true,
@@ -407,7 +418,7 @@ function getPageTypes() {
 	];
 }
 
-async function generateImageVariation(imagePath, width, suffix, dryRun, text = null) {
+async function generateImageVariation(imagePath, width, suffix, dryRun, text = null, create = false) {
 	try {
 		const imageExtension = path.extname(imagePath);
 		const imageName = path.basename(imagePath).replace(imageExtension, '');
@@ -429,7 +440,19 @@ async function generateImageVariation(imagePath, width, suffix, dryRun, text = n
 
 			if (suffix == '-teaser' && text) {
 				options.height = 620;
-				sharpImage = sharp(imagePath).resize(options);
+
+				if (create) {
+					sharpImage = sharp({
+						create: {
+							width: options.width,
+							height: options.height,
+							channels: 4,
+							background: '#222222',
+						},
+					});
+				} else {
+					sharpImage = sharp(imagePath).resize(options);
+				}
 
 				const image = await nodeHtmlToImage({
 					html: `
@@ -573,7 +596,23 @@ async function typesSubtask(type) {
 						}
 					}
 
-					if (data.imageSocial) {
+					const url = file.path.split('/' + srcFolder)[1].replace('index.md', '');
+
+					if (data.imageSocialGeneric) {
+						const imageNames = glob.sync(srcFolder + '/!(img)/**/*-teaser.{jpg,jpeg,png}');
+						const genericImage = url + data.id + '-teaser.jpg';
+						let dryRun = false;
+						if (imageNames.includes(srcFolder + genericImage)) dryRun = true;
+
+						const imageTeaser = await generateImageVariation(srcFolder + genericImage, 1200, '-teaser', dryRun, data.title, true);
+
+						imagesTeasers.push({
+							original: genericImage,
+							src: imageTeaser.replace(srcFolder, ''),
+							width: 1200,
+							height: 620,
+						});
+					} else if (data.imageSocial) {
 						const imageNames = glob.sync(srcFolder + '/!(img)/**/*-teaser.{jpg,jpeg,png}');
 						const imageCheckExtension = path.extname(data.imageSocial);
 						const imageCheckName = path.basename(data.imageSocial).replace(imageCheckExtension, '');
@@ -612,7 +651,7 @@ async function typesSubtask(type) {
 					
 					templateData.article = data;
 					templateData.article.type = type.name;
-					templateData.article.url = file.path.split('/' + srcFolder)[1].replace('index.md', '');
+					templateData.article.url = url;
 					templateData.article.createdAt = file.stat.birthtime;
 					templateData.article.updatedAt = file.stat.mtime;
 
