@@ -66,7 +66,7 @@ handlebars.Handlebars.registerHelper({
 		}
 
 		if (article && article.imageSocialGeneric) {
-			const genericImage = article.url + article.id + '.jpg';
+			const genericImage = article.url + article.id + '-teaser.jpg';
 			let image = imagesTeasers.find(image => image.original == genericImage);
 
 			if (image) return baseUrl + image.src;
