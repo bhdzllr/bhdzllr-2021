@@ -1,6 +1,6 @@
 ---
 id: the-last-gr8conf
-title: The last GR8Conf
+title: The Last GR8Conf
 tagline: In 2019 I attended my first GR8Conf without knowing that this would be the last.
 date: 2022-11-03
 image: /blog/the-last-gr8conf/gr8conf-it-uni-copenhagen-1.jpg
