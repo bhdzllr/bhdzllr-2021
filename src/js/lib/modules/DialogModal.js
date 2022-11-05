@@ -8,6 +8,7 @@ export class DialogModal {
 
 	constructor({
 		contentAsHtml,
+		title = null,
 		ariaLabelledBy = null,
 		showOnCreation = false,
 		showCallback = null,
@@ -15,6 +16,7 @@ export class DialogModal {
 		hideRootScrollbars = true,
 	}) {
 		this.contentAsHtml = contentAsHtml;
+		this.title = title;
 		this.showOnCreation = showOnCreation;
 		this.showCallback = showCallback;
 		this.hideCallback = hideCallback;
@@ -24,10 +26,21 @@ export class DialogModal {
 		this.overlay;
 		this.dialog;
 		this.btnClose;
+		this.headerBar;
+		this.titleElement;
 		this.firstFocusableElement;
 		this.lastFocusableElement;
 		this.lastElement;
 		this.isOpen = false;
+		this.initialStyles = {
+			documentElement: {
+				overflow: null,
+				scrollbarGutter: null,
+			},
+			body: {
+				overflow: null,
+			}
+		}
 
 		this.initDom();
 		this.initListeners();
@@ -57,7 +70,24 @@ export class DialogModal {
 		this.btnClose.setAttribute('aria-label', 'Close');
 		this.btnClose.innerHTML = `<span aria-hidden="true">&times;</span>`;
 
-		this.overlay.appendChild(this.btnClose);
+		this.headerBar = document.createElement('div');
+		this.headerBar.classList.add('dm-header-bar');
+		this.headerBar.classList.add('js-dm-header-bar');
+
+		if (this.title) {
+			this.titleElement = document.createElement('strong');
+			this.titleElement.classList.add('dm-title');
+			this.titleElement.classList.add('js-dm-title');
+			this.titleElement.textContent = this.title;
+			this.titleElement.id = 'dm-title-' + Math.random().toString(36).substring(2, 9);
+			this.headerBar.appendChild(this.titleElement);
+			this.headerBar.classList.add('dm-header-bar--title');
+
+			if (!this.ariaLabelledBy) this.dialog.setAttribute('aria-labelledby', this.titleElement.id);
+		}
+
+		this.headerBar.appendChild(this.btnClose);
+		this.overlay.appendChild(this.headerBar);
 		this.overlay.appendChild(this.dialog);
 		document.body.appendChild(this.overlay);
 	}
@@ -74,7 +104,12 @@ export class DialogModal {
 		});
 
 		this.overlay.addEventListener('mouseup', (e) => {
-			if (overlayMouseDownTarget && overlayMouseDownTarget.classList.contains('js-dm-overlay')) {
+			if (overlayMouseDownTarget
+				&& (
+					overlayMouseDownTarget.classList.contains('js-dm-overlay')
+					|| overlayMouseDownTarget.classList.contains('js-dm-header-bar')
+				)
+			) {
 				this.hide();
 			}
 		});
@@ -149,13 +184,29 @@ export class DialogModal {
 		if (this.lastElement) this.lastElement.focus();
 	}
 
+	deactivateBodyScroll() {
+		this.initialStyles.documentElement.overflow = document.documentElement.style.overflow;
+		this.initialStyles.documentElement.scrollbarGutter = document.documentElement.style.scrollbarGutter;
+		this.initialStyles.body.overflow = document.body.style.overflow;
+
+		document.documentElement.style.overflow = 'hidden';
+		document.body.style.overflow = 'hidden';
+
+		const viewportHeight = Math.max(document.documentElement.clientHeight || 0, window.innerHeight || 0);
+		const hasScrollbar = document.body.scrollHeight > viewportHeight;
+		if (hasScrollbar) document.documentElement.style.scrollbarGutter = 'stable';
+	}
+
+	activateBodyScroll() {
+		document.documentElement.style.overflow = this.initialStyles.documentElement.overflow || 'auto';
+		document.documentElement.style.scrollbarGutter = this.initialStyles.documentElement.scrollbarGutter || 'auto';
+		document.body.style.overflow = this.initialStyles.body.overflow || 'auto';
+	}
+
 	show() {
 		this.lastElement = document.activeElement;
 
-		if (this.hideRootScrollbars) {
-			document.documentElement.style.overflow = 'hidden';
-			document.body.style.overflow = 'hidden';
-		}
+		if (this.hideRootScrollbars) this.deactivateBodyScroll();
 
 		this.overlay.classList.remove('hidden');
 		this.overlay.hidden = false;
@@ -167,10 +218,7 @@ export class DialogModal {
 	}
 
 	hide() {
-		if (this.hideRootScrollbars) {
-			document.documentElement.style.overflow = 'auto';
-			document.body.style.overflow = 'auto';
-		}
+		if (this.hideRootScrollbars) this.activateBodyScroll();
 
 		this.overlay.classList.add('hidden');
 		this.overlay.hidden = true;
@@ -262,7 +310,7 @@ export function addDialogModalDefaultStyles() {
 			z-index: 100;
 
 			display: block;
-			padding: 3.5em 1.5em 1.5em;
+			padding: 0 1.5em 1.5em;
 			overflow-y: auto;
 
 			background-color: rgba(0, 0, 0, 0.75);
@@ -272,18 +320,48 @@ export function addDialogModalDefaultStyles() {
 			display: none;
 		}
 
-		.dm-btn-close {
-			position: absolute;
-			top: 5px;
-			right: 0.45em;
+		.dm-header-bar {
+			position: relative;
 
+			display: flex;
+			flex-direction: row;
+			justify-content: flex-end;
+			align-items: center;
+			height: 3.5em;
+			margin-left: -1.5em;
+			margin-right: -1.5em;
+			margin-bottom: 1.5em;
+			padding: 0 1.5em;
+			box-sizing: border-box;
+		}
+
+		.dm-header-bar--title {
+			justify-content: space-between;
+		}
+
+		.dm-title {
 			display: inline-block;
-			width: 35px;
+			margin-right: 1em;
+			overflow: hidden;
+
+			color: #ffffff;
+			font-size: 1.25em;
+			font-weight: bold;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		.dm-btn-close {
+			display: inline-flex;
+			justify-content: flex-end;
+
 			height: 50px;
+			padding: 0 0.5em;
 
 			background: transparent;
 			border: none;
 			cursor: pointer;
+			transform: translateX(0.5em);
 
 			color: #ffffff;
 			font-size: 35px;
