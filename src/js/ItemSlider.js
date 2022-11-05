@@ -56,6 +56,7 @@ template.innerHTML = `
 			top: 50%;
 			left: 8px;
 
+			padding: 0;
 			width: 30px;
 			height: 30px;
 
