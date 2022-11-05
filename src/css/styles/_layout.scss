@@ -351,7 +351,9 @@ main {
 	overflow-x: hidden;
 
 	color: $color-text;
+	font-size: 1.15rem;
 	font-weight: lighter;
+	-webkit-text-stroke: 0.25px;
 
 	@media #{$screen-min-sm} {
 		color: $color-text--lighter;
