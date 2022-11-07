@@ -366,6 +366,7 @@ function getPageTypes() {
 					'Video',
 					'Tech',
 					'Productivity',
+					'TIL',
 				],
 			},
 		},

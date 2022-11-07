@@ -6,6 +6,7 @@ date: 2022-11-01
 imageSocialGeneric: true
 categories:
   - Web Development
+  - TIL
 tags:
   - web
   - development
