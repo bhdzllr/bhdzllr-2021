@@ -32,7 +32,9 @@ There were a lot of interesting talks which I joined and I have notes of. Also a
 The conference was groovy to get insights into the Groovy world and learn new things. The organization was great, the food delicious and the presents creative (a shirt and a cup with El Groovyssimo on it).
 
 <hbs>
-{{image "/blog/the-last-gr8conf/gr8conf-discontinued.png" "Screenshot from GR8Conf Tweet: We regret to inform you that we are canceling GR8Conf+JDK.io and that GR8Conf will be discontinued."}}
+  <figure>
+    {{image "/blog/the-last-gr8conf/gr8conf-discontinued.png" "Screenshot from GR8Conf Tweet: We regret to inform you that we are canceling GR8Conf+JDK.io and that GR8Conf will be discontinued."}}
+  </figure>
 </hbs>
  
 On September 1, 2022 it was announced that - after a two-year break due to the COVID-19 pandemic - the conference for 2022 would be canceled and discontinued.
