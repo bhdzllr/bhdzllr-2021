@@ -4,7 +4,7 @@ title: Accessibility Quick Check Guidelines
 tagline: This guidelines help to make a quick and easy accessibility check on a website.
 date: 2022-12-19
 image: /blog/accessibility-quick-check-guidelines/vienna-railway-station-by-quaritsch-photography.jpg
-imageAlt: Vienna main station buides for blind people on the floor with orange sun lens flair and people in the background.
+imageAlt: Vienna railway station guides for blind people on the ground with a train on the right.
 imageSocial: /blog/accessibility-quick-check-guidelines/vienna-railway-station-by-quaritsch-photography.jpg
 categories:
   - Accessibility
