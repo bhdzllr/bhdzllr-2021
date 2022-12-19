@@ -110,7 +110,7 @@ Looking for:
 
 ## Appendix
 
-### Testings Tools
+### Testing Tools
 
 * [WAVE Accessibility Check](https://wave.webaim.org/), as plugin for Chrome, Edge and Firefox
 * [aXe Accessibilty Check](https://www.deque.com/axe/), also as plugin for Chrome, Edge and Firefox
