@@ -26,6 +26,11 @@ After a few years I got it out of the drawer (2020), adapted it and now it is pu
 
 Part of the university project was to make a quantitative survey, ask the staff of events what they need, ask the customers what they need. Then I built the application and made an event to test it. This enabled me to collect a little feedback.
 
+## Implementation
+
+The application uses Meteor (Node.js Framework) with BlazeJS as template engine. Stripe is used for the payment process.
+Deployment is done with Meteor Up.
+
 ## How it's going
 
 At the moment I just have one customer with one to two events per year. So I can say I have a project that makes money 😉. 
