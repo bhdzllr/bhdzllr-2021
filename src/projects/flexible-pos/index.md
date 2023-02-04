@@ -33,7 +33,7 @@ Deployment is done with Meteor Up.
 
 ## How it's going
 
-At the moment I just have one customer with one to two events per year. So I can say I have a project that makes money 😉. 
+At the moment I just have one customer (pricing is $79 per location and month) with one to two events per year. So I can say I have a project that makes money 😉. 
 
 The hard part for me is marketing and sales and I do not invest time in it. I think this is something were you really need to go and talk to a lot of possible customers, which takes a lot of time and probably very good sales skills because there is always a lot of skepticism and things to explain how this works.
 
