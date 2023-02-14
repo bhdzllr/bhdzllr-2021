@@ -48,5 +48,5 @@ The project is still online and can be used. There are also some recurring users
 {{#gallery}}
   {{galleryImage '/projects/shopping-list/shopping-list-iphone.jpg' 'iPhone on table showing the web app in full screen mode.'}}
   {{galleryImage '/projects/shopping-list/shopping-list-antique.jpg' 'Screenshot of the web app with antique theme.'}}
-  {galleryImage '/projects/shopping-list/shopping-list-modern.jpg' 'Screenshot of the web app with modern theme.'}}
+  {{galleryImage '/projects/shopping-list/shopping-list-modern.jpg' 'Screenshot of the web app with modern theme.'}}
 {{/gallery}}
