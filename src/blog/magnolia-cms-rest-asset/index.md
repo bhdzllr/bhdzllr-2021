@@ -3,7 +3,9 @@ id: magnolia-cms-rest-asset
 title: Magnolia CMS Asset via REST
 tagline: Creating Assets in Magnolia CMS via REST and Nodes API.
 date: 2023-01-21
-imageSocialGeneric: true
+image: /blog/magnolia-cms-rest-asset/magnolia-cms-rest-asset.jpg
+imageAlt: Screenshot of some lines of the cURL command from the code snippet in the article.
+imageSocial: /blog/magnolia-cms-rest-asset/magnolia-cms-rest-asset.jpg
 categories:
   - Web Development
 tags:
