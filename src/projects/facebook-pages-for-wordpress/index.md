@@ -32,6 +32,8 @@ It is a WordPress plugin written in PHP. In May 2020 it was adapted for WordPres
 
 ## How it's going
 
+I posted the link to GitHub on [Hacker News](https://news.ycombinator.com/item?id=17006922) and it got 15 upvotes and 16 stars on [GitHub](https://github.com/bhdzllr/facebook-pages-for-wordpress).
+
 Because Facebook often changes the API sometimes code adjustments are necessary. As of August 2021 the plugin still works but maybe needs graph version or SDK version updates in the future.
 
 ## Gallery
