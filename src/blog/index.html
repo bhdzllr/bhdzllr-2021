@@ -7,49 +7,46 @@
 	</div>
 </div>
 
-<ul class="list-simple">
-	{{#unless entries}}
-	<div class="module">
-		<div>
-			<p>There are currently no blog posts. Check back later.</p>
+{{#unless entries}}
+<div class="module">
+	<div>
+		<p>There are currently no blog posts. Check back later.</p>
+	</div>
+</div>
+{{/unless}}
+{{#if entriesFirst}}
+<div class="module">
+	<div>
+		<div class="slider" tabindex="-1">
+		{{#each entriesFirst}}
+			{{> card article=this element="article"}}
+		{{/each}}
 		</div>
 	</div>
-	{{/unless}}
-	{{#if entriesFirst}}
-	<div class="module">
-		<div>
-			<div class="slider" tabindex="-1">
-			{{#each entriesFirst}}
-				{{> card article=this}}
-			{{/each}}
+</div>
+{{/if}}
+{{#if entriesRest}}
+<div class="module module--transparent module--limited pt-2 pb-2">
+	<div>
+		{{#each entriesRest}}
+		<article class="article article--list-item">
+			<h2 class="article__title">
+				<a href="{{this.url}}">{{this.title}}</a>
+			</h2>
+			<div class="article__meta">
+				<p class="article__datetime">{{formatDate this.date}}</p>
+				<p class="article__categories">
+					{{#each this.categories}}
+					<span>{{this}}</span>
+					{{/each}}
+				</p>
 			</div>
-		</div>
+			<p class="article__tagline">{{this.tagline}}</p>
+		</article>
+		{{/each}}
 	</div>
-	{{/if}}
-	{{#if entriesRest}}
-	<div class="module module--transparent module--limited">
-		<div>
-			{{#each entriesRest}}
-			<li class="article article--list-item">
-				<h2 class="article__title">
-					<a href="{{this.url}}">{{this.title}}</a>
-				</h2>
-				<div class="article__meta">
-					<p class="article__datetime">{{formatDate this.date}}</p>
-					<p class="article__categories">
-						{{#each this.categories}}
-						<span>{{this}}</span>
-						{{/each}}
-					</p>
-				</div>
-				<p class="article__tagline">{{this.tagline}}</p>
-			</li>
-			{{/each}}
-		</div>
-	</div>
-	{{/if}}
-</ul>
-
+</div>
+{{/if}}
 
 {{/content}}
 {{/extend}}

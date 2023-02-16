@@ -56,7 +56,7 @@
 }
 
 .article--list-item {
-	margin-bottom: 3rem;
+	margin-bottom: 4rem;
 }
 
 .article__header {
@@ -76,6 +76,7 @@
 	}
 
 	.article--list-item & {
+		margin-top: 0;
 		margin-bottom: 0.5rem;
 	}
 
