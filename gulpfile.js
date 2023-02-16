@@ -367,6 +367,7 @@ function getPageTypes() {
 					'Tech',
 					'Productivity',
 					'TIL',
+					'Fun',
 				],
 			},
 		},
