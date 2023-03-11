@@ -606,7 +606,7 @@ async function typesSubtask(type) {
 						let dryRun = false;
 						if (imageNames.includes(srcFolder + genericImage)) dryRun = true;
 
-						const imageTeaser = await generateImageVariation(srcFolder + genericImage, 1200, '-teaser', dryRun, data.title, true);
+						const imageTeaser = await generateImageVariation(srcFolder + genericImage.replace('-teaser.jpg', '.jpg'), 1200, '-teaser', dryRun, data.title, true);
 
 						imagesTeasers.push({
 							original: genericImage,
