@@ -694,7 +694,8 @@ async function typesSubtask(type) {
 					};
 
 					resolve({
-						entries: entriesType,
+						entries: entriesType, // By date and pinned
+						entriesByDate: entriesType.sort((a, b) => b.date - a.date), // Ba Date
 						entriesFirst: entriesFirst,
 						entriesRest: entriesRest,
 					});

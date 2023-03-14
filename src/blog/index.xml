@@ -7,8 +7,8 @@
 		<language>en</language>
 		<atom:link href="{{data.baseUrl}}{{link 'blog-feed'}}" rel="self" type="application/rss+xml" />
 
-		{{#if entries}}
-		{{#each entries}}
+		{{#if entriesByDate}}
+		{{#each entriesByDate}}
 		<item>
 			<title>{{this.title}}</title>
 			<description>{{this.contentAsHtml}}</description>
