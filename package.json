@@ -10,6 +10,7 @@
     "start": "gulp dev",
     "build": "gulp dist",
     "images": "gulp imageVariations",
+    "types": "gulp types",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "gulp deploy"
   },

@@ -535,7 +535,7 @@ async function generateImageVariation(imagePath, width, suffix, dryRun, text = n
 
 		return imageNameResized;
 	} catch (e) {
-		console.log('Error while generating image variation: ', e);
+		console.error('Error while generating image variation: ', e);
 	}
 }
 
@@ -591,7 +591,7 @@ async function typesSubtask(type) {
 						},
 						'filepath': file.path,
 					});
-					
+
 					if (errors.length) {
 						for (error of errors) {
 							console.error(`Front Matter Warning with Property "${error.property}": ${error.message} in file "${error.filepath}"`);
@@ -603,6 +603,7 @@ async function typesSubtask(type) {
 					if (data.imageSocialGeneric) {
 						const imageNames = glob.sync(srcFolder + '/!(img)/**/*-teaser.{jpg,jpeg,png}');
 						const genericImage = url + data.id + '-teaser.jpg';
+
 						let dryRun = false;
 						if (imageNames.includes(srcFolder + genericImage)) dryRun = true;
 
@@ -621,7 +622,7 @@ async function typesSubtask(type) {
 						const imageCheck = data.imageSocial.replace(imageCheckName + imageCheckExtension, imageCheckName + '-teaser' + imageCheckExtension);
 
 						let dryRun = false;
-						if (imageNames.includes(imageCheck)) dryRun = true;
+						if (imageNames.includes(srcFolder + imageCheck)) dryRun = true;
 
 						const imageTeaser = await generateImageVariation(srcFolder + data.imageSocial, 1200, '-teaser', dryRun, data.title);
 
@@ -925,3 +926,4 @@ exports.default = series(clean, imageVariations, types, parallel(pages, styles, 
 exports.dev = exports.default;
 exports.dist = series(clean, imageVariations, types, parallel(pages, styles, scripts, server, res));
 exports.imageVariations = imageVariations;
+exports.types = types;
