@@ -10,7 +10,7 @@ year: 2022
 action: https://bhdzllr.github.io/business-card-the-batman/index-sides.html
 categories:
   - Web Development
-  - Side Projects
+  - Fun
 tags:
   - web
   - development
