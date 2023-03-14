@@ -428,12 +428,6 @@ async function generateImageVariation(imagePath, width, suffix, dryRun, text = n
 		const imageNameResized = imageDistFolder + imageName + suffix + imageExtension;
 
 		if (!dryRun) {
-			// PNG to JPG
-			// if (imageName.includes(' (jpg)')) {
-			// 	imageExtension = '.jpg';
-			// 	imageName = imageName.replace(' (jpg)', '');
-			// }
-
 			const options = {
 				width: width,
 				withoutEnlargement: true,
@@ -554,13 +548,6 @@ function pages(cb) {
 			batch: getHandlebarsBatch(),
 		}))
 		.pipe(dest(distFolder));
-
-	// Res
-	// src([
-	// 		srcFolder + '/pages/**/*',
-	// 		'!' + srcFolder + '/pages/**/*.html',
-	// 	])
-	// 	.pipe(dest(distFolder));
 
 	cb();
 }
@@ -731,24 +718,9 @@ async function typesSubtask(type) {
 			.pipe(dest(type.dist));
 	}
 
-	// Res
-	// function copyResources() {
-	// 	src([
-	// 		type.src + '/**/*',
-	// 		'!' + type.src + '/index.html',
-	// 		'!' + type.src + '/**/*.md'
-	// 	]).pipe(dest(type.dist));
-	// }
-
-	// function finishTask() {
-	// 	cb();
-	// }
-
 	await createType()
 		.then(createIndex)
-		.then(createRss)
-		// .then(copyResources)
-		// .then(finishTask);
+		.then(createRss);
 }
 
 function styles() {
