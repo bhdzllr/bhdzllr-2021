@@ -34,7 +34,10 @@
 				<a href="{{this.url}}">{{this.title}}</a>
 			</h2>
 			<div class="article__meta">
-				<p class="article__datetime">{{this.year}}</p>
+				<p class="article__datetime">
+					<time datetime="{{formatDate this.date}}">{{formatDate this.date}}</time>
+					{{> pinned item=this}}
+				</p>
 				<p class="article__categories">
 					{{#each this.categories}}
 					<span>{{this}}</span>

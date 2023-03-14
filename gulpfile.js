@@ -327,6 +327,10 @@ function getPageTypes() {
 			required: true,
 			pattern: /\d{4}-\d{2}-\d{2}/,
 		},
+		'pinned': {
+			type: 'boolean',
+			required: false,
+		},
 		'image': {
 			type: 'string',
 			required: false,
@@ -668,6 +672,10 @@ async function typesSubtask(type) {
 
 					entriesType.sort(function(a, b) {
 						return b.date - a.date;
+					});
+
+					entriesType.sort(function(a, b) {
+						return (a.pinned === b.pinned) ? 0 : a.pinned ? -1 : 1;
 					});
 
 					entriesType.forEach(function (element, index) {

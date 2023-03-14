@@ -1,9 +1,15 @@
-<{{#if element}}{{element}}{{else}}li{{/if}} class="card card--color-full article article--card">
+<{{#if element}}{{element}}{{else}}article{{/if}} class="card card--color-full article article--card">
 	{{#if article.date}}
 	{{#if article.year}}
-	<p class="article__datetime">{{article.year}}</p>
+	<p class="article__datetime">
+		<time datetime="{{article.year}}">{{article.year}}</time>
+		{{> pinned item=article}}
+	</p>
 	{{else}}
-	<p class="article__datetime">{{formatDate article.date}}</p>
+	<p class="article__datetime">
+		<time datetime="{{formatDate article.date}}">{{formatDate article.date}}</time>
+		{{> pinned item=article}}
+	</p>
 	{{/if}}
 	{{/if}}
 	<p class="article__categories">
@@ -22,4 +28,4 @@
 		<span class="screen-reader-text article__link-text">Show Project</span>
 		<span class="screen-reader-text">{{article.title}}</span>
 	</a>
-</{{#if element}}{{element}}{{else}}li{{/if}}>
+</{{#if element}}{{element}}{{else}}article{{/if}}>

@@ -260,6 +260,13 @@
 	}
 }
 
+.article__pinned {
+	&::before {
+		content: '/';
+		margin-right: 0.25rem;
+	}
+}
+
 .article__categories {
 	font-size: 0.875rem;
 

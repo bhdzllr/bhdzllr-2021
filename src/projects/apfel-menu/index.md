@@ -3,6 +3,7 @@ id: apfel-menu
 title: Apfel Menu
 tagline: 'Apple website menu rebuilt just for my own improvement and fun.'
 date: 2022-08-12
+pinned: true
 image: /projects/apfel-menu/apfel-menu-cover.jpg
 imageAlt: 'A mix of two desktop and two mobile screenshots from my own implementation of the apple website menu.'
 imageSocial: /projects/apfel-menu/apfel-menu-cover.jpg

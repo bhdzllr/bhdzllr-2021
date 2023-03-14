@@ -3,6 +3,7 @@ id: flexible-pos
 title: Flexible POS
 tagline: Flexible POS is a point of sale system that helps to process orders regardless of location or device. Take orders as waiter or allow self-ordering by your guests at the same time.
 date: 2020-03-18
+pinned: true
 image: /projects/flexible-pos/flexible-pos-mockup.jpg
 imageAlt: Smartphone showing the order screen of Flexible POS application.
 year: 2020
