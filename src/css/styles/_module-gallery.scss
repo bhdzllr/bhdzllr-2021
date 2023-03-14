@@ -51,7 +51,7 @@
 .gallery-detail-image {
 	display: flex;
 	align-items: center;
-	max-height: calc(100vh - 15rem);
+	max-height: calc(100vh - 10rem);
 
 	img {
 		display: block;
@@ -86,6 +86,8 @@
 }
 
 .dm-overlay.gallery-overlay {
+	display: flex;
+	flex-direction: column;
 	cursor: zoom-out;
 
 	.dm-dialog {
