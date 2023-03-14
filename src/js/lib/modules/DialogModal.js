@@ -130,28 +130,42 @@ export class DialogModal {
 
 		const childNodes = this.getFocusableChildNodes();
 
-		if (!Boolean(childNodes.length)) return;
+		if (!Boolean(childNodes.length)) {
+			this.removeFirstFocusableElementListener();
+			this.removeLastFocusableElementListener();
+			return;
+		}
 
-		this.firstFocusableElement = childNodes[0];
-		this.lastFocusableElement = childNodes[childNodes.length - 1];
-
-		this.handleFirstFocusableElementHandler = this.handleFirstFocusableElement.bind(this);
-		this.handleLastFocusableElementHandler = this.handleLastFocusableElement.bind(this);
-
-		this.setFirstFocusableElement(this.firstFocusableElement);
-		this.setLastFocusableElement(this.lastFocusableElement);
+		this.setFirstFocusableElement(childNodes[0]);
+		this.setLastFocusableElement(childNodes[childNodes.length - 1]);
 	}
 
 	setFirstFocusableElement(firstFocusableElement) {
-		if (this.firstFocusableElement) this.firstFocusableElement.removeEventListener('keydown', this.handleFirstFocusableElementHandler);
+		this.removeFirstFocusableElementListener();
+
+		this.handleFirstFocusableElementHandler = this.handleFirstFocusableElement.bind(this);
 		this.firstFocusableElement = firstFocusableElement;
 		this.firstFocusableElement.addEventListener('keydown', this.handleFirstFocusableElementHandler);
 	}
 
 	setLastFocusableElement(lastFocusableElement) {
-		if (this.lastFocusableElement) this.lastFocusableElement.removeEventListener('keydown', this.handleLastFocusableElementHandler);
+		this.removeLastFocusableElementListener();
+
+		this.handleLastFocusableElementHandler = this.handleLastFocusableElement.bind(this);
 		this.lastFocusableElement = lastFocusableElement;
 		this.lastFocusableElement.addEventListener('keydown', this.handleLastFocusableElementHandler);
+	}
+
+	removeFirstFocusableElementListener() {
+		if (!this.firstFocusableElement) return;
+
+		this.firstFocusableElement.removeEventListener('keydown', this.handleFirstFocusableElementHandler);
+	}
+
+	removeLastFocusableElementListener() {
+		if (!this.lastFocusableElement) return;
+
+		this.lastFocusableElement.removeEventListener('keydown', this.handleLastFocusableElementHandler);
 	}
 
 	handleFirstFocusableElement(e) {
