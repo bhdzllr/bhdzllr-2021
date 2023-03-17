@@ -104,12 +104,12 @@ Another option is to add the styles in the head of the HTML document. The big ad
     <meta charset="utf-8" />
     <title>How to start with CSS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    ***
+    +++
     <style>
       p {
         color: limegreen;
       }
-    </style>/***
+    </style>/+++
 
   </head>
   <body>
@@ -130,7 +130,7 @@ The most common way is to use an external file. Therefore different pages can us
     <title>How to start with CSS</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  ***  <link rel="stylesheet" type="text/css href="path/to/style.css" />  /***
+  +++  <link rel="stylesheet" type="text/css href="path/to/style.css" />  /+++
 
   </head>
   <body>

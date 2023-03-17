@@ -18,8 +18,8 @@ const md = require('markdown-it')({
 				let html = hljs
 					.highlight(str, { language: lang, ignore_illegals: true })
 					.value
-					.replaceAll(/\/\*\*\*/g, '</mark>')
-					.replaceAll(/\*\*\*/g, '<mark>');
+					.replaceAll(/\/\+\+\+/g, '</mark>')
+					.replaceAll(/\+\+\+/g, '<mark>');
 
 				return `<pre class="hljs hljs--${lang}"><code>${html}</code></pre>`;
 			} catch (__) {}

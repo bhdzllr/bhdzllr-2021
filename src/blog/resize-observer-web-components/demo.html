@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<title>Web Components ResizeObserver Demo - How to use ResizeObserver in Web Components - @bhdzllr</title>
+
+		<meta name="description" content="Web Components ResizeObserver Demo" />
+		<meta name="robots" content="index, follow" />
+
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+
+				background: #ffffff;
+				
+				color: #222222;
+				font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+				font-size: 1em;
+				line-height: 1.625em;
+			}
+
+			body {
+				padding: 2rem;
+			}
+
+			.grid {
+				display: grid;
+				grid-template-columns: 200px 1fr;
+				grid-gap: 1rem;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="grid">
+			<div>
+				<bhdzllr-card>
+					<img slot="image" src="demo-image-480.jpg" alt="Brown and black firewood stacked" />
+					<h1 slot="title">Hello, Worlds!</h1>
+					<p slot="text">This is just a text.</p>
+				</bhdzllr-card>
+			</div>
+
+			<div>
+				<bhdzllr-card>
+					<img slot="image" src="demo-image-480.jpg" alt="Brown and black firewood stacked" />
+					<h1 slot="title">Hello, Worlds again!</h1>
+					<p slot="text">This is just another text.</p>
+				</bhdzllr-card>
+			</div>
+		</div>
+
+		<script>
+			const template = document.createElement('template');
+			template.innerHTML = `
+				<style>
+					:host {
+						display: block;
+						padding: 1rem;
+						overflow: hidden;
+
+						border: 2px solid #cccccc;
+						border-radius: 8px;
+					}
+
+					:host([hidden]) {
+						display: none;
+					}
+
+					slot[name="title"]::slotted(*) {
+						margin-top: 0;
+					}
+
+					slot[name="text"]::slotted(*) {
+						margin-bottom: 0;
+					}
+
+					slot[name="image"] {
+						display: block;
+						margin-bottom: 1em;
+					}
+
+					slot[name="image"]::slotted(img) {
+						display: block;
+						max-width: 100%;
+					}
+
+					.bhdzllr-card--lg slot[name="image"] {
+						float: left;
+
+						display: block;
+						max-width: 25%;
+						margin-right: 1em;
+						margin-bottom: 0;
+						overflow: visible;
+					}
+				</style>
+				<div class="bhdzllr-card js-container">
+					<slot name="image"></slot>
+					<slot name="title"></slot>
+					<slot name="text"></slot>
+				</div>
+			`;
+
+			class Card extends HTMLElement {
+
+				static get breakPoint() {
+					return 250;
+				}
+
+				constructor() {
+					super();
+
+					this.attachShadow({ mode: 'open' });
+					this.shadowRoot.appendChild(template.content.cloneNode(true));
+				
+					this.el = this.shadowRoot.getRootNode().host;
+					this.container = this.shadowRoot.querySelector('.js-container');
+					this.resizeObserver = new ResizeObserver((entries) => this.updateContainer(entries[0]));
+				}
+
+				connectedCallback() {
+					this.resizeObserver.observe(this.el);
+				}
+
+				updateContainer(entry) {
+					if (
+						entry.contentBoxSize[0].inlineSize > Card.breakPoint
+						&& !this.container.classList.contains('bhdzllr-card--lg')
+					) {
+						this.container.classList.add('bhdzllr-card--lg');
+					} else if (
+						entry.contentBoxSize[0].inlineSize <= Card.breakPoint
+						&& this.container.classList.contains('bhdzllr-card--lg')
+					) {
+						this.container.classList.remove('bhdzllr-card--lg');
+					}
+				}
+
+			}
+
+			customElements.define('bhdzllr-card', Card);
+		</script>
+	</body>
+</html>
