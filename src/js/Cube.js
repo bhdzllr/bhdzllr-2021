@@ -14,6 +14,10 @@ const defaultOptions = {
 	],
 };
 
+/**
+ * Cube
+ * This would work well as a web component too.
+ */
 export class Cube {
 
 	constructor(element, options = {}) {

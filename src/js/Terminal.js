@@ -4,7 +4,7 @@ import { isElementInViewport } from './lib/utils/checks';
 
 /**
  * Terminal
- * This would work well as a web component too.
+ * This would work well as a web component too? Maybe not so well because of the flow?
  */
 export class Terminal {
 
