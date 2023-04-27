@@ -87,8 +87,8 @@ export class Terminal {
 		this.loader.setAttribute('aria-hidden', 'true');
 		this.loader.hidden = true;
 
-		this.inputWrapper.appendChild(this.input);
 		this.inputWrapper.appendChild(this.inputCustom);
+		this.inputWrapper.appendChild(this.input);
 		this.inputWrapper.appendChild(this.inputCaretHelper);
 		this.inputWrapper.appendChild(this.inputCaret);
 		this.inputWrapper.appendChild(this.loader);
