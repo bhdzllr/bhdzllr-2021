@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+		<title>Sortable List Demo - Creating a simple sortable list with JavaScript - @bhdzllr</title>
+
+		<meta name="description" content="Sortable List Demo" />
+		<meta name="robots" content="index, follow" />
+
+		<style>
+			html,
+			body {
+				margin: 0;
+				padding: 0;
+
+				background: #ffffff;
+				
+				color: #222222;
+				font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+				font-size: 1em;
+				line-height: 1.625em;
+			}
+
+			body {
+				min-width: 500px;
+				max-width: 800px;
+				margin: 0 auto;
+				padding: 2rem;
+			}
+
+			ul {
+				margin: 0;
+				padding: 0;
+
+				list-style: none;
+			}
+
+			li {
+				display: block;
+				padding: 1rem;
+
+				border: 1px solid silver;
+			}
+
+			[data-i="0"] {
+				background-color: #dedede;
+			}
+
+			[data-i="4"] {
+				background-color: #efefef;
+			}
+		</style>
+	</head>
+	<body>
+		<ul class="js-sortable-list">
+			<li data-i="0">1. One</li>
+			<li data-i="1">2. Two</li>
+			<li data-i="2">3. Three</li>
+			<li data-i="3">4. Four</li>
+			<li data-i="4">5. Five</li>
+		</ul>
+
+		<script>
+			function initSortableList(el) {
+				const items = el.children;
+				let dragSrcEl;
+				let dragSrcStartY;
+				let dragSrcParent;
+
+				for (let i = 0; i < items.length; i++) {
+					const item = items[i];
+
+					item.draggable = true;
+
+					/** Drag and Drop */
+
+					item.addEventListener('dragstart', function (e) {
+						dragSrcEl = this;
+						dragSrcStartY = e.clientY;
+						dragSrcParent = this.parentNode;
+
+						dragSrcEl.style.opacity = '0.2';
+
+						e.dataTransfer.effectAllowed = 'move';
+					});
+
+					item.addEventListener('dragover', function (e) {
+						e.preventDefault();
+
+						e.dataTransfer.dropEffect = 'move';
+
+						if (dragSrcEl === this) return;
+
+						if (dragSrcStartY <= e.clientY) {
+							dragSrcParent.insertBefore(this, dragSrcEl);
+						} else {
+							dragSrcParent.insertBefore(dragSrcEl, this);
+						}
+
+						dragSrcStartY = e.clientY;
+
+						return false;
+					});
+
+					item.addEventListener('dragend', function () {
+						dragSrcEl.style.opacity = '1';
+						dragSrcEl = null;
+						dragSrcStartY = null;
+					});
+
+					/** Touch */
+
+					let clone;
+					let rect;
+					let prev;
+					let next;
+
+					item.addEventListener('touchstart', function (e) {
+						e.preventDefault();
+						e.stopPropagation();
+
+						const touch = e.touches[0];
+
+						dragSrcEl = this;
+						dragSrcStartY = touch.clientY;
+						dragSrcParent = this.parentNode;
+
+						dragSrcEl.style.opacity = '0.2';
+
+						const style = getComputedStyle(this);
+						let padding = 0;
+						if (style.getPropertyValue('box-sizing') === 'content-box') {
+							padding = parseInt(style.getPropertyValue('padding-left').replace('px', '')) + parseInt(style.getPropertyValue('padding-right').replace('px', ''));
+						}
+
+						clone = this.cloneNode(true);
+						rect = this.getBoundingClientRect();
+
+						clone.style.opacity = '0.5';
+						clone.style.position = 'absolute';
+						clone.style.width = rect.width - padding + 'px';
+						clone.setAttribute('aria-hidden', 'true');
+						el.appendChild(clone);
+
+						clone.style.top = e.changedTouches[0].clientY - (rect.height / 2) + 'px';
+						clone.style.left = rect.left + 'px';
+
+						prev = item.previousElementSibling;
+						next = item.nextElementSibling;
+					});
+
+					item.addEventListener('touchmove', function (e) {
+						const touch = e.touches[0];
+
+						clone.style.top = e.changedTouches[0].clientY - (rect.height / 2) + 'px';
+						clone.style.left = rect.left + 'px';
+
+						if (touch.clientY > dragSrcStartY) {
+							// Move down
+							if (next && touch.clientY >= next.getBoundingClientRect().top) {
+								dragSrcParent.insertBefore(next, dragSrcEl);
+								next = dragSrcEl.nextElementSibling;
+								prev = dragSrcEl.previousElementSibling;
+							}
+						} else {
+							// Move up
+							if (prev && touch.clientY <= prev.getBoundingClientRect().bottom) {
+								dragSrcParent.insertBefore(dragSrcEl, prev);
+								next = dragSrcEl.nextElementSibling;
+								prev = dragSrcEl.previousElementSibling;
+							}
+						}
+					});
+
+					item.addEventListener('touchend', function (e) {
+						dragSrcEl.style.opacity = '1';
+						dragSrcEl = null;
+						dragSrcStartY = null;
+
+						clone.remove();
+					});
+				}
+			}
+
+			initSortableList(document.querySelector('.js-sortable-list'));
+		</script>
+	</body>
+</html>
