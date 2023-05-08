@@ -686,6 +686,7 @@ async function typesSubtask(type) {
 						}
 					});
 
+					// Home page
 					entries[type.name] = {};
 					entries[type.name] = {
 						all: entriesType,
@@ -695,7 +696,7 @@ async function typesSubtask(type) {
 
 					resolve({
 						entries: entriesType, // By date and pinned
-						entriesByDate: entriesType.sort((a, b) => b.date - a.date), // Ba Date
+						entriesByDate: entriesType.sort((a, b) => b.date - a.date), // By Date
 						entriesFirst: entriesFirst,
 						entriesRest: entriesRest,
 					});
@@ -703,25 +704,25 @@ async function typesSubtask(type) {
 		});
 	}
 
-	function createIndex(value) {
+	function createIndex(entries) {
 		src(type.src + '/index.html')
 			.pipe(data(getHandlebarsDefaultData))
-			.pipe(handlebars(value, {
+			.pipe(handlebars(entries, {
 				batch: getHandlebarsBatch(),
 			}))
 			.pipe(dest(type.dist));
 
-		return value;
+		return entries;
 	}
 
-	function createRss(value) {
+	function createRss(entries) {
 		const xmlFile = type.src + '/index.xml';
 
 		if (!fs.existsSync(xmlFile)) return;
 
 		src(xmlFile)
 			.pipe(data(getHandlebarsDefaultData))
-			.pipe(handlebars(value, {
+			.pipe(handlebars(entries, {
 				batch: getHandlebarsBatch(),
 			}))
 			.pipe(dest(type.dist));
