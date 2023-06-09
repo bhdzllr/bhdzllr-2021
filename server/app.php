@@ -250,7 +250,7 @@ trait PredefinedVariablesTrait {
 	private array $cookieParams = [];
 	private string|false|null $body = null;
 
-	public initPredefinedVariables() {
+	public function initPredefinedVariables() {
 		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? 'GET';
 		$this->uri = $_SERVER['REQUEST_URI'];
 		$this->host = $_SERVER['HTTP_HOST'];
