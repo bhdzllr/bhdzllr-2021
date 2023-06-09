@@ -216,6 +216,10 @@ trait HeaderTrait {
 
 	private array $headers = [];
 
+	public function initHeadersFromRequest() {
+		$this->headers = getallheaders();
+	}
+
 	public function getHeaders(): array {
 		return $this->headers;
 	}
@@ -234,29 +238,84 @@ trait HeaderTrait {
 
 }
 
-trait DatabaseFromEnvTrait {
+trait PredefinedVariablesTrait {
 
-	protected PDO $db;
+	private string $method;
+	private string $uri;
+	private string $host;
+	private string $fullUrl;
+	private array $queryParams = [];
+	private array $parsedBody = [];
+	private array $uploadedFiles = [];
+	private array $cookieParams = [];
+	private string|false|null $body = null;
 
-	private function createDatabaseFromEnv() {
-		if (!empty(getenv('DB_DSN'))) {
-			$dsn = getenv('DB_DSN');
-			$type = explode(':', $dsn)[0];
-			$charset = isset(explode('charset=', $dsn)[1]) ? explode('charset=', $dsn)[1] : 'utf8';
+	public initPredefinedVariables() {
+		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? 'GET';
+		$this->uri = $_SERVER['REQUEST_URI'];
+		$this->host = $_SERVER['HTTP_HOST'];
+		$this->fullUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
+		$this->queryParams = $_GET;
+		$this->parsedBody = $_POST;
+		$this->uploadedFiles = $_FILES;
+		$this->cookieParams = $_COOKIE;
+		$this->body = file_get_contents('php://input', 'r') ?: null;
+	}
 
-			try {
-				if ($type == 'mysql') {
-					$this->db = new PDO($dsn, getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
-					$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-					$this->db->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES ' . $charset);
-				} elseif ($type == 'sqlite') {
-					$this->db = new PDO($dsn);
-					$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-				}
-			} catch (PDOException $e) {
-				throw new PDOException($e->getMessage());
-			}
-		}
+	public function getMethod(): string {
+		return $this->method;
+	}
+
+	public function getUri(): string {
+		return $this->uri;
+	}
+
+	public function getHost(): string {
+		return $this->host;
+	}
+
+	public function getFullUrl(): string {
+		return $this->fullUrl;
+	}
+
+	public function getQueryParams(): array {
+		return $this->queryParams;
+	}
+
+	public function setParsedBody(array $parsedBody) {
+		$this->parsedBody = $parsedBody;
+	}
+
+	public function getParsedBody(): array {
+		return $this->parsedBody;
+	}
+
+	public function getUploadedFiles(): array {
+		return $this->uploadedFiles;
+	}
+
+	public function getCookieParams(): array {
+		return $this->cookieParams;
+	}
+
+	public function getBody(): string|false|null {
+		return $this->body;
+	}
+
+}
+
+trait ValueTrait {
+
+	private array $value = [];
+
+	public function setValue(string $name, mixed $value) {
+		$this->value[$name] = $value;
+	}
+
+	public function getValue(string $name) {
+		if (!isset($this->value[$name])) return;
+
+		return $this->value[$name];
 	}
 
 }
@@ -690,14 +749,14 @@ class Validator {
 
 }
 
+// @todo Do not use file, use database instead
 class Migration {
 
-	use DatabaseFromEnvTrait;
-
+	protected PDO $db;
 	private string $file = './.migrations';
 
-	public function __construct(?string $file = null) {
-		$this->createDatabaseFromEnv();
+	public function __construct(PDO $db, ?string $file = null) {
+		$this->db = $db;
 
 		if (isset($file)) $this->file = $file;
 	}
@@ -716,8 +775,6 @@ class Migration {
 
 		$lastVersion = 0;
 
-		// echo 'Starting migration, current version: ' . $currentVersion . "\n";
-
 		foreach ($migrations as $version => $migration) {
 			$lastVersion = $version + 1;
 			if ($lastVersion <= $currentVersion) continue;
@@ -728,12 +785,6 @@ class Migration {
 				die($e);
 			}
 		}
-
-		// if ($currentVersion == $lastVersion) {
-		// 	echo 'Migration done. Up to date, no changes made.';
-		// } else {
-		// 	echo 'Migration done. New version: ' . $lastVersion;
-		// }
 
 		$handle = fopen($this->file, 'w+');
 		fwrite($handle, $lastVersion);
@@ -1182,7 +1233,7 @@ abstract class ActiveRecord implements JsonSerializable {
 
 class DatabaseFromEnv {
 
-	use DatabaseFromEnvTrait;
+	protected PDO $db;
 
 	public function __construct() {
 		$this->createDatabaseFromEnv();
@@ -1190,6 +1241,27 @@ class DatabaseFromEnv {
 
 	public function getDatabase(): PDO {
 		return $this->db;
+	}
+
+	private function createDatabaseFromEnv() {
+		if (!empty(getenv('DB_DSN'))) {
+			$dsn = getenv('DB_DSN');
+			$type = explode(':', $dsn)[0];
+			$charset = isset(explode('charset=', $dsn)[1]) ? explode('charset=', $dsn)[1] : 'utf8';
+
+			try {
+				if ($type == 'mysql') {
+					$this->db = new PDO($dsn, getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
+					$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+					$this->db->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES ' . $charset);
+				} elseif ($type == 'sqlite') {
+					$this->db = new PDO($dsn);
+					$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+				}
+			} catch (PDOException $e) {
+				throw new PDOException($e->getMessage());
+			}
+		}
 	}
 
 }
@@ -1287,7 +1359,7 @@ class View {
 		}
 	}
 
-	private static function getMethodField(string $method = Route::POST) {
+	private static function getMethodField(string $method = 'POST') {
 		return '<input type="hidden" name="_method" value="' . $method . '" />';
 	}
 
@@ -1408,13 +1480,13 @@ class Result {
 		return $this->status;
 	}
 
-	public static function generateArray(string $result = RESULT::SUCCESS, ?string $message = null, ?array $context = []) {
-		if (!$message && $result == Result::SUCCESS) $message = 'OK';
+	public static function generateArray(string $type = RESULT::SUCCESS, ?string $message = null, ?array $result = []) {
+		if (!$message && $type == Result::SUCCESS) $message = 'OK';
 
 		return [
-			'result'  => $result,
+			'type'  => $type,
 			'message' => $message,
-			'context' => $context,
+			'result' => $result,
 		];
 	}
 
@@ -1551,6 +1623,7 @@ class Router {
 	private array $locales = [];
 
 	private array $routes = [];
+	private ?Route $route;
 
 	public function __call(string $name, array $arguments): Route {
 		$method = strtoupper($name);
@@ -1633,12 +1706,18 @@ class Router {
 		return $route;
 	}
 
-	private function setContextPath(string $contextPath) {
-		$this->contextPath = $contextPath;
+	public function getRoute(): ?Route {
+		return $this->route;
 	}
 
 	public function setLocales(string ...$locales) {
 		$this->locales = $locales;
+	}
+
+	public function getLocale(): string {
+		if (!$this->route) return null;
+
+		return $this->route->getLocale();
 	}
 
 	/**
@@ -1691,28 +1770,20 @@ class Router {
 		return;
 	}
 
+	public function setContextPath(string $contextPath) {
+		$this->contextPath = $contextPath;
+	}
+
 }
 
 class App extends Router {
 
 	use InterceptorTrait;
 	use HeaderTrait;
+	use PredefinedVariablesTrait;
+	use ValueTrait;
 
 	protected DIContainer $container;
-
-	private string $host;
-	private string $fullUrl;
-	private array $queryParams = [];
-	private array $parsedBody = [];
-	private array $uploadedFiles = [];
-	private array $cookieParams = [];
-	private string|false|null $body = null;
-
-	private string $method;
-	private string $uri;
-	private ?Route $route;
-
-	private array $value = [];
 
 	public function __construct(DIContainer $container) {
 		$this->container = $container;
@@ -1740,17 +1811,8 @@ class App extends Router {
 
 		$this->contextPath = getenv('APP_CONTEXT_PATH');
 
-		$this->method = $_POST['_method'] ?? $_SERVER['REQUEST_METHOD'] ?? Route::GET;
-		$this->uri = $_SERVER['REQUEST_URI'];
-		$this->headers = getallheaders();
-
-		$this->host = $_SERVER['HTTP_HOST'];
-		$this->fullUrl = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? 'https' : 'http') . "://{$_SERVER['HTTP_HOST']}{$_SERVER['REQUEST_URI']}";
-		$this->queryParams = $_GET;
-		$this->parsedBody = $_POST;
-		$this->uploadedFiles = $_FILES;
-		$this->cookieParams = $_COOKIE;
-		$this->body = file_get_contents('php://input', 'r') ?: null;
+		$this->initHeadersFromRequest();
+		$this->initPredefinedVariables();
 	}
 
 	public function exceptionHandler(Throwable $e) {
@@ -1790,66 +1852,6 @@ class App extends Router {
 		}
 
 		$this->render($result);
-	}
-
-	public function getHost(): string {
-		return $this->host;
-	}
-
-	public function getFullUrl(): string {
-		return $this->fullUrl;
-	}
-
-	public function getQueryParams(): array {
-		return $this->queryParams;
-	}
-
-	public function setParsedBody(array $parsedBody) {
-		$this->parsedBody = $parsedBody;
-	}
-
-	public function getParsedBody(): array {
-		return $this->parsedBody;
-	}
-
-	public function getUploadedFiles(): array {
-		return $this->uploadedFiles;
-	}
-
-	public function getCookieParams(): array {
-		return $this->cookieParams;
-	}
-
-	public function getBody(): string|false|null {
-		return $this->body;
-	}
-
-	public function getMethod(): string {
-		return $this->method;
-	}
-
-	public function getUri(): string {
-		return $this->uri;
-	}
-
-	public function getRoute(): ?Route {
-		return $this->route;
-	}
-
-	public function getLocale(): string {
-		if (!$this->route) return null;
-
-		return $this->route->getLocale();
-	}
-
-	public function setValue(string $name, mixed $value) {
-		$this->value[$name] = $value;
-	}
-
-	public function getValue(string $name) {
-		if (!isset($this->value[$name])) return;
-
-		return $this->value[$name];
 	}
 
 	public function getContainer(): DIContainer {
@@ -2083,6 +2085,7 @@ return (function () {
 	$container->set('App\DIContainer', $container);
 
 	$app = new App($container);
+	$app->getContainer()->set('App', $app);
 
 	$app->before(new AppBeforeInterceptor());
 	$app->after(new AppAfterInterceptor());

@@ -714,11 +714,11 @@ $app->post('minilytics-event', function () use ($app) {
 	return Result::generateArray();
 });
 
-$app->get('minilytics-admin', function () use ($app) {
+$app->get('minilytics-admin', function () use ($app, $db) {
 	$config = $app->getValue('minilyticsConfig');
 	$sites = $config->getSites();
 	$migrationFile = $config->getMigrationFile();
-	$migration = new Migration($migrationFile);
+	$migration = new Migration($db, $migrationFile);
 
 	$migration->run(
 		function (PDO $db) use ($sites) {
