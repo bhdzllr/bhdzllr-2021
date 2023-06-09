@@ -1623,7 +1623,7 @@ class Router {
 	private array $locales = [];
 
 	private array $routes = [];
-	private ?Route $route;
+	private ?Route $route = null;
 
 	public function __call(string $name, array $arguments): Route {
 		$method = strtoupper($name);
@@ -1704,6 +1704,10 @@ class Router {
 		}
 
 		return $route;
+	}
+
+	public function setRoute(Route $route) {
+		$this->route = $route;
 	}
 
 	public function getRoute(): ?Route {
@@ -1861,7 +1865,7 @@ class App extends Router {
 	public function run() {
 		$route = $this->findRoute($this->method, $this->uri);
 		if (!$route) throw new HttpException('Not Found.', 404);
-		$this->route = $route;
+		$this->setRoute($route);
 
 		if (!$route->usesOnlyRouteInterceptor() && $this->getInterceptorBefore()) ($this->getInterceptorBefore())($this);
 		if ($route->getInterceptorBefore()) ($route->getInterceptorBefore())($this);
@@ -2085,10 +2089,10 @@ return (function () {
 	$container->set('App\DIContainer', $container);
 
 	$app = new App($container);
-	$app->getContainer()->set('App', $app);
-
 	$app->before(new AppBeforeInterceptor());
 	$app->after(new AppAfterInterceptor());
+
+	$app->getContainer()->set('App', $app);
 
 	return $app;
 
