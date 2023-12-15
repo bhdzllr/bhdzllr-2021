@@ -6,7 +6,7 @@ date: 2020-11-17
 image: /projects/quick-logging/quick-logging-website.jpg
 imageAlt: 'Screenshot of the home page of quicklogging.com with text: Build web apps for quick data logging. Web apps for simple data input. Use the data as CSV in your spreadsheet program of choice.'
 year: 2020
-action: https://www.quicklogging.com/
+# action: https://www.quicklogging.com/
 categories:
   - Web Development
   - Side Projects
@@ -47,6 +47,11 @@ Quick Logging uses four pricing models:
 * Single ($3/month): Unlimited apps, one with unlimited fields
 * Basic ($7/month): Unlimited apps, five with unlimited fields
 * Pro ($15/month): Unlimited apps with unlimited fields
+
+### Closure
+
+The project was ended at the end of 2023 and will not be continued.
+
 
 ## Gallery
 
