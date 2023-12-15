@@ -7,7 +7,7 @@ image: /projects/shopping-list/shopping-list-iphone.jpg
 imageAlt: 'iPhone on table showing the web app in full screen mode.'
 imageSocial: /projects/shopping-list/shopping-list-iphone.jpg
 year: 2020
-action: https://www.shoppinglist.at/
+action: https://bhdzllr.github.io/shopping-list/
 categories:
   - Web Development
   - Side Projects
