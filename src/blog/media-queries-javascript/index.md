@@ -16,11 +16,11 @@ tags:
   - resize
 ---
 
-There are various use cases in JavaScript where knowing the screen width is essential. Unlike individual containers where the [ResizeObserver interface can be utilized](/blog/resize-observer-web-components/), the entire screen width is often needed, for instance, to display or hide certain parts of an application or to initiate or stop animations.
+There are various use cases in JavaScript where knowing the screen width is essential. Unlike individual containers where the [ResizeObserver interface can be used](/blog/resize-observer-web-components/), the entire screen width is often needed, for instance, to display or hide certain parts of an application or to initiate or stop animations.
 
-Consider an example of an interactive map with animated train routes that should only be displayed on devices with a specific screen width. To prevent the animation from running when the map is hidden, querying the screen width can be beneficial.
+Consider an example of an interactive map with animated train routes that should only be displayed on devices with a specific screen width. To prevent the animation from running when the map is hidden, querying the screen width can be necessary.
 
-The initial instinct might be to listen for the `resize` event on window and then check the screen width. To make the event and the execution more efficient and performance-friendly, ensuring it's not executed too frequently, a toggle variable or the delayed execution of the resize event (debouncing) can be used:
+The initial idea might be to listen for the `resize` event on window and then check the screen width. To make the event and the execution more efficient and performance-friendly, ensuring it's not executed too frequently, a toggle variable or the delayed execution of the resize event (debouncing) can be used:
 
 ```JavaScript
 let wasFullVersion = false;
