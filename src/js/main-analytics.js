@@ -94,6 +94,10 @@ var Minilytics = (function () {
 		);
 	}
 
+	function isGpcActive() {
+		return navigator.globalPrivacyControl;
+	}
+
 	function isOptOutActive() {
 		if (isDoNotTrackActive() || document.cookie.indexOf(disableString + '=true') > -1) {
 			window[disableString] = true;
@@ -258,6 +262,7 @@ var Minilytics = (function () {
 		visit: function () {
 			if (isPageReloadedOrBackForward()) return;
 			if (isDoNotTrackActive()) return;
+			if (isGpcActive()) return;
 			if (isOptOutActive()) return;
 			if (isLocalhost()) return;
 			if (isBot()) return;
