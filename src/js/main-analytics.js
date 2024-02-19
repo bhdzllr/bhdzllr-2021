@@ -84,6 +84,10 @@ var Minilytics = (function () {
 		return false;
 	}
 
+	function isGlobalPrivacyControlActive() {
+		return navigator.globalPrivacyControl;
+	}
+
 	function isDoNotTrackActive() {
 		return (
 			navigator.doNotTrack && (navigator.doNotTrack == '1' || navigator.doNotTrack == 'yes')
@@ -92,10 +96,6 @@ var Minilytics = (function () {
 		) || (
 			navigator.msDoNotTrack && (navigator.msDoNotTrack == '1')
 		);
-	}
-
-	function isGpcActive() {
-		return navigator.globalPrivacyControl;
 	}
 
 	function isOptOutActive() {
@@ -261,8 +261,8 @@ var Minilytics = (function () {
 		},
 		visit: function () {
 			if (isPageReloadedOrBackForward()) return;
+			if (isGlobalPrivacyControlActive()) return;
 			if (isDoNotTrackActive()) return;
-			if (isGpcActive()) return;
 			if (isOptOutActive()) return;
 			if (isLocalhost()) return;
 			if (isBot()) return;
