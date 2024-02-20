@@ -134,8 +134,8 @@ handlebars.Handlebars.registerHelper({
 				return '/projects';
 			case 'mail':
 				return '/contact';
-			case 'impressum':
-				return '/impressum';
+			case 'rechtliches':
+				return '/rechtliches';
 			case 'legal':
 				return '/legal';
 		}
