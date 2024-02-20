@@ -30,6 +30,33 @@
 				margin: 0 auto;
 				padding: 1rem 2rem;
 			}
+
+			*:focus {
+				outline: 2px solid #292929;
+				outline-offset: 2px;
+			}
+
+			*:focus:not(:focus-visible) {
+				outline: none;
+			}
+
+			*:focus-visible {
+				outline: 2px solid #292929;
+				outline-offset: 2px;
+			}
+
+			a,
+			a:link,
+			a:focus,
+			a:hover {
+				color: #595959;
+				text-deocration: underline;
+			}
+
+			a:visited,
+			a:active {
+				color: #292929;
+			}
 		</style>
 	</head>
 	<body>
