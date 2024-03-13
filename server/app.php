@@ -2,15 +2,31 @@
 
 namespace App;
 
+use \Closure;
+use \Exception;
 use \finfo;
+use \JsonSerializable;
 use \PDO;
 use \PDOException;
-use \ArrayObject;
-use \JsonSerializable;
-use \Exception;
-use \Throwable;
 use \ReflectionClass;
 use \ReflectionException;
+use \Throwable;
+
+trait EnvTrait {
+
+	public function loadEnv(string $filePath) {
+		if (file_exists($filePath)) {
+			$file = fopen($filePath, 'r');
+
+			while (($line = fgets($file)) !== false) {
+				putenv(trim($line));
+			}
+
+			fclose($file);
+		}
+	}
+
+}
 
 trait DITrait {
 
@@ -88,8 +104,9 @@ trait DITrait {
 	/**
 	 * Resolve class dependencies.
 	 *
-	 * @todo Check for isArray(), isCallable(), isDefaultValueAvailable(),
-	 *       isOptional(), etc. if parameter is not a class.
+	 * Does only work with class parameters.
+	 * No check for isArray(), isCallable(), isDefaultValueAvailable(),
+	 * isOptional(), etc. if parameter is not a class.
 	 * 
 	 * @param string $id Class to resolve.
 	 * 
@@ -270,6 +287,21 @@ trait PredefinedVariablesTrait {
 		return $this->uri;
 	}
 
+	public function getUriPath(): ?string {
+		$parts = parse_url($this->uri);
+		return $parts['path'] ?? null;
+	}
+
+	public function getUriQueryString(): ?string {
+		$parts = parse_url($this->uri);
+		return $parts['query'] ?? null;
+	}
+
+	public function getUriFragment(): ?string {
+		$parts = parse_url($this->uri);
+		return $parts['fragment'] ?? null;
+	}
+
 	public function getHost(): string {
 		return $this->host;
 	}
@@ -322,7 +354,7 @@ trait ValueTrait {
 
 trait SanitizerTrait {
 
-	public function sanitize(array|string|null $input) {
+	public function sanitize(ActiveRecord|array|string|null $input) {
 		if (is_array($input) && count($input) == 0) return;
 		if (is_null($input)) return;
 
@@ -330,7 +362,13 @@ trait SanitizerTrait {
 			return array_keys($arr) !== range(0, count($arr) - 1);
 		};
 
-		if (is_array($input) && $isAssoc($input)) {
+		if ($input instanceof ActiveRecord) {
+			$input->iterateData(function ($key, &$value) {
+				$value = $this->sanitize($value);
+			});
+
+			$output = $input;
+		} elseif (is_array($input) && $isAssoc($input)) {
 			foreach ($input as $key => $value) {
 				$output[$key] = $this->sanitize($value);
 			}
@@ -357,13 +395,17 @@ class HttpException extends Exception {
 
 }
 
+class TemplateRenderException extends Exception {}
+
 class I18n {
 
 	private array $lines = [];
 	private string $locale = 'en';
 
 	public function load(string $file, ?string $locale = 'en') {
-		$this->lines[$locale] = include $file;
+		$lines = include $file;
+		if (!isset($this->lines[$locale])) $this->lines[$locale] = [];
+		$this->lines[$locale] = array_merge($this->lines[$locale], $lines);
 		$this->locale = $locale;
 	}
 
@@ -375,7 +417,7 @@ class I18n {
 		return $this->locale;
 	}
 
-	public function get(string $line, ?string $fallback, ...$args): string {
+	public function get(string $line, ?string $fallback = null, ...$args): string {
 		$i18nString = '';
 
 		if (empty($this->locale)) {
@@ -422,18 +464,41 @@ class Helpers {
 		exit();
 	}
 
-	public static function setRateLimitCookie(int $status, string $name, int $expirationSeconds = 60) {
-		if ($status == 200) setcookie($name, true, time() + $expirationSeconds);
+	public static function setRateLimitCookie(int $status, string $name, int $expirationSeconds = 60, int $maxTries = 5) {
+		$triesTime = Session::get($name . '-tries-time') ?? time();
+
+		if (time() > ($triesTime + $expirationSeconds)) {
+			Session::delete($name . '-tries-number');
+			Session::delete($name . '-tries-time');
+		}
+
+		$triesNumber = Session::get($name . '-tries-number') ?? 1;
+		$triesTime = Session::get($name . '-tries-time') ?? time();
+
+		if ($triesNumber < $maxTries) {
+			Session::set($name . '-tries-number', $triesNumber + 1);
+			Session::set($name . '-tries-time', time());
+			return;
+		}
+
+		if ($status == 200) {
+			Session::delete($name . '-tries-number');
+			Session::delete($name . '-tries-time');
+			setcookie($name, true, time() + $expirationSeconds);
+		}
 	}
 
 	public static function checkRateLimitCookie(App $app, string $name) {
-		if (isset($app->cookieParams[$name])) {
+		if (isset($app->getCookieParams()[$name])) {
+			Session::delete($name . '-tries-number');
+			Session::delete($name . '-tries-time');
 			throw new HttpException('Too much requests, please try again later.', 429);
 		}
 	}
 
 }
 
+// @todo Session Cookie Security
 class Session {
 
 	public static function start() {
@@ -445,7 +510,7 @@ class Session {
 	}
 
 	public static function get(string $key) {
-		return (isset($_SESSION[$key])) ? $_SESSION[$key] : false; 
+		return (isset($_SESSION[$key])) ? $_SESSION[$key] : null; 
 	}
 
 	public static function has(string $key) {
@@ -490,13 +555,43 @@ class Session {
 		return false;
 	}
 
-	public function hasValidTokenOnce(string $tokenValue, ?string $tokenName = 'token'): bool {
+	public static function hasValidTokenOnce(string $tokenValue, ?string $tokenName = 'token'): bool {
 		if (Session::hasValidToken($tokenValue, $tokenName)) {
 			Session::delete($tokenName);
 			return true;
 		}
 
 		return false;
+	}
+
+	public static function flash(string $key, $value) {
+		$flash = Session::get('flash');
+		if (!$flash) $flash = [];
+
+		$flash[$key] = $value;
+
+		Session::set('flash', $flash);
+	}
+
+	public static function hasFlash($key): bool {
+		$flash = Session::get('flash');
+		if (!$flash) return false;
+		if (!$flash[$key]) return false;
+
+		return true;
+	}
+
+	public static function getFlash($key) {
+		$flash = Session::get('flash');
+		if (!$flash) return;
+		if (!$flash[$key]) return;
+
+		$message = $flash[$key];
+		unset($flash[$key]);
+
+		Session::set('flash', $flash);
+
+		return $message;
 	}
 
 }
@@ -569,21 +664,52 @@ class Validator {
 		return $this;
 	}
 
-	public function minMax(?int $min, ?int $max = null): self {
+	public function minMaxString(?int $min, ?int $max = null): self {
+		$notInRange = false;
+		$value = $this->value;
+
+		if (!empty($value)) {
+			if (isset($min) && strlen($value) < $min) $notInRange = true;
+			if (isset($max) && strlen($value) > $max) $notInRange = true;
+		}
+
+		if ($notInRange) $this->setError(__FUNCTION__);
+
+		return $this;
+	}
+
+	public function minMaxNumber(?int $min, ?int $max = null): self {
+		$notInRange = false;
+		$value = $this->value;
+
+		if (is_numeric($value)) {
+			if (isset($min) && $value < $min) $notInRange = true;
+			if (isset($max) && $value > $max) $notInRange = true;
+		} else {
+			$notInRange = true;
+		}
+
+		if ($notInRange) $this->setError(__FUNCTION__);
+
+		return $this;
+	}
+
+	public function minMaxFile(?int $min, ?int $max = null): self {
 		$notInRange = false;
 		$value = $this->value;
 
 		// File Array
 		if ($this->isFile && is_array($this->value[$this->name]['name'])) {
 			$value = count($this->value[$this->name]['name']);
-		}
 
-		if (is_numeric($value)) {
-			if (isset($min) && $value < $min) $notInRange = true;
-			if (isset($max) && $value > $max) $notInRange = true;
-		} elseif (is_string($value) && !empty($value)) {
-			if (isset($min) && strlen($value) < $min) $notInRange = true;
-			if (isset($max) && strlen($value) > $max) $notInRange = true;
+			if (is_numeric($value)) {
+				if (isset($min) && $value < $min) $notInRange = true;
+				if (isset($max) && $value > $max) $notInRange = true;
+			} else {
+				$notInRange = true;
+			}
+		} else {
+			$notInRange = true;
 		}
 
 		if ($notInRange) $this->setError(__FUNCTION__);
@@ -716,12 +842,6 @@ class Validator {
 		return $this;
 	}
 
-	public function clean(): self {
-		$this->value = filter_var($this->value, FILTER_SANITIZE_STRING);
-
-		return $this;
-	}
-
 	private function setError(string $code, string $context = null) {
 		$error = [
 			'name'    => $this->name,
@@ -749,35 +869,31 @@ class Validator {
 
 }
 
-// @todo Do not use file, use database instead
 class Migration {
 
 	protected PDO $db;
-	private string $file = './.migrations';
+	private string $table = 'migrations';
 
-	public function __construct(PDO $db, ?string $file = null) {
+	public function __construct(PDO $db, ?string $table = null) {
 		$this->db = $db;
+		if (isset($table)) $this->table = $table;
 
-		if (isset($file)) $this->file = $file;
+		$this->checkMigrationTable();
 	}
 
 	public function __destruct() {
 		unset($this->db);
 	}
 
-	public function run(callable ...$migrations) {
-		if (!file_exists($this->file)) fopen($this->file, 'w');
-		$handle = fopen($this->file, 'r');
-		$currentVersion = fgets($handle);
-		fclose($handle);
+	public function run(array $migrations) {
+		$currentVersion = $this->findCurrentVersion();
 
 		if (!$currentVersion) $currentVersion = 0;
-
-		$lastVersion = 0;
+		$nextVersion = 0;
 
 		foreach ($migrations as $version => $migration) {
-			$lastVersion = $version + 1;
-			if ($lastVersion <= $currentVersion) continue;
+			$nextVersion = $version + 1;
+			if ($nextVersion <= $currentVersion) continue;
 
 			try {
 				$migration($this->db);
@@ -786,27 +902,69 @@ class Migration {
 			}
 		}
 
-		$handle = fopen($this->file, 'w+');
-		fwrite($handle, $lastVersion);
-		fclose($handle);
-
-		if ($currentVersion == $lastVersion) {
+		if ($currentVersion == $nextVersion) {
 			return false;
 		}
 
+		$this->saveNewVersion($nextVersion);
+
 		return true;
+	}
+
+	private function checkMigrationTable() {
+		$queryTableCheck = "SELECT 1 FROM `$this->table`";
+		$queryTableCreate = "CREATE TABLE `$this->table` (
+			`id`        INTEGER NOT NULL PRIMARY KEY AUTO_INCREMENT,
+			`version`   INTEGER NOT NULL,
+			`timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL
+		)";
+
+		try {
+			$this->db->query($queryTableCheck);
+		} catch (Exception $e) {
+			// Table not found, create it.
+			$this->db->exec($queryTableCreate);
+		}
+	}
+
+	private function findCurrentVersion() {
+		$queryLastId = "SELECT * FROM `$this->table` ORDER BY `id` DESC LIMIT 1";
+
+		$statement = $this->db->prepare($queryLastId);
+		$statement->execute();
+
+		$row = $statement->fetch();
+
+		if (empty($row)) return;
+
+		return $row['version'];
+	}
+
+	private function saveNewVersion(int $version) {
+		$query = "INSERT INTO `$this->table` (`version`) VALUES (:newVersion)";
+
+		$statement = $this->db->prepare($query);
+		$statement->execute([
+			'newVersion' => $version,
+		]);
 	}
 
 }
 
 abstract class ActiveRecord implements JsonSerializable {
 
-	public static PDO $db;
+	protected static PDO $db;
+	protected static string $defaultDateTimeFormat = 'Y-m-d H:i:s';
+
 	protected Validator $validator;
 	protected array $data = [];
+
 	protected string $table;
 	protected array $fields = [];
+	protected array $additional = [];
+	protected array $hidden = ['password'];
 	protected string $primaryKey = 'id';
+
 	private ?array $constraintsContext;
 
 	public function __construct() {
@@ -822,7 +980,8 @@ abstract class ActiveRecord implements JsonSerializable {
 	}
 
 	public function __set(string $name, mixed $value) {
-		$this->data[$name] = $value;
+		$key = $this->convertKey($name);
+		$this->data[$key] = $value;
 	}
 
 	public function __get(string $name): mixed {
@@ -841,8 +1000,55 @@ abstract class ActiveRecord implements JsonSerializable {
 		self::$db = $db;
 	}
 
-	public function getDatabase(): PDO {
+	public static function getDatabase(): PDO {
 		return self::$db;
+	}
+
+	public function setTable(string $table) {
+		if (!preg_match('/^[A-Za-z0-9._-]*$/', $table)) throw new Exception('Error setting database table.');
+
+		$this->table = $table;
+	}
+
+	public function getTable(): string {
+		return (getenv('DB_TABLE_PREFIX') ?: '') . $this->table;
+	}
+
+	private function getFields() {
+		return $this->fields;
+	}
+
+	public function getPrimaryKey(): string {
+		return $this->primaryKey;
+	}
+
+	public function getData(): array {
+		return $this->data;
+	}
+
+	public function iterateData(Closure $c) {
+		foreach ($this->data as $key => &$value) {
+			$c($key, $value);
+		}
+	}
+
+	public static function setDefaultDatimeFormat(string $format) {
+		self::$defaultDateTimeFormat = $format;
+	}
+
+	public static function getDefaultDatimeFormat(): PDO {
+		return self::$defaultDateTimeFormat;
+	}
+
+	public static function getCurrentDateTime(): string {
+		return gmdate(self::$defaultDateTimeFormat);
+	}
+
+	public function convertKey(string $key) {
+		$key = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
+		$key = str_replace(' ', '', ucwords(str_replace('-', ' ', $key)));
+
+		return lcfirst($key);
 	}
 
 	public function save(): bool {
@@ -853,8 +1059,9 @@ abstract class ActiveRecord implements JsonSerializable {
 		return $this->insert();
 	}
 
-	private function insert(): bool {
+	protected function insert(): bool {
 		$fields = $this->getFields();
+		$questionMarks = [];
 
 		foreach ($fields as $field) {
 			$questionMarks[] = '?';
@@ -879,15 +1086,12 @@ abstract class ActiveRecord implements JsonSerializable {
 			$statement->bindValue(($i + 1), $value, $this->getDataType($value));
 		}
 
-		try {
-			return $statement->execute();
-		} catch (PDOException $e) {
-			die($e->getMessage());
-		}
+		return $statement->execute();
 	}
 
-	private function update(): bool {
+	protected function update(): bool {
 		$fields = $this->getFields();
+		$primaryKey = $this->primaryKey;
 
 		foreach($fields as $field){
 			$getter = $this->convertKey($field);
@@ -901,7 +1105,7 @@ abstract class ActiveRecord implements JsonSerializable {
 
 		$query = "UPDATE `$this->table`"
 			. " SET `" . implode('` = ?, `', $fields) . "` = ?"
-			. " WHERE `$this->primaryKey` = ?";
+			. " WHERE `$primaryKey` = ?";
 
 		$statement = $this->getDatabase()->prepare($query);
 
@@ -909,26 +1113,20 @@ abstract class ActiveRecord implements JsonSerializable {
 			$statement->bindValue(($i + 1), $value, $this->getDataType($value));
 		}
 
-		$statement->bindValue(count($values) + 1 , $this->{$this->primaryKey}, PDO::PARAM_INT);
+		$statement->bindValue(count($values) + 1, $this->{$primaryKey}, PDO::PARAM_INT);
 
-		try {
-			return $statement->execute();
-		} catch (PDOException $e) {
-			die($e->getMessage());
-		}
+		return $statement->execute();
 	}
 
 	public function delete() {
-		$query = "DELETE FROM `$this->table` WHERE `$this->primaryKey` = :id";
+		$primaryKey = $this->primaryKey;
+		$query = "DELETE FROM `$this->table` WHERE `$primaryKey` = :id";
+		$id = $this->{$primaryKey};
 
 		$statement = $this->getDatabase()->prepare($query);
-		$statement->bindParam(':id', $this->{$this->primaryKey}, PDO::PARAM_INT);
+		$statement->bindParam(':id', $id, PDO::PARAM_INT);
 
-		try {
-			return $statement->execute();
-		} catch (PDOException $e) {
-			die($e->getMessage());
-		}
+		return $statement->execute();
 	}
 
 	public static function find(int $id, ?string $tableName = null) {
@@ -942,23 +1140,21 @@ abstract class ActiveRecord implements JsonSerializable {
 
 		$statement = $entity->getDatabase()->prepare($query);
 		$statement->bindParam(':id', $id, PDO::PARAM_INT);
-		
-		try {
-			$statement->execute();
-		} catch (PDOException $e) {
-			die($e->getMessage());
-		}
+		$statement->execute();
 
-		$row = $statement->fetch();
-		
+		$row = $statement->fetch(PDO::FETCH_ASSOC);
+
 		if (!empty($row)) {
-			$entity->map($row);
+			foreach ($row as $rowKey => $rowValue) {
+				$setter = $entity->convertKey($rowKey);
+				$entity->{$setter} = $rowValue;
+			}
 			
 			return $entity;
 		}
 	}
 
-	public static function findWhere(string $fieldName, mixed $fieldValue, ?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null, ?string $tableName = null): ArrayObject {
+	public static function findWhere(string $fieldName, mixed $fieldValue, ?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null, ?string $tableName = null): array {
 		$entity = new static();
 		if ($tableName) $entity->setTable($tableName);
 
@@ -966,6 +1162,8 @@ abstract class ActiveRecord implements JsonSerializable {
 		$fields = $entity->getFields();
 
 		if (!in_array($fieldName, $fields)) throw new Exception('Exception in `findWhere` because passed field name is not valid.');
+		if ($orderBy && !in_array($orderBy, $fields)) throw new Exception('Exception in `findWhere` because passed field name for ordering is not valid.');
+		if ($sort && !in_array(strtolower($sort), ['asc', 'desc'])) throw new Exception('Exception in `findWhere` because passed value for sorting is not valid.');
 
 		$query = "SELECT * FROM `$table` WHERE `$fieldName` = :fieldValue";
 		
@@ -976,21 +1174,20 @@ abstract class ActiveRecord implements JsonSerializable {
 
 		$statement = $entity->getDatabase()->prepare($query);
 		$statement->bindParam(':fieldValue', $fieldValue, $entity->getDataType($fieldValue));
-		
-		try {
-			$statement->execute();
-		} catch (PDOException $e) {
-			die($e->getMessage());
-		}
+		$statement->execute();
 
-		$entities = new ArrayObject();
+		$entities = [];
 
-		foreach ($statement->fetchAll() as $row) {
-			$entity = new static();
-			if ($tableName) $entity->setTable($tableName);
-			$entity->map($row);
+		foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+			$entityFromRow = new static();
+			if ($tableName) $entityFromRow->setTable($tableName);
 
-			$entities[] = $entity;
+			foreach ($row as $rowKey => $rowValue) {
+				$setter = $entityFromRow->convertKey($rowKey);
+				$entityFromRow->{$setter} = $rowValue;
+			}
+
+			$entities[] = $entityFromRow;
 		}
 
 		return $entities;
@@ -998,6 +1195,7 @@ abstract class ActiveRecord implements JsonSerializable {
 
 	public static function findOne(string $fieldName, mixed $fieldValue, ?string $tableName = null) {
 		$entity = new static();
+
 		if ($tableName) {
 			$entity->setTable($tableName);
 			$entities = static::findWhere($fieldName, $fieldValue, null, 'ASC', null, null, $tableName);
@@ -1005,19 +1203,19 @@ abstract class ActiveRecord implements JsonSerializable {
 			$entities = static::findWhere($fieldName, $fieldValue);
 		}
 
-
 		if (count($entities)) {
-			$entity->map($entities[0]->getData());
-
-			return $entity;
+			return $entities[0];
 		}
 	}
 
-	public static function findAll(?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null, ?string $tableName = null) {
+	public static function findAll(?string $orderBy = null, ?string $sort = 'ASC', ?int $limit = null, ?int $offset = null, ?string $tableName = null): array {
 		$entity = new static();
 		if ($tableName) $entity->setTable($tableName);
 
 		$table = $entity->getTable();
+
+		if ($orderBy && !in_array($orderBy, $fields)) throw new Exception('Exception in `findWhere` because passed field name for ordering is not valid.');
+		if ($sort && !in_array(strtolower($sort), ['asc', 'desc'])) throw new Exception('Exception in `findWhere` because passed value for sorting is not valid.');
 
 		$query = "SELECT * FROM `$table`";
 
@@ -1027,43 +1225,20 @@ abstract class ActiveRecord implements JsonSerializable {
 		if ($offset && $limit) $query .= " OFFSET $offset";
 
 		$statement = $entity->getDatabase()->prepare($query);
+		$statement->execute();
 
-		try {
-			$statement->execute();
-		} catch (PDOException $e) {
-			die($e->getMessage());
-		}
+		$entities = [];
 
-		$entities = new ArrayObject();;
+		foreach ($statement->fetchAll(PDO::FETCH_ASSOC) as $row) {
+			$entityFromRow = new static();
+			if ($tableName) $entityFromRow->setTable($tableName);
 
-		foreach ($statement->fetchAll() as $row) {
-			$entity = new static();
-			$entity->map($row);
+			foreach ($row as $rowKey => $rowValue) {
+				$setter = $entityFromRow->convertKey($rowKey);
+				$entityFromRow->{$setter} = $rowValue;
+			}
 
-			$entities[] = $entity;
-		}
-
-		return $entities;
-	}
-
-	public static function query(string $query) {
-		$entity = new static();
-
-		$statement = $entity->getDatabase()->prepare($query);
-
-		try {
-			$statement->execute();
-		} catch (PDOException $e) {
-			die($e->getMessage());
-		}
-
-		$entities = new ArrayObject();;
-
-		foreach ($statement->fetchAll() as $row) {
-			$entity = new static();
-			$entity->map($row);
-
-			$entities[] = $entity;
+			$entities[] = $entityFromRow;
 		}
 
 		return $entities;
@@ -1073,61 +1248,6 @@ abstract class ActiveRecord implements JsonSerializable {
 		return $this->getDatabase()->lastInsertId();
 	}
 
-	public function setTable(string $table) {
-		$this->table = $table;
-	}
-
-	public function getTable(): string {
-		return (getenv('DB_TABLE_PREFIX') ?: '') . $this->table;
-	}
-
-	public function getPrimaryKey(): string {
-		return $this->primaryKey;
-	}
-
-	public function getData(): array {
-		return $this->data;
-	}
-
-	public function map(array $data) {
-		foreach ($data as $rowKey => $rowValue) {
-			if (is_numeric($rowKey)) continue;
-
-			$key = $this->convertKey($rowKey);
-			$setter = $key;
-			$this->data[$setter] = isset($data[$rowKey]) ? $data[$rowKey] : null;
-
-			if (is_numeric($this->data[$setter])) {
-				if (strpos($this->data[$setter], '.') !== false) {
-					$this->data[$setter] = (float) $this->data[$setter];
-				} else {
-					$this->data[$setter] = (int) $this->data[$setter];
-				}
-			}
-		}
-	}
-
-	public function mapFormFields(array $data) {
-		foreach ($data as $rowKey => $rowValue) {
-			if (is_numeric($rowKey)) continue;
-			if (substr($rowKey, 0, 1) === '_') continue;
-
-			$rowKeyMapped = $this->getDatabaseFieldName($rowKey);
-			$key = $this->convertKey($rowKeyMapped);
-
-			$setter = $key;
-			$this->data[$setter] = $data[$rowKey];
-
-			if (is_numeric($this->data[$setter])) {
-				if (strpos($this->data[$setter], '.') !== false) {
-					$this->data[$setter] = (float) $this->data[$setter];
-				} else {
-					$this->data[$setter] = (int) $this->data[$setter];
-				}
-			}
-		}
-	}
-
 	public function useConstraints(Validator $validator, ?array $context = null) {
 		$this->validator = $validator;
 		$this->constraintsContext = $context;
@@ -1135,31 +1255,6 @@ abstract class ActiveRecord implements JsonSerializable {
 
 	protected function constraints(Validator $validator, ?array $context = null) {
 		return;
-	}
-
-	public function getDatabaseFieldName(string $fieldName): string {
-		foreach ($this->fields as $databaseFieldName => $formFieldName) {
-			if ($formFieldName != $fieldName) continue;
-			if (is_numeric($databaseFieldName)) return $formFieldName;
-
-			return $databaseFieldName;
-		}
-
-		throw new Exception('ActiveRecord has no mapping for a form field with name "' . $fieldName . '".');
-	} 
-
-	public function getFormFieldName(string $fieldName): string {
-		if (!isset($this->fields[$fieldName])) {
-			$fields = $this->getFields();
-
-			foreach ($fields as $field) {
-				if ($field == $fieldName) return $field;
-			}
-
-			throw new Exception('ActiveRecord has no mapping for a database field with name "' . $fieldName . '".');
-		}
-
-		return $this->fields[$fieldName];
 	}
 
 	public function isValid(): bool {
@@ -1185,30 +1280,34 @@ abstract class ActiveRecord implements JsonSerializable {
 		return null;
 	}
 
-	public function jsonSerialize(): array {
-		return $this->data;
+	public function __serialize(): array {
+		return $this->generateSerializableData();
 	}
 
-	private function getFields() {
-		$fields = [];
+	public function jsonSerialize(): array {
+		return $this->generateSerializableData();
+	}
 
-		foreach ($this->fields as $databaseFieldName => $formFieldName) {
-			if (is_numeric($databaseFieldName)) {
-				// There is no mapping so the name is the same.
-				$fields[] = $formFieldName;
-			} else {
-				$fields[] = $databaseFieldName;
+	private function generateSerializableData(): array {
+		$data = [];
+
+		foreach ($this->getFields() as $field) {
+			if (in_array($field, $this->hidden)) continue;
+
+			$getter = $this->convertKey($field);
+			$data[$getter] = $this->data[$getter] ?? null;
+		}
+
+		if ($this->additional) {
+			foreach ($this->additional as $additional) {
+				if (in_array($additional, $this->hidden)) continue;
+
+				$getter = $this->convertKey($additional);
+				$data[$getter] = $this->data[$getter] ?? null;
 			}
 		}
 
-		return $fields;
-	}
-
-	private function convertKey(string $key) {
-		$key = str_replace(' ', '', ucwords(str_replace('_', ' ', $key)));
-		$key = str_replace(' ', '', ucwords(str_replace('-', ' ', $key)));
-
-		return lcfirst($key);
+        return $data;
 	}
 
 	private function getDataType($value) {
@@ -1218,8 +1317,8 @@ abstract class ActiveRecord implements JsonSerializable {
 			case 'boolean':
 				return PDO::PARAM_BOOL;
 			case 'integer':
-			case 'double':
 				return PDO::PARAM_INT;
+			case 'double':
 			case 'string':
 				return PDO::PARAM_STR;
 			case 'NULL':
@@ -1233,9 +1332,12 @@ abstract class ActiveRecord implements JsonSerializable {
 
 class DatabaseFromEnv {
 
+	use EnvTrait;
+
 	protected PDO $db;
 
 	public function __construct() {
+		$this->loadEnv('.env');
 		$this->createDatabaseFromEnv();
 	}
 
@@ -1254,15 +1356,25 @@ class DatabaseFromEnv {
 					$this->db = new PDO($dsn, getenv('DB_USERNAME'), getenv('DB_PASSWORD'));
 					$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 					$this->db->setAttribute(PDO::MYSQL_ATTR_INIT_COMMAND, 'SET NAMES ' . $charset);
+					$this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 				} elseif ($type == 'sqlite') {
 					$this->db = new PDO($dsn);
 					$this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+					$this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 				}
 			} catch (PDOException $e) {
 				throw new PDOException($e->getMessage());
 			}
+		} else {
+			throw new Exception('Unable to create database from environment variables, maybe some variables are missing.');
 		}
 	}
+
+}
+
+interface ComponentInterface {
+
+	public function __invoke(): string;
 
 }
 
@@ -1272,11 +1384,13 @@ class View {
 
 	private array $layout = ['file' => null, 'data' => null];
 	private array $areas;
-	private I18n $i18n;
+	private string $content;
+	private array $classList = [];
+	protected I18n $i18n;
 
 	public function withLayout(string $file, array|ActiveRecord|null $arrayOrRecord = null, bool $sanitize = true): self {
 		if ($arrayOrRecord && $sanitize) {
-			$data = $this->sanitizeTemplateData($arrayOrRecord);
+			$data = $this->sanitize($arrayOrRecord);
 		} else {
 			$data = $arrayOrRecord;
 		}
@@ -1287,17 +1401,17 @@ class View {
 		return $this;
 	}
 
-	public function withLayoutData(array $data = [], ?bool $sanitze = true) {
-		if ($sanitize) $data = $this->sanitzeTemplateData($data);
+	public function withLayoutData(array $data = [], ?bool $sanitize = true) {
+		if ($sanitize) $data = $this->sanitize($data);
 
-		$this->layout['data'] = array_merge($this->layout['data'], $data);
+		$this->layout['data'] = array_merge($this->layout['data'] ?? [], $data);
 
 		return $this;
 	}
 
-	public function withArea(string $file, array|ActiveRecord|null $arrayOrRecord = null, ?string $areaName = 'main', ?bool $sanitize = true): self {
+	public function withArea(string $file, ?string $areaName = 'main', array|ActiveRecord|null $arrayOrRecord = null, ?bool $sanitize = true): self {
 		if ($arrayOrRecord && $sanitize) {
-			$data = $this->sanitizeTemplateData($arrayOrRecord);
+			$data = $this->sanitize($arrayOrRecord);
 		} else {
 			$data = $arrayOrRecord;
 		}
@@ -1308,40 +1422,53 @@ class View {
 		return $this;
 	}
 
+	public function withAreaData(array $data = [], string $areaName = 'main', ?bool $sanitize = true) {
+		if ($sanitize) $data = $this->sanitize($data);
+
+		$this->areas[$areaName]['data'] = array_merge($this->areas[$areaName]['data'] ?? [], $data);
+
+		return $this;
+	}
+
+	public function withContent(string $content): static {
+		$this->content = $content;
+		return $this;
+	}
+
 	public function withI18n(I18n $i18n): self {
 		$this->i18n = $i18n;
 
 		return $this;
 	}
 
-	private function sanitizeTemplateData(array|ActiveRecord $arrayOrRecord): array {
-		$data = [];
+	public function withClassList(string $context, ?array $classes = null): self {
+		$this->classList[$context] = $classes;
+		return $this;
+	}
 
-		if ($arrayOrRecord instanceof ActiveRecord) {
-			$data = $arrayOrRecord->getData();
-		} elseif (is_array($arrayOrRecord)) {
-			$data = $arrayOrRecord;
-		} else {
-			throw new Exception('Template data must be an array or instance of "ActiveRecord".');
+	public function getI18n(): ?I18n {
+		return $this->i18n ?? null;
+	}
+
+	protected function classList(string $context, ?array $classes = null) {
+		if (!isset($this->classList[$context])) $this->classList[$context] = [];
+		if (!$classes) $classes = [];
+		if (!$this->classList[$context] && !$classes) return;
+
+		$classList = [];
+		$classListWithConditions = array_merge($classes, $this->classList[$context]);
+
+		foreach ($classListWithConditions as $className => $classCondition) {
+			if ($classCondition) $classList[] = $className;
 		}
 
-		foreach ($data as $dataKey => $item) {
-			if ($item instanceof ActiveRecord) {
-				$sanitizedRecordData = $this->sanitize($item->getData());
-				if (!empty($sanitizedRecordData)) $item->map($sanitizedRecordData);
-				$data[$dataKey] = $item;
-			} elseif ($item instanceof ArrayObject) {
-				foreach ($item as $recordKey => $record) {
-					$sanitizedRecordData = $this->sanitize($record->getData());
-					if (!empty($sanitizedRecordData)) $record->map($sanitizedRecordData);
-					$data[$dataKey][$recordKey] = $record;
-				}
-			} else {
-				$data[$dataKey] = $this->sanitize($item);
-			}
-		}
+		if (count($classList) === 0) return '';
 
-		return $data;
+		return 'class="' . implode(' ', $classList) . '"';
+	}
+
+	protected function hasArea(string $areaName) {
+		return isset($this->areas[$areaName]);
 	}
 
 	private function area(?string $areaName = 'main') {
@@ -1355,7 +1482,7 @@ class View {
 
 			include $template;
 		} else {
-			throw new Exception('Template file "' . $template . '"" not found.');
+			throw new TemplateRenderException('Template file "' . $template . '" not found.');
 		}
 	}
 
@@ -1390,19 +1517,56 @@ class View {
 	}
 
 	private function i18n(string $key, ?string $fallback = null, ...$args) {
+		if (!isset($this->i18n)) {
+			echo $fallback;
+			return;
+		}
+
 		echo $this->i18n->get($key, $fallback, ...$args);
 	}
 
-	private function getI18n(string $key, ?string $fallback = null, ...$args) {
+	private function getI18nString(string $key, ?string $fallback = null, ...$args) {
+		if (!isset($this->i18n)) return $fallback;
+
 		return $this->i18n->get($key, $fallback, ...$args);
 	}
 
-	private function component(string $className, ?array $params = []): ?string {
-		$component = new $className($params);
+	private function component(string $className, ...$params): ?string {
+		$component = new $className(...$params);
 
-		if (!($component instanceof View)) return null;
+		if (is_callable($component)) {
+			return $component();
+		}
 
-		return $component->render();
+		if (($component instanceof View)) {
+			if ($this->getI18n()?->getLocale()) $component->getI18n()?->setLocale($this->getI18n()?->getLocale());
+
+			return $component->render();
+		}
+
+		return null;
+	}
+
+	// @todo Allow match with pattern
+	protected function isActive(string $url): bool {
+		$uriParts = parse_url($_SERVER['REQUEST_URI']);
+		return $url == ($uriParts['path'] ?? '/');
+	}
+
+	private function hasFlash($key) {
+		return Session::hasFlash($key);
+	}
+
+	private function getFlash($key) {
+		return Session::getFlash($key);
+	}
+
+	public function getAreas(): array {
+		return $this->areas;
+	}
+
+	public function getArea(string $areaName = 'main') {
+		return $this->areas[$areaName] ?? null;
 	}
 
 	public function renderAreas(): string {
@@ -1414,13 +1578,17 @@ class View {
 			}
 		}
 
-		$content = ob_get_contents();
+		$this->content = ob_get_contents();
 		ob_end_clean();
 
-		return $content;
+		return $this->content;
 	}
 
 	public function render(): string {
+		if (isset($this->content)) {
+			return $this->content;
+		}
+
 		if (!$this->layout['file'] || !file_exists($this->layout['file'])) {
 			return $this->renderAreas();
 		}
@@ -1431,10 +1599,10 @@ class View {
 
 		include $this->layout['file'];
 
-		$content = ob_get_contents();
+		$this->content = ob_get_contents();
 		ob_end_clean();
 
-		return $content;
+		return $this->content;
 	}
 
 	public function __toString(): string {
@@ -1537,7 +1705,7 @@ class Route {
 	private array $excludedAppInterceptors = [];
 	private ?string $name = null;
 
-	public function __construct(string $method, string $uri, callable $action) {
+	public function __construct(string $method, string $uri, callable|array $action) {
 		if (!in_array(
 			$method, [
 				Route::GET,
@@ -1628,43 +1796,40 @@ class Router {
 	public function __call(string $name, array $arguments): Route {
 		$method = strtoupper($name);
 		$uri = $arguments[0];
-		$callable = $arguments[1];
+		$callableOrArray = $arguments[1];
 
 		if ($this->contextPath) $uri = '/' . trim($this->contextPath, '/\\') . $uri;
 
-		if (gettype($callable) === 'array') {
-			$class = $callable[0];
-			$action = $callable[1] ?? 'index';
-			$object = $this->container->resolve($class);
-
-			if (!method_exists($object, $action)) throw new HttpException('Not Found.', 404);
-
-			$callable = [$object, $action];
-		}
-
-		$this->routes[$method][] = new Route($method, $uri, $callable);
+		$this->routes[$method][] = new Route($method, $uri, $callableOrArray);
 		return end($this->routes[$method]);
 	}
 
 	public function findRoute(string $requestedMethod, string $requestedUri): ?Route {
 		if (empty($this->routes) || empty($this->routes[$requestedMethod])) return null;
 
+		$uriParts = parse_url($requestedUri);
+		$path = ($uriParts['path'] ?? '')
+			. (isset($uriParts['query']) ? '?' . $uriParts['query'] : '')
+			. (isset($uriParts['fragment']) ? '#' . $uriParts['fragment'] : '');
+
 		$route = null;
 		foreach ($this->routes[$requestedMethod] as $possibleRoute) {
 			$uriPattern = $possibleRoute->getUri();
 
-			// Remove leading and trailing slashes (if present) and add it again.
-			$requestedUri = trim($requestedUri, '/\\');
-			$uriPattern   = trim($uriPattern,   '/\\');
-			$requestedUri = '/' . $requestedUri . '/';
-			$uriPattern   = '/' . $uriPattern   . '/';
+			// Remove leading and trailing slashes (if present) ...
+			$path = trim($path, '/\\');
+			$uriPattern = trim($uriPattern,   '/\\');
+
+			// ... and add it again, to make sure they are available..
+			$path = '/' . $path . '/';
+			$uriPattern = '/' . $uriPattern   . '/';
 
 			$uriPattern = preg_quote($uriPattern);
 
 			if (!empty($this->locales)) {
 				// Replace locale patterns with regex.
-				$uriPattern = str_replace('/\{locale\}',   '(\/' . implode('|\/', $this->locales) . ')',  $uriPattern, $localeReplaced);
-				$uriPattern = str_replace('/\{locale\?\}', '(\/' . implode('|\/', $this->locales) . ')?', $uriPattern, $localeOptionalReplaced);
+				$uriPattern = str_replace('\{locale\}',   '(' . implode('|', $this->locales) . ')',  $uriPattern, $localeReplaced);
+				$uriPattern = str_replace('\{locale\?\}', '?(' . implode('|', $this->locales) . ')?', $uriPattern, $localeOptionalReplaced);
 			}
 
 			// Replace patterns with regex.
@@ -1673,7 +1838,7 @@ class Router {
 			$uriPattern = str_replace('\{num\}',   '(\d+)',   $uriPattern);
 			$uriPattern = str_replace('\{num\?\}', '?(\d+)?', $uriPattern);
 
-			$routeMatch = preg_match('(^' . $uriPattern . '$)i', $requestedUri, $parameters);
+			$routeMatch = preg_match('(^' . $uriPattern . '$)i', $path, $parameters);
 
 			if (isset($routeMatch) && $routeMatch) {
 				$route = $possibleRoute;
@@ -1687,8 +1852,8 @@ class Router {
 					// Remove empty parameter
 					if (empty($parameter)) continue;
 
-					// If parameter starts with '/' it must be the locale
-					if (substr($parameter, 0, 1) === '/') {
+					// Check if first parameter is one of the defined locales
+					if ($key === 0 && in_array($parameter, $this->locales)) {
 						$locale = ltrim($parameter, '/');
 						if ($locale && !$route->getLocale()) $route->setLocale($locale);
 						continue;
@@ -1718,7 +1883,7 @@ class Router {
 		$this->locales = $locales;
 	}
 
-	public function getLocale(): string {
+	public function getLocale(): ?string {
 		if (!$this->route) return null;
 
 		return $this->route->getLocale();
@@ -1734,7 +1899,9 @@ class Router {
 	 */
 	public function generateRouteByName(?string $name = null, array $parameters = []) {
 		$pattern = '{\w+\??}';
-		$routeUri = $this->getRoute()->getUri() ?? '/';
+		$routeUri = !isset($name)
+			? $this->getRoute()?->getUri() ?? '/'
+			: '/';
 
 		// If a name is handed to the method, search for the route
 		if ($name) {
@@ -1750,7 +1917,7 @@ class Router {
 		}
 
 		// If the current route has a locale set, use it
-		if ($this->getRoute()->getLocale()) {
+		if ($this->getRoute()?->getLocale()) {
 			$localeReplacement = '/' . $this->getRoute()->getLocale();
 		} else {
 			$localeReplacement = '';
@@ -1760,11 +1927,16 @@ class Router {
 		$routeUri = str_replace('/{locale}',  $localeReplacement, $routeUri);
 		$routeUri = str_replace('/{locale?}', $localeReplacement, $routeUri);
 
+		if (empty($routeUri)) $routeUri = '/';
+
 		// Get the route
 		try {
 			$uri = preg_replace_callback('(' . $pattern . ')', function ($matches) use (&$parameters) {
 				return array_shift($parameters);
 			}, $routeUri);
+
+			// Remove duplicated slashes if route has optional parameters
+			$uri = preg_replace('#(?<!:)//+#', '/', $uri);
 
 			return $uri;
 		} catch (Exception $e) {
@@ -1782,30 +1954,20 @@ class Router {
 
 class App extends Router {
 
+	use EnvTrait;
 	use InterceptorTrait;
 	use HeaderTrait;
 	use PredefinedVariablesTrait;
 	use ValueTrait;
 
 	protected DIContainer $container;
+	protected ?string $errorViewClass = null;
 
 	public function __construct(DIContainer $container) {
 		$this->container = $container;
 
 		$this->loadEnv('.env');
 		$this->init();
-	}
-
-	public function loadEnv(string $filePath) {
-		if (file_exists($filePath)) {
-			$file = fopen($filePath, 'r');
-
-			while (($line = fgets($file)) !== false) {
-				putenv(trim($line));
-			}
-
-			fclose($file);
-		}
 	}
 
 	public function init() {
@@ -1819,6 +1981,10 @@ class App extends Router {
 		$this->initPredefinedVariables();
 	}
 
+	public function setErrorViewClass(string $errorViewClass) {
+		$this->errorViewClass = $errorViewClass;
+	}
+
 	public function exceptionHandler(Throwable $e) {
 		$isDebugMode = getEnv('DEBUG') && getEnv('DEBUG') == 'true';
 		$result = new Result('<h1>Internal Server Error</h1>', 500, ['Content-Type', 'text/html; charset=utf-8']);
@@ -1827,32 +1993,52 @@ class App extends Router {
 			$result->setStatus($e->getCode() > 0 ? $e->getCode() : 500);
 		}
 
-		if ($result->getStatus() == 404) {
-			$result->setBody('<h1>Not Found</h1>');
-		} else {
-			if ($isDebugMode) {
-				$result->appendToBody('<p>' . $e->getMessage() . '</p><p>' . $e->getTraceAsString() . '</p>' . $e);
+		$resultArray = Result::generateArray(
+			Result::ERROR,
+			$e->getMessage(),
+			$isDebugMode ? [
+				'code' => $result->getStatus(),
+				'exception' => $e,
+				'trace' => $e->getTraceAsString(),
+			] : [],
+		);
+
+		if ($result->getStatus() != 500) {
+			$result->setBody('<h1>Error</h1>');
+
+			if ($result->getStatus() == 404) {
+				$result->setBody('<h1>Not Found</h1>');
+			}
+
+			if ($e instanceof TemplateRenderException) {
+				$result->setBody('<p><strong>TemplateRenderException<strong></p>');
 			}
 		}
 
+		if ($isDebugMode) {
+			$result->appendToBody('<p>' . $e->getMessage() . '</p><p>' . $e->getTraceAsString() . '</p>' . $e);
+		}
+
+		if ($this->errorViewClass) {
+			$errorView = $this->container->resolve($this->errorViewClass);
+
+			if ($errorView instanceof View) {
+				if ($this->getLocale()) $errorView->getI18n()?->setLocale($this->getLocale());
+
+				$errorView->withLayoutData([
+					'error' => $resultArray,
+				]);
+			}
+
+			$result->setBody($errorView);
+		}
+
+		// JSON
 		if (
 			$this->getHeader('Accept') == 'application/json'
 			|| $this->getHeader('Content-Type') == 'application/json'
 		) {
-			if ($isDebugMode) {
-				$context = [
-					'exception' => $e,
-					'trace' => $e->getTraceAsString(),
-				];
-			}
-
-			$result->setBody(
-				Result::generateArray(
-					Result::ERROR,
-					$e->getMessage(),
-					$context ?? [],
-				)
-			);
+			$result->setBody($resultArray);
 		}
 
 		$this->render($result);
@@ -1870,7 +2056,18 @@ class App extends Router {
 		if (!$route->usesOnlyRouteInterceptor() && $this->getInterceptorBefore()) ($this->getInterceptorBefore())($this);
 		if ($route->getInterceptorBefore()) ($route->getInterceptorBefore())($this);
 
-		$result = ($route->getAction())(...$route->getParameters());
+		$callableAction = $route->getAction();
+		if (gettype($callableAction) === 'array') {
+			$class = $callableAction[0];
+			$action = $callableAction[1] ?? 'index';
+			$object = $this->container->resolve($class);
+
+			if (!method_exists($object, $action)) throw new HttpException('Not Found.', 404);
+
+			$callableAction = [$object, $action];
+		}
+
+		$result = ($callableAction)(...$route->getParameters());
 
 		if ($result instanceof ResultVariations) {
 			$accept = $this->getHeader('Accept');
@@ -1885,6 +2082,9 @@ class App extends Router {
 			if (!$result) throw new HttpException('Not Found.', 404);
 		}
 
+		if ($result instanceof View && $this->getLocale()) {
+			$result->getI18n()?->setLocale($this->getLocale());
+		}
 		if (!$result instanceof Result) $result = new Result($result);
 
 		if ($route->getInterceptorAfter()) $result = ($route->getInterceptorAfter())($this, $result);
@@ -1900,9 +2100,9 @@ class App extends Router {
 
 		if (is_null($body)) {
 			$output = '';
-		} else if (is_string($body) || (is_object($body) && method_exists($body , '__toString'))) {
+		} elseif (is_string($body) || (is_object($body) && method_exists($body , '__toString'))) {
 			$output = $body;
-		} else if (is_object($body) || is_array($body)) {
+		} elseif (is_object($body) || is_array($body)) {
 			$derivedContentType = 'application/json';
 			$output = json_encode($body);
 		} else {
@@ -2085,6 +2285,8 @@ class DIContainer {
 }
 
 return (function () {
+	if (php_sapi_name() === 'cli') return;
+
 	$container = new DIContainer();
 	$container->set('App\DIContainer', $container);
 
@@ -2092,7 +2294,7 @@ return (function () {
 	$app->before(new AppBeforeInterceptor());
 	$app->after(new AppAfterInterceptor());
 
-	$app->getContainer()->set('App', $app);
+	$app->getContainer()->set('App\App', $app);
 
 	return $app;
 
