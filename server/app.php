@@ -1498,7 +1498,7 @@ class View {
 	}
 
 	private static function getHoneypotField() {
-		return '<input type="checkbox" name="hooman-check" id="hooman-check" aria-hidden="true" tabindex="-1" style="position: absolute; widht: 1px; height: 1px; overflow: hidden;">';
+		return '<input type="checkbox" name="hooman-check" id="hooman-check" aria-hidden="true" tabindex="-1" style="position: absolute; width: 1px; height: 1px; overflow: hidden; opacity: 0.1">';
 	}
 
 	private function e($value, $alt = null) {
