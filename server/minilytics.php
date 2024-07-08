@@ -771,7 +771,7 @@ $app->get('minilytics-admin', function () use ($app, $db) {
 				}
 			}
 		},
-	]);
+	], true);
 
 	htmlStart();
 

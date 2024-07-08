@@ -133,6 +133,13 @@ $minilyticsConfig->addSite(
 		],
 	),
 );
+$minilyticsConfig->addSite(
+	new Minilytics\Site(
+		'nutrition-logs', 'Nutrition Logs', 'nutritionlogs.com', 'https://www.nutritionlogs.com/', [
+			'zeller.berny@aon.at',
+		],
+	),
+);
 $app->setValue('minilyticsConfig', $minilyticsConfig);
 
 $app->run();

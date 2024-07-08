@@ -885,8 +885,8 @@ class Migration {
 		unset($this->db);
 	}
 
-	public function run(array $migrations) {
-		$currentVersion = $this->findCurrentVersion();
+	public function run(array $migrations, bool $rerun = false) {
+		$currentVersion = $rerun ? 0 : $this->findCurrentVersion();
 
 		if (!$currentVersion) $currentVersion = 0;
 		$nextVersion = 0;
