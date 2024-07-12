@@ -107,6 +107,11 @@ var Minilytics = (function () {
 		return false;
 	}
 
+	function isPageExcluded() {
+		if (document.querySelector('[data-minilytics-exclude="false"]')) return false;
+		if (document.querySelector('[data-minilytics-exclude]')) return true;
+	}
+
 	function isLocalhost() {
 		return (location.hostname === 'localhost' || location.hostname === '127.0.0.1');
 	}
@@ -264,6 +269,7 @@ var Minilytics = (function () {
 			if (isGlobalPrivacyControlActive()) return;
 			if (isDoNotTrackActive()) return;
 			if (isOptOutActive()) return;
+			if (isPageExcluded()) return;
 			if (isLocalhost()) return;
 			if (isBot()) return;
 
