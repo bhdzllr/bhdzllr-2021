@@ -1305,6 +1305,15 @@ class Visit extends ActiveRecord {
 		'timestamp',
 	];
 
+	public function __set(string $name, mixed $value) {
+		if ($name === 'unique') {
+			$this->data['unique'] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+			return;
+		}
+
+		$this->set($name, $value);
+	}
+
 	protected function constraints(Validator $validator, ?array $context = null) {
 		if (isset($context['site_ids'])) {
 			$validator->field('siteId', $this->siteId)->required()->inList(...$context['site_ids']);

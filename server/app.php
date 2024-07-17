@@ -980,11 +980,19 @@ abstract class ActiveRecord implements JsonSerializable {
 	}
 
 	public function __set(string $name, mixed $value) {
+		$this->set($name, $value);
+	}
+
+	protected function set(string $name, mixed $value) {
 		$key = $this->convertKey($name);
 		$this->data[$key] = $value;
 	}
 
 	public function __get(string $name): mixed {
+		return $this->get($name);
+	}
+
+	protected function get(string $name): mixed {
 		if (array_key_exists($name, $this->data)) {
 			return $this->data[$name];
 		}
