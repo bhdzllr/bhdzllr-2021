@@ -29,7 +29,7 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 		new AnalyticsOptOut(document.querySelector('.js-analytics-opt-out'), i18n);	
 	}
 	addAnalyticsCode(function () {
-		loadScript('/js/main-analytics.js', 'js-minilytics', () => {
+		loadScript('/js/main-analytics.js?t=202407172202', 'js-minilytics', () => {
 			Minilytics.initOptOutButton();
 		}, {
 			async: false,
