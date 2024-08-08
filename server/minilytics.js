@@ -176,7 +176,7 @@ function renderChart() {
 	}
 
 	stepsX = chartWidthInside / (chartData.length - 1);
-	valuesY = Math.round(maxUnique / linesY);
+	valuesY = Math.ceil(maxUnique / linesY);
 	if (valuesY == 0) valuesY = 1;
 
 	document.querySelector('.js-chart-container').innerHTML = `
@@ -209,11 +209,18 @@ function renderChart() {
 					let labelRatio = Math.round(chartData.length / maximumLabelsX);
 
 					chartData.map((record, i) => {
-						if (i == 0
-							|| i == (chartData.length - 1)
-							|| chartData.length <= maximumLabelsX
-							|| i % labelRatio == 0
-						) labels.push(`<text x="${(stepsX * i) + chartOffsetLeft}" y="${chartHeightInside + chartSpace}">${record.label}</text>`);
+						if (
+							(
+								i == 0
+								|| i == (chartData.length - 1)
+								|| chartData.length <= maximumLabelsX
+								|| i % labelRatio == 0
+							) && (
+								i != (chartData.length - 2)
+							)
+						) {
+							labels.push(`<text x="${(stepsX * i) + chartOffsetLeft}" y="${chartHeightInside + chartSpace}">${record.label}</text>`);
+						}
 					});
 
 					return labels.join('');
@@ -359,27 +366,29 @@ function renderTable(result, mapping, caption, rows) {
 	let rowCount = 0;
 
 	return `
-		<table>
-			${caption ? `<caption>${caption}}</caption>` : ''}
-			<thead>
-				<tr>
-					${renderTableHeadCells(mapping)}
-				</tr>
-			</thead>
-			<tbody>
-				${result.map(resultItem => {
-					if (rows && rows == rowCount) return;
+		<div class="table-container">
+			<table>
+				${caption ? `<caption>${caption}}</caption>` : ''}
+				<thead>
+					<tr>
+						${renderTableHeadCells(mapping)}
+					</tr>
+				</thead>
+				<tbody>
+					${result.map(resultItem => {
+						if (rows && rows == rowCount) return;
 
-					rowCount++;
-				return `
-				<tr>
-					${renderTableBodyCells(resultItem, mapping)}
-				</tr>
-				`;
-				}).join('')}
-				${rowCount == 0 ? `<td colspan="2">No data available.</td>` : ''}
-			</tbody>
-		</table>
+						rowCount++;
+					return `
+					<tr>
+						${renderTableBodyCells(resultItem, mapping)}
+					</tr>
+					`;
+					}).join('')}
+					${rowCount == 0 ? `<td colspan="2">No data available.</td>` : ''}
+				</tbody>
+			</table>
+		</div>
 	`;
 }
 

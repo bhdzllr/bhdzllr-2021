@@ -1630,6 +1630,14 @@ function htmlStart() {
 				border: none;
 			}
 
+			.table-container {
+				overflow-y: scroll;
+			}
+
+			.details .table-container {
+				overflow-y: unset;
+			}
+
 			table {
 				width: 100%;
 
@@ -1677,7 +1685,8 @@ function htmlStart() {
 			}
 
 			table td {
-				padding: 0.25rem 0.25rem 0.25rem 0.125rem;;
+				padding: 0.25rem 0.25rem 0.25rem 0.125rem;
+				box-sizing: border-box;
 			}
 
 			table td small {
@@ -1945,8 +1954,13 @@ function htmlStart() {
 				text-align: left;
 			}
 
+			.dm-overlay {
+				margin-bottom: 0;
+			}
+
 			.dm-dialog {
 				padding: 1rem 1.5rem 1.5rem;
+				box-sizing: border-box;
 			}
 
 			.dm-dialog h1 {
