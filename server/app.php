@@ -2201,6 +2201,9 @@ class AppBeforeInterceptor {
 	}
 
 	private function filterBodyValues() {
+		$contentTypeHeader = $this->app->getHeader('Content-Type');
+		if (!isset($contentTypeHeader)) return;
+
 		$contentType = explode(';', $this->app->getHeader('Content-Type'))[0];
 
 		if ($contentType == 'application/x-www-form-urlencoded' || $contentType == 'multipart/form-data') {
