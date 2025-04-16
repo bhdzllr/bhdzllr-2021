@@ -717,61 +717,62 @@ $app->post('minilytics-event', function () use ($app) {
 $app->get('minilytics-admin', function () use ($app, $db) {
 	$config = $app->getValue('minilyticsConfig');
 	$sites = $config->getSites();
-	$migration = new Migration($db);
+	
+	$migrations = [];
+	foreach ($sites as $site) {
+		array_push($migrations, function (PDO $db) use ($site) {
+			$queryCheckVisits = 'SELECT 1 FROM `' . $site->id . '_visits`';
+			$queryVisits = 'CREATE TABLE `' . $site->id . '_visits` (
+				`id`              BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+				`guid`            CHAR(36) NOT NULL,
+				`site_id`         VARCHAR(128) NOT NULL,
+				`path`            VARCHAR(1024) NOT NULL,
+				`unique`          BIT NOT NULL,
+				`referrer`        TEXT NULL,
+				`referrer_path`   TEXT NULL,
+				`timezone`        TEXT NULL,
+				`browser_name`    VARCHAR(64) NULL,
+				`browser_version` INT(5) UNSIGNED NULL,
+				`os`              VARCHAR(255) NULL,
+				`touch`           BIT NOT NULL,
+				`device_width`    INT(5) UNSIGNED NOT NULL,
+				`device_height`   INT(5) UNSIGNED NOT NULL,
+				`utm_source`      VARCHAR(255) NULL,
+				`utm_medium`      VARCHAR(255) NULL,
+				`utm_campaign`    VARCHAR(255) NULL,
+				`utm_term`        VARCHAR(255) NULL,
+				`utm_content`     VARCHAR(255) NULL,
+				`duration`        MEDIUMINT UNSIGNED NULL,
+				`timestamp`       TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+			) CHARACTER SET utf8 COLLATE utf8_general_ci';
 
-	$migration->run([
-		function (PDO $db) use ($sites) {
-			foreach ($sites as $site) {
-				$queryCheckVisits = 'SELECT 1 FROM `' . $site->id . '_visits`';
-				$queryVisits = 'CREATE TABLE `' . $site->id . '_visits` (
-					`id`              BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-					`guid`            CHAR(36) NOT NULL,
-					`site_id`         VARCHAR(128) NOT NULL,
-					`path`            VARCHAR(1024) NOT NULL,
-					`unique`          BIT NOT NULL,
-					`referrer`        TEXT NULL,
-					`referrer_path`   TEXT NULL,
-					`timezone`        TEXT NULL,
-					`browser_name`    VARCHAR(64) NULL,
-					`browser_version` INT(5) UNSIGNED NULL,
-					`os`              VARCHAR(255) NULL,
-					`touch`           BIT NOT NULL,
-					`device_width`    INT(5) UNSIGNED NOT NULL,
-					`device_height`   INT(5) UNSIGNED NOT NULL,
-					`utm_source`      VARCHAR(255) NULL,
-					`utm_medium`      VARCHAR(255) NULL,
-					`utm_campaign`    VARCHAR(255) NULL,
-					`utm_term`        VARCHAR(255) NULL,
-					`utm_content`     VARCHAR(255) NULL,
-					`duration`        MEDIUMINT UNSIGNED NULL,
-					`timestamp`       TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-				) CHARACTER SET utf8 COLLATE utf8_general_ci';
+			$queryCheckEvents = 'SELECT 1 FROM `' . $site->id . '_events`';
+			$queryEvents = 'CREATE TABLE `' . $site->id . '_events` (
+				`id`        BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
+				`site_id`   VARCHAR(128) NOT NULL,
+				`name`      VARCHAR(128) NOT NULL,
+				`context`   TEXT NULL,
+				`timestamp` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+			) CHARACTER SET utf8 COLLATE utf8_general_ci';
 
-				$queryCheckEvents = 'SELECT 1 FROM `' . $site->id . '_events`';
-				$queryEvents = 'CREATE TABLE `' . $site->id . '_events` (
-					`id`        BIGINT(20) UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
-					`site_id`   VARCHAR(128) NOT NULL,
-					`name`      VARCHAR(128) NOT NULL,
-					`context`   TEXT NULL,
-					`timestamp` TIMESTAMP ON UPDATE CURRENT_TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
-				) CHARACTER SET utf8 COLLATE utf8_general_ci';
-
-				try {
-					$db->query($queryCheckVisits);
-				} catch (Exception $e) {
-					// Table not found, create it.
-					$db->exec($queryVisits);
-				}
-
-				try {
-					$db->query($queryCheckEvents);
-				} catch (Exception $e) {
-					// Table not found, create it.
-					$db->exec($queryEvents);
-				}
+			try {
+				$db->query($queryCheckVisits);
+			} catch (Exception $e) {
+				// Table not found, create it.
+				$db->exec($queryVisits);
 			}
-		},
-	], true);
+
+			try {
+				$db->query($queryCheckEvents);
+			} catch (Exception $e) {
+				// Table not found, create it.
+				$db->exec($queryEvents);
+			}
+		});
+	}
+
+	$migration = new Migration($db);
+	$migration->run($migrations, 'migrations_minilytics');
 
 	htmlStart();
 
