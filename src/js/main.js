@@ -25,9 +25,9 @@ document.addEventListener('DOMContentLoaded', async function (e) {
 	beautifyFileInputs(i18n);
 
 	// Minilytics takes care of this, but do it to prevent loading the file and save some time
-	if (document.querySelector('.js-analytics-opt-out')) {
-		new AnalyticsOptOut(document.querySelector('.js-analytics-opt-out'), i18n);	
-	}
+	// if (document.querySelector('.js-analytics-opt-out')) {
+	// 	new AnalyticsOptOut(document.querySelector('.js-analytics-opt-out'), i18n);	
+	// }
 	addAnalyticsCode(function () {
 		loadScript('/js/main-analytics.js?t=202407172202', 'js-minilytics', () => {
 			Minilytics.initOptOutButton();
