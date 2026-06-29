@@ -1198,7 +1198,7 @@ tabsTemplate.innerHTML = `
 	</div>
 `;
 
-export class Tabs extends HTMLElement {
+class Tabs extends HTMLElement {
 
 	#tabList;
 	#tabsSlot;
