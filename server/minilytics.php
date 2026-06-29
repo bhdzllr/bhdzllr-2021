@@ -15,13 +15,6 @@ use App\Helpers;
 use App\Migration;
 use App\View;
 
-/**
- * @todo
- * Engagement -> Time on page or with scrolling? > 10 seconds -> PHP
- * Counts compared to last period
- * Fallback tracking without JS?
- */
-
 $timezoneCountryMap = json_decode('{
 	"Africa/Abidjan": "CI: Côte d\'Ivoire",
 	"Africa/Accra": "CI: Côte d\'Ivoire",
