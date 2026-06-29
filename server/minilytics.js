@@ -1178,16 +1178,6 @@ function addDialogModalDefaultStyles() {
 	document.head.appendChild(style);
 }
 
-const KEYCODE = {
-	TAB: 9,
-	DOWN: 40,
-	LEFT: 37,
-	RIGHT: 39,
-	UP: 38,
-	HOME: 36,
-	END: 35,
-};
-
 const tabsTemplate = document.createElement('template');
 tabsTemplate.innerHTML = `
 	<style>
@@ -1208,7 +1198,14 @@ tabsTemplate.innerHTML = `
 	</div>
 `;
 
-class Tabs extends HTMLElement {
+export class Tabs extends HTMLElement {
+
+	#tabList;
+	#tabsSlot;
+	#tabPanelsSlot;
+	#observer;
+	#onSlotChangeHandler;
+	#onKeyDownHandler;
 
 	constructor() {
 		super();
@@ -1216,11 +1213,11 @@ class Tabs extends HTMLElement {
 		this.attachShadow({ mode: 'open' });
 		this.shadowRoot.appendChild(tabsTemplate.content.cloneNode(true));
 
-		this.tabList = this.shadowRoot.querySelector('.js-tablist');
-		this.tabsSlot = this.shadowRoot.querySelector('.js-tab');
-		this.tabPanelsSlot = this.shadowRoot.querySelector('.js-tabpanel');
+		this.#tabList = this.shadowRoot.querySelector('.js-tablist');
+		this.#tabsSlot = this.shadowRoot.querySelector('.js-tab');
+		this.#tabPanelsSlot = this.shadowRoot.querySelector('.js-tabpanel');
 
-		this.observer = new MutationObserver((mutations) => {
+		this.#observer = new MutationObserver((mutations) => {
 			mutations.forEach((mutation) => {
 				if (mutation.attributeName === 'selected') {
 					this.selectTab(mutation.target.dataset.index);
@@ -1230,35 +1227,105 @@ class Tabs extends HTMLElement {
 	}
 
 	connectedCallback() {
-		if (!this.hasAttribute('wa-aria-label')) console.warn('[Tabs] No "wa-aria-label" attribute set to use for "aria-label".');
-
-		if (this.hasAttribute('wa-aria-label')) this.tabList.setAttribute('aria-label', this.getAttribute('wa-aria-label'));
-	
-		this.onSlotChangeHandler = this.onSlotChange.bind(this);
-		this.onKeyDownHandler = this.onKeyDown.bind(this);
-
-		this.tabsSlot.addEventListener('slotchange', this.onSlotChangeHandler);
-		this.tabPanelsSlot.addEventListener('slotchange', this.onSlotChangeHandler);
-
-		for (const [i, tab] of this.getTabs().entries()) {
-			tab.addEventListener('click', (e) => {
-				e.preventDefault();
-				e.target.setAttribute('selected', '');
-			});
+		if (!this.hasAttribute('wa-aria-label') && !this.hasAttribute('aria-labelledby')) {
+			console.warn('[Tabs] No "wa-aria-label" or "aria-labelledby" attribute set to use for "aria-label".');
 		}
 
-		this.addEventListener('keydown', this.onKeyDownHandler);
+		if (this.hasAttribute('wa-aria-label')) {
+			this.#tabList.setAttribute('aria-label', this.getAttribute('wa-aria-label'));
+		}
 
-		this.startSelectedObserver();
+		this.#onSlotChangeHandler = this.#onSlotChange.bind(this);
+		this.#onKeyDownHandler = this.#onKeyDown.bind(this);
+
+		this.#tabsSlot.addEventListener('slotchange', this.#onSlotChangeHandler);
+		this.#tabPanelsSlot.addEventListener('slotchange', this.#onSlotChangeHandler);
+
+		this.addEventListener('keydown', this.#onKeyDownHandler);
+
+		this.#startSelectedObserver();
 	}
 
 	disconnectedCallback() {
-		this.removeEventListener('keydown', this.onKeyDownHandler);
+		this.removeEventListener('keydown', this.#onKeyDownHandler);
 
-		this.stopSelectedObserver();
+		this.#stopSelectedObserver();
 	}
 
-	onSlotChange(e) {
+	getTabs() {
+		return this.#tabsSlot.assignedNodes();
+	}
+
+	getTabPanels() {
+		return this.#tabPanelsSlot.assignedNodes();
+	}
+
+	selectTab(index, withFocus = true) {
+		const tabs = this.getTabs();
+		const tabPanels = this.getTabPanels();
+
+		this.#stopSelectedObserver();
+
+		for (const [i, tab] of tabs.entries()) {
+			if (i != index) {
+				tab.setAttribute('aria-selected', 'false');
+				tab.setAttribute('tabindex', '-1');
+
+				if (tab.hasAttribute('selected')) {
+					tab.removeAttribute('selected');
+				}
+
+				continue;
+			}
+
+			tab.setAttribute('aria-selected', 'true');
+			tab.setAttribute('tabindex', '0');
+
+			if (!tab.hasAttribute('selected')) {
+				tab.setAttribute('selected', '');
+			}
+
+			if (withFocus) {
+				tab.focus();
+			}
+		}
+
+		for (const [i, tabPanel] of tabPanels.entries()) {
+			if (i != index) {
+				tabPanel.hidden = true;
+				continue;
+			}
+
+			tabPanel.hidden = false;
+		}
+
+		this.dispatchEvent(
+			new CustomEvent('bhdzllr-tabs-selected', {
+				bubbles: false,
+				detail: {
+					index: Number(index),
+				},
+			}),
+		);
+
+		this.#startSelectedObserver();
+	}
+
+	#startSelectedObserver() {
+		for (const tab of this.getTabs()) {
+			this.#observer.observe(tab, {
+				attributes: true,
+			});
+		}
+	}
+
+	#stopSelectedObserver() {
+		this.#observer.disconnect();
+	}
+
+	#onSlotChange() {
+		this.#stopSelectedObserver();
+
 		const tabs = this.getTabs();
 		const tabPanels = this.getTabPanels();
 		let isATabSelected = false;
@@ -1267,14 +1334,18 @@ class Tabs extends HTMLElement {
 			let isTabSelected = tab.hasAttribute('selected') ? true : false;
 			let tabId = tab.id ? tab.id : 'bhdzllr-tabs-tab-' + i;
 
+			tab.hidden = false;
 			tab.setAttribute('id', tabId);
 			tab.setAttribute('role', 'tab');
 			tab.setAttribute('aria-selected', `${isTabSelected}`);
 			if (!tab.hasAttribute('aria-controls')) tab.setAttribute('aria-controls', 'bhdzllr-tabs-panel-' + i);
 			tab.setAttribute('tabindex', `${isTabSelected ? '0' : '-1'}`);
 			tab.dataset.index = i;
+			tab.addEventListener('click', this.#onTabClick);
 
-			if (isTabSelected) isATabSelected = true;
+			if (isTabSelected) {
+				isATabSelected = true;
+			}
 
 			if (!tabPanels[i]) {
 				console.warn('[Tabs] There are more tabs defined than panels.');
@@ -1289,15 +1360,16 @@ class Tabs extends HTMLElement {
 			tabPanel.hidden = !isTabSelected;
 		}
 
-		
 		if (!isATabSelected) {
-			this.selectTab(0);
+			this.selectTab(0, false);
 		}
+
+		this.#startSelectedObserver();
 	}
 
-	onKeyDown(e) {
+	#onKeyDown(e) {
 		if (e.altKey) return;
-		if (e.keyCode == KEYCODE.TAB) return;
+		if (e.key === 'Tab') return;
 		if (e.target.getAttribute('role') !== 'tab') return;
 
 		const tabs = this.getTabs();
@@ -1305,83 +1377,43 @@ class Tabs extends HTMLElement {
 		let newTab = 0;
 
 		for (const [i, tab] of tabs.entries()) {
-			if (tab.hasAttribute('selected')) currentTab = i;
+			if (tab.hasAttribute('selected')) {
+				currentTab = i;
+			}
 		}
 
-		switch (e.keyCode) {
-			case KEYCODE.LEFT:
-			case KEYCODE.UP:
+		switch (e.key) {
+			case 'ArrowLeft':
+			case 'ArrowUp':
 				newTab = currentTab - 1;
 				break;
-			case KEYCODE.RIGHT:
-			case KEYCODE.DOWN:
+			case 'ArrowRight':
+			case 'ArrowDown':
 				newTab = currentTab + 1;
 				break;
-			case KEYCODE.HOME:
+			case 'Home':
 				break;
-			case KEYCODE.END: 
+			case 'End':
 				newTab = tabs.length - 1;
+				break;
 			default:
 				return;
 		}
 
-		if (newTab < 0) newTab = tabs.length - 1;
-		if (newTab > (tabs.length - 1)) newTab = 0;
+		if (newTab < 0) {
+			newTab = tabs.length - 1;
+		}
+
+		if (newTab > (tabs.length - 1)) {
+			newTab = 0;
+		}
 
 		this.selectTab(newTab);
 	}
 
-	startSelectedObserver() {
-		for (const tab of this.getTabs()) {
-			this.observer.observe(tab, {
-				attributes: true,
-			});
-		}
-	}
-
-	stopSelectedObserver() {
-		this.observer.disconnect();
-	}
-
-	selectTab(index) {
-		const tabs = this.getTabs();
-		const tabPanels = this.getTabPanels();
-
-		this.stopSelectedObserver();
-
-		for (const [i, tab] of tabs.entries()) {
-			if (i != index) {
-				tab.setAttribute('aria-selected', 'false');
-				tab.setAttribute('tabindex', '-1');
-				if (tab.hasAttribute('selected')) tab.removeAttribute('selected');
-				continue;
-			}
-
-			tab.setAttribute('aria-selected', 'true');
-			tab.setAttribute('tabindex', '0');
-			if (!tab.hasAttribute('selected')) tab.setAttribute('selected', '');
-
-			tab.focus();
-		}
-
-      	for (const [i, tabPanel] of tabPanels.entries()) {
-      		if (i != index) {
-      			tabPanel.hidden = true;
-      			continue;
-      		}
-
-      		tabPanel.hidden = false;
-      	}
-
-      	this.startSelectedObserver();
-	}
-
-	getTabs() {
-		return this.tabsSlot.assignedNodes();
-	}
-
-	getTabPanels() {
-		return this.tabPanelsSlot.assignedNodes();
+	#onTabClick(e) {
+		e.preventDefault();
+		this.setAttribute('selected', '');
 	}
 
 }
