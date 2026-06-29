@@ -1030,8 +1030,8 @@ $app->post('minilytics-data&site={any}', function (string $id) use ($app, $timez
 		}
 
 		// Browser Name with Version
-	$browserVersion = $visit->browserVersion;
-	if (!$browserVersion) $browserVersion = '0';
+		$browserVersion = $visit->browserVersion;
+		if (!$browserVersion) $browserVersion = '0';
 		$browserVersionFull = $browserName . ' ' . $visit->browserVersion;
 		$browserVersionKey = array_search($browserVersionFull, array_column($result['browserVersions'], 'name'));
 		if ($browserVersionKey !== false) {
@@ -1067,7 +1067,7 @@ $app->post('minilytics-data&site={any}', function (string $id) use ($app, $timez
 
 		// UTM sources
 		if ($visit->utmSource) {
-			$utmSourceKey = array_search($visit->utmSource, array_column($result['utmSources'], 'name'));
+			$utmSourceKey = array_search($visit->utmSource, array_column($result['utmSources'] ?? [], 'name'));
 			if ($utmSourceKey !== false) {
 				$result['utmSources'][$utmSourceKey]->visits++;
 				if ($visit->unique) $result['utmSources'][$utmSourceKey]->unique++;
@@ -1086,7 +1086,7 @@ $app->post('minilytics-data&site={any}', function (string $id) use ($app, $timez
 
 		// UTM Mediums
 		if ($visit->utmMedium) {
-			$utmMediumKey = array_search($visit->utmMedium, array_column($result['utmMedium'], 'name'));
+			$utmMediumKey = array_search($visit->utmMedium, array_column($result['utmMedium'] ?? [], 'name'));
 			if ($utmMediumKey !== false) {
 				$result['utmMediums'][$utmMediumKey]->visits++;
 				if ($visit->unique) $result['utmMediums'][$utmMediumKey]->unique++;
@@ -1102,7 +1102,7 @@ $app->post('minilytics-data&site={any}', function (string $id) use ($app, $timez
 
 		// UTM Campaigns
 		if ($visit->utmCampaign) {
-			$utmCampaignKey = array_search($visit->utmCampaign, array_column($result['utmCampaigns'], 'name'));
+			$utmCampaignKey = array_search($visit->utmCampaign, array_column($result['utmCampaigns'] ?? [], 'name'));
 			if ($utmCampaignKey !== false) {
 				$result['utmCampaigns'][$utmCampaignKey]->visits++;
 				if ($visit->unique) $result['utmCampaigns'][$utmCampaignKey]->unique++;
@@ -1118,7 +1118,7 @@ $app->post('minilytics-data&site={any}', function (string $id) use ($app, $timez
 
 		// UTM Terms
 		if ($visit->utmTerm) {
-			$utmTermKey = array_search($visit->utmTerm, array_column($result['utmTerms'], 'name'));
+			$utmTermKey = array_search($visit->utmTerm, array_column($result['utmTerms'] ?? [], 'name'));
 			if ($utmTermKey !== false) {
 				$result['utmTerms'][$utmTermKey]->visits++;
 				if ($visit->unique) $result['utmTerms'][$utmTermKey]->unique++;
@@ -1134,7 +1134,7 @@ $app->post('minilytics-data&site={any}', function (string $id) use ($app, $timez
 
 		// UTM Contents
 		if ($visit->utmContents) {
-			$utmContentKey = array_search($visit->utmContents, array_column($result['utmContents'], 'name'));
+			$utmContentKey = array_search($visit->utmContents, array_column($result['utmContents'] ?? [], 'name'));
 			if ($utmContentKey !== false) {
 				$result['utmContents'][$utmContentKey]->visits++;
 				if ($visit->unique) $result['utmContents'][$utmContentKey]->unique++;
